@@ -68,8 +68,9 @@ body::before {
 </div>
 
 <script>
-let verses = {kjv:{}, niv:{}, nlt:{}};
-let currentVerse="", currentRef="", translation="kjv";
+let verses = { kjv:{}, niv:{}, nlt:{} };
+let dailyKey = "";
+let translation = "kjv";
 
 // Flatten JSON into { "Book Chapter:Verse": "text" }
 function flattenJSON(json){
@@ -84,69 +85,66 @@ function flattenJSON(json){
     return flat;
 }
 
-// Load JSON per translation with logging
+// Load JSON per translation
 async function loadTranslation(trans, url){
-    try {
-        console.log(`Fetching ${trans} from ${url}`);
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-        const data = await res.json();
-        verses[trans] = flattenJSON(data);
-        console.log(`${trans} loaded successfully. Total verses:`, Object.keys(verses[trans]).length);
-    } catch(err) {
-        console.error(`Error loading ${trans}:`, err);
-        document.getElementById("verse-text").innerText = `Failed to load ${trans} verses.`;
-    }
+    const res = await fetch(url);
+    const data = await res.json();
+    verses[trans] = flattenJSON(data);
 }
 
-// Deterministic daily verse selection
-function getDailyVerseKey(){
-    const keys = Object.keys(verses[translation]);
+// Pick daily verse from KJV only
+function pickDailyVerse(){
+    const keys = Object.keys(verses.kjv);
     const date = new Date();
     const seed = date.getFullYear()*10000 + (date.getMonth()+1)*100 + date.getDate();
     const index = seed % keys.length;
-    return keys[index];
+    dailyKey = keys[index];
 }
 
-// Load the daily verse
-function loadVerse(){
-    const key = getDailyVerseKey();
-    currentRef = key;
-    currentVerse = verses[translation][key] || "Verse not available";
-    document.getElementById("verse-text").innerText = currentVerse;
-    document.getElementById("verse-ref").innerText = currentRef + " (" + translation.toUpperCase() + ")";
+// Display verse in selected translation
+function displayVerse(){
+    const verseText = verses[translation][dailyKey] || "Verse not available";
+    document.getElementById("verse-text").innerText = verseText;
+    document.getElementById("verse-ref").innerText = `${dailyKey} (${translation.toUpperCase()})`;
+}
+
+// Change translation
+function changeTranslation(val){
+    translation = val;
+    displayVerse();
+}
+
+// Read aloud
+function readVerse(){
+    if("speechSynthesis" in window){
+        const utter = new SpeechSynthesisUtterance(
+            verses[translation][dailyKey] + " - " + dailyKey
+        );
+        speechSynthesis.speak(utter);
+    }
 }
 
 // Display today's date
 function displayTodaysDate(){
     const today = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById("todays-date").innerText = today.toLocaleDateString('en-US', options);
+    const options = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+    document.getElementById("todays-date").innerText =
+        today.toLocaleDateString('en-US', options);
 }
 
-// Change translation
-function changeTranslation(val){ translation=val; loadVerse(); }
+// Initialize
+(async function(){
+    await Promise.all([
+        loadTranslation("kjv","https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/KJV/KJV_bible.json"),
+        loadTranslation("niv","https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/NIV/NIV_bible.json"),
+        loadTranslation("nlt","https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/NLT/NLT_bible.json")
+    ]);
 
-// Read aloud
-function readVerse(){
-    if("speechSynthesis" in window){
-        const utter = new SpeechSynthesisUtterance(currentVerse + " - " + currentRef);
-        const voices = speechSynthesis.getVoices();
-        utter.voice = voices.find(v=>v.lang.startsWith("en"))||voices[0];
-        utter.rate=1; utter.pitch=1.05;
-        speechSynthesis.speak(utter);
-    } else alert("Speech synthesis not supported.");
-}
-
-// Initialize with correct raw URLs
-Promise.all([
-    loadTranslation("kjv","https://raw.githubusercontent.com/tapnpray/tapnpray/main/BIBLE/KJV/KJV_bible.json"),
-    loadTranslation("niv","https://raw.githubusercontent.com/tapnpray/tapnpray/main/BIBLE/NIV/NIV_bible.json"),
-    loadTranslation("nlt","https://raw.githubusercontent.com/tapnpray/tapnpray/main/BIBLE/NLT/NLT_bible.json")
-]).then(()=>{
+    pickDailyVerse();
     displayTodaysDate();
-    loadVerse();
-});
+    displayVerse();
+})();
 </script>
+
 </body>
 </html>
