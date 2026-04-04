@@ -72,16 +72,23 @@ let verses = { kjv:{}, niv:{}, nlt:{} };
 let dailyKey = "";
 let translation = "kjv";
 
-// Flatten JSON into { "Book Chapter:Verse": "text" }
+// FIXED: Flatten JSON based on your actual structure
 function flattenJSON(json){
     let flat = {};
-    for (const book in json){
-        json[book].forEach((chapter, cIdx)=>{
-            chapter.forEach((verse, vIdx)=>{
-                flat[`${book} ${cIdx+1}:${vIdx+1}`] = verse;
-            });
-        });
+
+    for (const book in json) {
+        const chapters = json[book];
+
+        for (const chapterNum in chapters) {
+            const versesObj = chapters[chapterNum];
+
+            for (const verseNum in versesObj) {
+                const ref = `${book} ${chapterNum}:${verseNum}`;
+                flat[ref] = versesObj[verseNum];
+            }
+        }
     }
+
     return flat;
 }
 
