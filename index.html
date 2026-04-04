@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Verse of the Day</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:url('background.jpg') no-repeat center center fixed;
+    background-size:cover;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    height:100vh;
+    text-align:center;
+}
+body::before {
+    content:"";
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.5));
+    z-index:-1;
+}
+.logo-container {margin-top:15px;}
+.logo-container img {max-width:260px;width:70%;filter:drop-shadow(0 0 10px rgba(0,0,0,0.8));}
+.tagline {margin-top:10px;color:white;font-weight:bold;font-size:clamp(14px,4vw,18px);text-shadow:0 2px 6px rgba(0,0,0,0.8);}
+.center-container {flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; width:100%; padding:10px;}
+#votd-header {color:white;font-weight:bold;font-size:clamp(18px,5vw,26px);margin-bottom:12px;text-shadow:0 2px 6px rgba(0,0,0,0.7);}
+#votd-container {font-size:clamp(22px,6.5vw,34px); font-weight:bold; line-height:1.5; color:white; background:rgba(0,0,0,0.65); padding:22px; border-radius:16px; max-width:92%; max-height:65vh; overflow:auto; box-shadow:0 10px 25px rgba(0,0,0,0.6);}
+#verse-text {color:white;}
+#verse-ref {margin-top:12px; font-size:0.7em; opacity:0.85;}
+.btn {margin-top:12px; padding:10px 16px; border:none; border-radius:8px; background:#4db8ff; color:white; font-weight:bold; cursor:pointer;}
+.btn:hover {background:#3399dd;}
+.translation {margin-top:10px; color:white; font-size:14px;}
+@media (max-width:480px) {.logo-container img {max-width:200px;}}
+</style>
+</head>
+<body>
+
+<div class="logo-container">
+    <img src="logo.png" alt="Logo">
+    <div class="tagline">One Tap Closer to Christ</div>
+</div>
+
+<div class="center-container">
+    <div id="votd-header">
+        Verse of the Day - <span id="todays-date"></span>
+    </div>
+
+    <div id="votd-container">
+        <div id="verse-text">Loading daily verse...</div>
+        <div id="verse-ref"></div>
+    </div>
+
+    <div class="translation">
+        Translation:
+        <select onchange="changeTranslation(this.value)">
+            <option value="kjv">KJV</option>
+            <option value="niv">NIV</option>
+            <option value="nlt">NLT</option>
+        </select>
+    </div>
+
+    <button class="btn" onclick="readVerse()">Read Aloud</button>
+</div>
+
+<script>
+let verses = {kjv:{}, niv:{}, nlt:{}};
+let currentVerse="", currentRef="", translation="kjv";
+
+// Flatten JSON into { "Book Chapter:Verse": "text" }
+function flattenJSON(json){
+    let flat = {};
+    for (const book in json){
+        json[book].forEach((chapter, cIdx)=>{
+            chapter.forEach((verse, vIdx)=>{
+                flat[`${book} ${cIdx+1}:${vIdx+1}`] = verse;
+            });
+        });
+    }
+    return flat;
+}
+
+// Load JSON per translation with logging
+async function loadTranslation(trans, url){
+    try {
+        console.log(`Fetching ${trans} from ${url}`);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        const data = await res.json();
+        verses[trans] = flattenJSON(data);
+        console.log(`${trans} loaded successfully. Total verses:`, Object.keys(verses[trans]).length);
+    } catch(err) {
+        console.error(`Error loading ${trans}:`, err);
+        document.getElementById("verse-text").innerText = `Failed to load ${trans} verses.`;
+    }
+}
+
+// Deterministic daily verse selection
+function getDailyVerseKey(){
+    const keys = Object.keys(verses[translation]);
+    const date = new Date();
+    const seed = date.getFullYear()*10000 + (date.getMonth()+1)*100 + date.getDate();
+    const index = seed % keys.length;
+    return keys[index];
+}
+
+// Load the daily verse
+function loadVerse(){
+    const key = getDailyVerseKey();
+    currentRef = key;
+    currentVerse = verses[translation][key] || "Verse not available";
+    document.getElementById("verse-text").innerText = currentVerse;
+    document.getElementById("verse-ref").innerText = currentRef + " (" + translation.toUpperCase() + ")";
+}
+
+// Display today's date
+function displayTodaysDate(){
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById("todays-date").innerText = today.toLocaleDateString('en-US', options);
+}
+
+// Change translation
+function changeTranslation(val){ translation=val; loadVerse(); }
+
+// Read aloud
+function readVerse(){
+    if("speechSynthesis" in window){
+        const utter = new SpeechSynthesisUtterance(currentVerse + " - " + currentRef);
+        const voices = speechSynthesis.getVoices();
+        utter.voice = voices.find(v=>v.lang.startsWith("en"))||voices[0];
+        utter.rate=1; utter.pitch=1.05;
+        speechSynthesis.speak(utter);
+    } else alert("Speech synthesis not supported.");
+}
+
+// Initialize with correct raw URLs
+Promise.all([
+    loadTranslation("kjv","https://raw.githubusercontent.com/tapnpray/tapnpray/main/BIBLE/KJV/KJV_bible.json"),
+    loadTranslation("niv","https://raw.githubusercontent.com/tapnpray/tapnpray/main/BIBLE/NIV/NIV_bible.json"),
+    loadTranslation("nlt","https://raw.githubusercontent.com/tapnpray/tapnpray/main/BIBLE/NLT/NLT_bible.json")
+]).then(()=>{
+    displayTodaysDate();
+    loadVerse();
+});
+</script>
+</body>
+</html>
