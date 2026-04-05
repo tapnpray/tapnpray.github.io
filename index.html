@@ -221,7 +221,7 @@ body::after {
     <!-- MUTE BUTTON -->
     <button class="btn" id="mute-btn" onclick="toggleMute()">Mute Audio</button>
 
-    <div id="tap-counter">Total taps: Loading...</div>
+    <div id="tap-counter">Total Taps: Loading...</div>
 
     <!-- CROSS PULSE LOADER -->
     <div id="voice-status">
@@ -454,29 +454,21 @@ function displayTodaysDate(){
 }
 
 /* ------------------------------
-   TOTAL TAPS (SIMPLE ANALYTICS API KEY)
+   TOTAL TAPS (USING VISITORS)
 --------------------------------*/
 async function updateTapCounter() {
     try {
-        const res = await fetch(
-            "https://api.simpleanalytics.com/v3/pageviews?hostname=tapnpray.github.io",
-            {
-                headers: {
-                    "Authorization": "Bearer sa_api_key_l7IQLvzw9jUffcsIkg9Zca3P50gcZcW5pJhZ"
-                }
-            }
-        );
-
+        const res = await fetch("https://simpleanalytics.com/tapnpray.github.io.json?version=5");
         const data = await res.json();
 
-        const total = data?.pageviews?.value ?? 0;
+        const total = data?.visitors ?? 0;
 
         document.getElementById("tap-counter").innerText =
-            `Total taps: ${total}`;
+            `Total Taps: ${total}`;
     } catch (err) {
         console.error("Tap counter error:", err);
         document.getElementById("tap-counter").innerText =
-            "Total taps: unavailable";
+            "Total Taps: unavailable";
     }
 }
 
