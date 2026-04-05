@@ -440,6 +440,19 @@ async function init(){
     ]);
 
     pickDailyVerse();
+
+    /* --- TEMPORARY OVERRIDE FOR TODAY --- */
+    const today = new Date();
+    const overrideDate = new Date("2026-04-05");
+
+    if (
+        today.getFullYear() === overrideDate.getFullYear() &&
+        today.getMonth() === overrideDate.getMonth() &&
+        today.getDate() === overrideDate.getDate()
+    ) {
+        dailyKey = "Matthew 28:6";
+    }
+
     displayTodaysDate();
     displayVerse();
 }
