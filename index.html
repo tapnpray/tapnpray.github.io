@@ -227,7 +227,40 @@ body::after {
     </div>
 </div>
 
+<!-- BACKGROUND AUDIO -->
+<audio id="bg-audio" src="background.mp3" loop></audio>
+
 <script>
+/* ------------------------------
+   BACKGROUND AUDIO AUTOPLAY FIX
+--------------------------------*/
+let bgAudioStarted = false;
+
+function fadeInAudio(audio) {
+    audio.volume = 0;
+    audio.play();
+    let v = 0;
+    const fade = setInterval(() => {
+        if (v < 0.35) {
+            v += 0.02;
+            audio.volume = v;
+        } else {
+            clearInterval(fade);
+        }
+    }, 200);
+}
+
+function startBackgroundAudio() {
+    if (bgAudioStarted) return;
+    bgAudioStarted = true;
+
+    const audio = document.getElementById("bg-audio");
+    fadeInAudio(audio);
+}
+
+window.addEventListener("click", startBackgroundAudio);
+window.addEventListener("touchstart", startBackgroundAudio);
+
 /* ------------------------------
    BACKGROUND ROTATION
 --------------------------------*/
@@ -307,17 +340,14 @@ function initTTS() {
     const loadVoices = () => {
         const voices = speechSynthesis.getVoices();
 
-        // Filter for English voices only
         availableVoices = voices.filter(v => v.lang.startsWith("en"));
 
-        // Sort neural voices first
         availableVoices.sort((a, b) => {
             const aNeural = a.name.toLowerCase().includes("neural") ? 1 : 0;
             const bNeural = b.name.toLowerCase().includes("neural") ? 1 : 0;
             return bNeural - aNeural;
         });
 
-        // Populate dropdown
         const select = document.getElementById("voice-select");
         select.innerHTML = "";
 
@@ -328,19 +358,16 @@ function initTTS() {
             select.appendChild(opt);
         });
 
-        // Pick the best voice automatically
         selectedVoice =
             availableVoices.find(v => v.name.includes("Neural")) ||
             availableVoices.find(v => v.name.includes("Natural")) ||
             availableVoices.find(v => v.lang === "en-US") ||
             availableVoices[0];
 
-        // Set dropdown to selected voice
         select.value = availableVoices.indexOf(selectedVoice);
 
         voiceReady = true;
 
-        // Dim the cross but keep it visible
         document.getElementById("voice-status").innerHTML =
             `<div class="cross" style="opacity:0.4; animation:none;">✝</div> Voice ready`;
     };
