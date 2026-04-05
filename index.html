@@ -226,12 +226,6 @@ body::after {
     </div>
 </div>
 
-<!-- VITS TTS LIBRARY -->
-<script type="module">
-    import * as tts from "https://cdn.jsdelivr.net/npm/@diffusionstudio/vits-web/dist/index.js";
-    window.vits = tts;
-</script>
-
 <script>
 /* ------------------------------
    BACKGROUND ROTATION
@@ -302,51 +296,48 @@ function changeTranslation(val){
 }
 
 /* ------------------------------
-   NATURAL TTS (VITS)
+   NATURAL TTS (BROWSER NEURAL VOICES)
 --------------------------------*/
 let voiceReady = false;
+let selectedVoice = null;
 
-async function initTTS() {
-    try {
-        await vits.download("en_US-hfc_female-medium", (p) => {
-            const percent = Math.round(p.loaded * 100 / p.total);
-            document.getElementById("voice-status").innerHTML =
-                `<div class="cross">✝</div> Voice loading… ${percent}%`;
-        });
+function initTTS() {
+    const loadVoices = () => {
+        const voices = speechSynthesis.getVoices();
+
+        // Try to find a neural-quality voice
+        selectedVoice =
+            voices.find(v => v.name.includes("Neural")) ||
+            voices.find(v => v.name.includes("Natural")) ||
+            voices.find(v => v.lang === "en-US") ||
+            voices[0];
 
         voiceReady = true;
 
         // Dim the cross but keep it visible
         document.getElementById("voice-status").innerHTML =
             `<div class="cross" style="opacity:0.4; animation:none;">✝</div> Voice ready`;
+    };
 
-    } catch (err) {
-        console.error("TTS init error:", err);
-        document.getElementById("voice-status").innerHTML =
-            `<div class="cross">✝</div> Voice failed to load`;
-    }
+    // Some browsers load voices async
+    speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
 }
 
-async function readVerse() {
-    const text = verses[translation][dailyKey] + " — " + dailyKey;
-
+function readVerse() {
     if (!voiceReady) {
         alert("Voice is still loading. Try again in a moment.");
         return;
     }
 
-    try {
-        const wav = await vits.predict({
-            text,
-            voiceId: "en_US-hfc_female-medium"
-        });
+    const text = verses[translation][dailyKey] + " — " + dailyKey;
 
-        const audio = new Audio();
-        audio.src = URL.createObjectURL(wav);
-        audio.play();
-    } catch (err) {
-        console.error("TTS error:", err);
-    }
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.voice = selectedVoice;
+    utter.rate = 0.95;
+    utter.pitch = 1.0;
+
+    speechSynthesis.speak(utter);
 }
 
 /* ------------------------------
@@ -415,7 +406,7 @@ async function init(){
 window.addEventListener("load", async () => {
     await init();
     updateTapCounter();
-    initTTS(); // load natural voice
+    initTTS(); // load neural voice
 });
 </script>
 
