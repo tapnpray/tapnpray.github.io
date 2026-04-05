@@ -4,48 +4,161 @@
 <meta charset="UTF-8">
 <title>Verse of the Day</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
+/* --- GLOBAL STYLES --- */
 body {
     margin:0;
     font-family:Arial,sans-serif;
-    background:url('background.jpg') no-repeat center center fixed;
     background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
     display:flex;
     flex-direction:column;
     align-items:center;
     height:100vh;
     text-align:center;
+    animation:fadeIn 1.2s ease;
 }
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+
 body::before {
     content:"";
     position:fixed;
     top:0; left:0;
     width:100%; height:100%;
-    background:linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.5));
+    background:linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.55));
     z-index:-1;
 }
+
+/* --- LOGO --- */
 .logo-container {margin-top:15px;}
-.logo-container img {max-width:260px;width:70%;filter:drop-shadow(0 0 10px rgba(0,0,0,0.8));}
-.tagline {margin-top:10px;color:white;font-weight:bold;font-size:clamp(14px,4vw,18px);text-shadow:0 2px 6px rgba(0,0,0,0.8);}
-.center-container {flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; width:100%; padding:10px;}
-#votd-header {color:white;font-weight:bold;font-size:clamp(18px,5vw,26px);margin-bottom:12px;text-shadow:0 2px 6px rgba(0,0,0,0.7);}
-#votd-container {font-size:clamp(22px,6.5vw,34px); font-weight:bold; line-height:1.5; color:white; background:rgba(0,0,0,0.65); padding:22px; border-radius:16px; max-width:92%; max-height:65vh; overflow:auto; box-shadow:0 10px 25px rgba(0,0,0,0.6);}
-#verse-text {color:white;}
-#verse-ref {margin-top:12px; font-size:0.7em; opacity:0.85;}
-.btn {margin-top:12px; padding:10px 16px; border:none; border-radius:8px; background:#4db8ff; color:white; font-weight:bold; cursor:pointer;}
+.logo-container img {
+    max-width:260px;
+    width:70%;
+    transition:filter 0.3s ease;
+    filter:drop-shadow(0 0 10px rgba(0,0,0,0.8));
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+    .logo-container img {
+        filter: invert(0%) brightness(0.9) drop-shadow(0 0 10px rgba(0,0,0,0.6));
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .logo-container img {
+        filter: invert(100%) brightness(1.2) drop-shadow(0 0 10px rgba(0,0,0,0.9));
+    }
+}
+
+/* --- TAGLINE --- */
+.tagline {
+    margin-top:10px;
+    color:white;
+    font-weight:bold;
+    font-size:clamp(14px,4vw,18px);
+    text-shadow:0 2px 6px rgba(0,0,0,0.8);
+}
+
+/* --- MAIN CONTENT --- */
+.center-container {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    width:100%;
+    padding:10px;
+}
+
+#votd-header {
+    color:white;
+    font-weight:bold;
+    font-size:clamp(18px,5vw,26px);
+    margin-bottom:12px;
+    text-shadow:0 2px 6px rgba(0,0,0,0.7);
+}
+
+#votd-container {
+    font-size:clamp(22px,6.5vw,34px);
+    font-weight:bold;
+    line-height:1.5;
+    color:white;
+    background:rgba(0,0,0,0.65);
+    padding:22px;
+    border-radius:16px;
+    max-width:92%;
+    max-height:65vh;
+    overflow:auto;
+    box-shadow:0 10px 25px rgba(0,0,0,0.6);
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity .6s ease, transform .6s ease;
+}
+#votd-container.show {
+    opacity:1;
+    transform:translateY(0);
+}
+
+#verse-ref {
+    margin-top:12px;
+    font-size:0.7em;
+    opacity:0.85;
+}
+
+/* --- BUTTONS --- */
+.btn {
+    margin-top:12px;
+    padding:10px 16px;
+    border:none;
+    border-radius:8px;
+    background:#4db8ff;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:background .2s;
+}
 .btn:hover {background:#3399dd;}
-.translation {margin-top:10px; color:white; font-size:14px;}
-#tap-counter {color:white; margin-top:20px; font-size:14px; opacity:0.8;}
-@media (max-width:480px) {.logo-container img {max-width:200px;}}
+
+.action-buttons {
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+    justify-content:center;
+}
+
+.translation {
+    margin-top:10px;
+    color:white;
+    font-size:14px;
+}
+
+/* --- TAP COUNTER --- */
+#tap-counter {
+    color:white;
+    margin-top:20px;
+    font-size:14px;
+    opacity:0.8;
+}
+
+/* --- MOBILE --- */
+@media (max-width:480px) {
+    .logo-container img {max-width:200px;}
+}
 </style>
 </head>
 <body>
 
+<!-- LOGO -->
 <div class="logo-container">
-    <img src="logo.png" alt="Logo">
+    <img src="logo.svg" alt="Logo">
     <div class="tagline">One Tap Closer to Christ</div>
 </div>
 
+<!-- MAIN CONTENT -->
 <div class="center-container">
     <div id="votd-header">
         Verse of the Day - <span id="todays-date"></span>
@@ -65,66 +178,84 @@ body::before {
         </select>
     </div>
 
-    <button class="btn" onclick="readVerse()">Read Aloud</button>
+    <div class="action-buttons">
+        <button class="btn" onclick="readVerse()">Read</button>
+        <button class="btn" onclick="copyVerse()">Copy</button>
+        <button class="btn" onclick="shareVerse()">Share</button>
+    </div>
 
     <div id="tap-counter">Taps today: Loading...</div>
 </div>
 
 <script>
+/* ------------------------------
+   BACKGROUND ROTATION (REFRESH ONLY)
+--------------------------------*/
+const backgrounds = [
+  "backgrounds/background.jpg",
+  "backgrounds/cloud1.png",
+  "backgrounds/cloud2.png",
+  "backgrounds/cloud3.png",
+  "backgrounds/cloud4.png",
+  "backgrounds/cloud5.png",
+  "backgrounds/sunrise1.jpg",
+  "backgrounds/sunrise2.jpg",
+  "backgrounds/sunrise3.jpg",
+  "backgrounds/sunrise4.jpg",
+  "backgrounds/sunrise5.jpg"
+];
+
+const randomImage = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+document.body.style.backgroundImage = `url('${randomImage}')`;
+
+/* ------------------------------
+   VERSE SYSTEM
+--------------------------------*/
 let verses = { kjv:{}, niv:{}, nlt:{} };
 let dailyKey = "";
 let translation = "kjv";
 
-// Flatten JSON based on your actual structure
 function flattenJSON(json){
     let flat = {};
-
     for (const book in json) {
         const chapters = json[book];
-
         for (const chapterNum in chapters) {
             const versesObj = chapters[chapterNum];
-
             for (const verseNum in versesObj) {
                 const ref = `${book} ${chapterNum}:${verseNum}`;
                 flat[ref] = versesObj[verseNum];
             }
         }
     }
-
     return flat;
 }
 
-// Load JSON per translation
 async function loadTranslation(trans, url){
     const res = await fetch(url);
     const data = await res.json();
     verses[trans] = flattenJSON(data);
 }
 
-// Pick daily verse from KJV only
 function pickDailyVerse(){
     const keys = Object.keys(verses.kjv);
     const date = new Date();
     const seed = date.getFullYear()*10000 + (date.getMonth()+1)*100 + date.getDate();
-    const index = seed % keys.length;
-    dailyKey = keys[index];
+    dailyKey = keys[seed % keys.length];
 }
 
-// Display verse in selected translation
 function displayVerse(){
-    const verseText = verses[translation][dailyKey] || "Verse not available";
-    document.getElementById("verse-text").innerText = verseText;
-    document.getElementById("verse-ref").innerText = `${dailyKey} (${translation.toUpperCase()})`;
+    document.getElementById("votd-container").classList.add("show");
+    document.getElementById("verse-text").innerText =
+        verses[translation][dailyKey] || "Verse not available";
+    document.getElementById("verse-ref").innerText =
+        `${dailyKey} (${translation.toUpperCase()})`;
 }
 
-// Change translation
 function changeTranslation(val){
     translation = val;
     displayVerse();
 }
 
-// Read aloud
 function readVerse(){
     if("speechSynthesis" in window){
         const utter = new SpeechSynthesisUtterance(
@@ -134,7 +265,25 @@ function readVerse(){
     }
 }
 
-// Display today's date
+function copyVerse(){
+    navigator.clipboard.writeText(
+        `${verses[translation][dailyKey]} — ${dailyKey}`
+    );
+    alert("Verse copied!");
+}
+
+function shareVerse(){
+    if (navigator.share){
+        navigator.share({
+            title:"Verse of the Day",
+            text:`${verses[translation][dailyKey]} — ${dailyKey}`,
+            url:"https://tapnpray.github.io"
+        });
+    } else {
+        copyVerse();
+    }
+}
+
 function displayTodaysDate(){
     const today = new Date();
     const options = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
@@ -142,7 +291,9 @@ function displayTodaysDate(){
         today.toLocaleDateString('en-US', options);
 }
 
-// Tap counter
+/* ------------------------------
+   TAP COUNTER
+--------------------------------*/
 async function updateTapCounter() {
     try {
         const res = await fetch("https://api.countapi.xyz/hit/tapnpray/daily");
@@ -154,7 +305,9 @@ async function updateTapCounter() {
     }
 }
 
-// Initialize
+/* ------------------------------
+   INIT
+--------------------------------*/
 async function init(){
     await Promise.all([
         loadTranslation("kjv","https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/KJV/KJV_bible.json"),
@@ -167,7 +320,6 @@ async function init(){
     displayVerse();
 }
 
-// Run after full page load
 window.addEventListener("load", async () => {
     await init();
     updateTapCounter();
