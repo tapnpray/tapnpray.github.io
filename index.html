@@ -200,7 +200,7 @@ body::after {
         <select onchange="changeTranslation(this.value)">
             <option value="kjv">KJV</option>
             <option value="niv">NIV</option>
-            <option value="nlt">NLT</option>
+            <option value="nlt" selected>NLT</option>
         </select>
     </div>
 
@@ -314,7 +314,7 @@ document.body.style.backgroundImage =
 --------------------------------*/
 let verses = { kjv:{}, niv:{}, nlt:{} };
 let dailyKey = "";
-let translation = "kjv";
+let translation = "nlt";  /* DEFAULT TO NLT */
 
 function flattenJSON(json){
     let flat = {};
@@ -338,7 +338,7 @@ async function loadTranslation(trans, url){
 }
 
 function pickDailyVerse(){
-    const keys = Object.keys(verses.kjv);
+    const keys = Object.keys(verses.nlt);
     const date = new Date();
     const seed = date.getFullYear()*10000 + (date.getMonth()+1)*100 + date.getDate();
     dailyKey = keys[seed % keys.length];
@@ -358,7 +358,7 @@ function changeTranslation(val){
 }
 
 /* ------------------------------
-   NATURAL TTS (BROWSER NEURAL VOICES)
+   NATURAL TTS (DEFAULT: GOOGLE UK ENGLISH MALE)
 --------------------------------*/
 let voiceReady = false;
 let selectedVoice = null;
@@ -370,12 +370,6 @@ function initTTS() {
 
         availableVoices = voices.filter(v => v.lang.startsWith("en"));
 
-        availableVoices.sort((a, b) => {
-            const aNeural = a.name.toLowerCase().includes("neural") ? 1 : 0;
-            const bNeural = b.name.toLowerCase().includes("neural") ? 1 : 0;
-            return bNeural - aNeural;
-        });
-
         const select = document.getElementById("voice-select");
         select.innerHTML = "";
 
@@ -386,7 +380,10 @@ function initTTS() {
             select.appendChild(opt);
         });
 
+        /* DEFAULT TO GOOGLE UK ENGLISH MALE */
         selectedVoice =
+            availableVoices.find(v => v.name.includes("Google UK English Male")) ||
+            availableVoices.find(v => v.lang === "en-GB") ||
             availableVoices.find(v => v.name.includes("Neural")) ||
             availableVoices.find(v => v.name.includes("Natural")) ||
             availableVoices.find(v => v.lang === "en-US") ||
@@ -457,14 +454,25 @@ function displayTodaysDate(){
 }
 
 /* ------------------------------
-   TOTAL TAPS (SIMPLE ANALYTICS)
+   TOTAL TAPS (SIMPLE ANALYTICS API KEY)
 --------------------------------*/
 async function updateTapCounter() {
     try {
-        const res = await fetch("https://simpleanalytics.com/tapnpray.github.io.json?version=5");
+        const res = await fetch(
+            "https://api.simpleanalytics.com/v3/pageviews?hostname=tapnpray.github.io",
+            {
+                headers: {
+                    "Authorization": "Bearer sa_api_key_l7IQLvzw9jUffcsIkg9Zca3P50gcZcW5pJhZ"
+                }
+            }
+        );
+
         const data = await res.json();
+
+        const total = data?.pageviews?.value ?? 0;
+
         document.getElementById("tap-counter").innerText =
-            `Total taps: ${data.pageviews ?? 0}`;
+            `Total taps: ${total}`;
     } catch (err) {
         console.error("Tap counter error:", err);
         document.getElementById("tap-counter").innerText =
