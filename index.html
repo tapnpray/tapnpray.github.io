@@ -31,27 +31,11 @@ body::before {
     z-index:-1;
 }
 
-/* --- LOGO --- */
+/* --- LOGO (STATIC, NO FILTERS) --- */
 .logo-container {margin-top:15px;}
 .logo-container img {
     max-width:260px;
     width:70%;
-    transition:filter 0.3s ease;
-    filter:drop-shadow(0 0 10px rgba(0,0,0,0.8));
-}
-
-/* Light mode */
-@media (prefers-color-scheme: light) {
-    .logo-container img {
-        filter: invert(0%) brightness(0.9) drop-shadow(0 0 10px rgba(0,0,0,0.6));
-    }
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-    .logo-container img {
-        filter: invert(100%) brightness(1.2) drop-shadow(0 0 10px rgba(0,0,0,0.9));
-    }
 }
 
 /* --- TAGLINE --- */
@@ -184,7 +168,7 @@ body::before {
         <button class="btn" onclick="shareVerse()">Share</button>
     </div>
 
-    <div id="tap-counter">Taps today: Loading...</div>
+    <div id="tap-counter">Total taps: Loading...</div>
 </div>
 
 <script>
@@ -292,16 +276,18 @@ function displayTodaysDate(){
 }
 
 /* ------------------------------
-   TAP COUNTER
+   TOTAL TAP COUNTER (NEVER RESETS)
 --------------------------------*/
 async function updateTapCounter() {
     try {
-        const res = await fetch("https://api.countapi.xyz/hit/tapnpray/daily");
+        const res = await fetch("https://api.countapi.xyz/hit/tapnpray_github_io/taps_total");
         const data = await res.json();
         document.getElementById("tap-counter").innerText =
-            `Taps today: ${data.value}`;
+            `Total taps: ${data.value}`;
     } catch (err) {
         console.error("Tap counter error:", err);
+        document.getElementById("tap-counter").innerText =
+            "Total taps: unavailable";
     }
 }
 
