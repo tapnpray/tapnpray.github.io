@@ -18,16 +18,34 @@ body {
     align-items:center;
     height:100vh;
     text-align:center;
-    animation:fadeIn 1.2s ease;
-}
-@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
 
+    /* Smooth fade-in */
+    opacity:0;
+    animation:bgFadeIn 1.5s ease forwards;
+}
+
+@keyframes bgFadeIn {
+    from { opacity:0; }
+    to { opacity:1; }
+}
+
+/* Background gradient overlay */
 body::before {
     content:"";
     position:fixed;
     top:0; left:0;
     width:100%; height:100%;
     background:linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.55));
+    z-index:-2;
+}
+
+/* Background blur layer */
+body::after {
+    content:"";
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    backdrop-filter: blur(4px);
     z-index:-1;
 }
 
@@ -66,18 +84,27 @@ body::before {
     text-shadow:0 2px 6px rgba(0,0,0,0.7);
 }
 
+/* Verse box with glow + blur */
 #votd-container {
     font-size:clamp(22px,6.5vw,34px);
     font-weight:bold;
     line-height:1.5;
     color:white;
-    background:rgba(0,0,0,0.65);
+    background:rgba(0,0,0,0.55);
     padding:22px;
     border-radius:16px;
     max-width:92%;
     max-height:65vh;
     overflow:auto;
-    box-shadow:0 10px 25px rgba(0,0,0,0.6);
+
+    /* Glow */
+    box-shadow:
+        0 0 25px rgba(255,255,255,0.25),
+        0 0 60px rgba(255,255,255,0.15);
+
+    /* Blur behind verse box */
+    backdrop-filter: blur(6px);
+
     opacity:0;
     transform:translateY(10px);
     transition:opacity .6s ease, transform .6s ease;
@@ -128,6 +155,28 @@ body::before {
     opacity:0.8;
 }
 
+/* --- CROSS PULSE LOADER --- */
+#voice-status {
+    margin-top:12px;
+    color:white;
+    font-size:14px;
+}
+
+.cross {
+    font-size:22px;
+    color:white;
+    animation:pulse 1.4s infinite ease-in-out;
+    text-shadow:0 0 8px rgba(255,255,255,0.7);
+    margin-bottom:6px;
+    transition:opacity 0.6s ease;
+}
+
+@keyframes pulse {
+    0% { opacity:0.4; transform:scale(1); }
+    50% { opacity:1; transform:scale(1.15); }
+    100% { opacity:0.4; transform:scale(1); }
+}
+
 /* --- MOBILE --- */
 @media (max-width:480px) {
     .logo-container img {max-width:200px;}
@@ -169,11 +218,23 @@ body::before {
     </div>
 
     <div id="tap-counter">Total taps: Loading...</div>
+
+    <!-- CROSS PULSE LOADER -->
+    <div id="voice-status">
+        <div class="cross">✝</div>
+        Voice loading…
+    </div>
 </div>
+
+<!-- VITS TTS LIBRARY -->
+<script type="module">
+    import * as tts from "https://cdn.jsdelivr.net/npm/@diffusionstudio/vits-web/dist/index.js";
+    window.vits = tts;
+</script>
 
 <script>
 /* ------------------------------
-   BACKGROUND ROTATION (REFRESH ONLY)
+   BACKGROUND ROTATION
 --------------------------------*/
 const backgrounds = [
   "backgrounds/background.jpg",
@@ -189,8 +250,8 @@ const backgrounds = [
   "backgrounds/sunrise5.jpg"
 ];
 
-const randomImage = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-document.body.style.backgroundImage = `url('${randomImage}')`;
+document.body.style.backgroundImage =
+    `url('${backgrounds[Math.floor(Math.random() * backgrounds.length)]}')`;
 
 /* ------------------------------
    VERSE SYSTEM
@@ -240,15 +301,57 @@ function changeTranslation(val){
     displayVerse();
 }
 
-function readVerse(){
-    if("speechSynthesis" in window){
-        const utter = new SpeechSynthesisUtterance(
-            verses[translation][dailyKey] + " - " + dailyKey
-        );
-        speechSynthesis.speak(utter);
+/* ------------------------------
+   NATURAL TTS (VITS)
+--------------------------------*/
+let voiceReady = false;
+
+async function initTTS() {
+    try {
+        await vits.download("en_US-hfc_female-medium", (p) => {
+            const percent = Math.round(p.loaded * 100 / p.total);
+            document.getElementById("voice-status").innerHTML =
+                `<div class="cross">✝</div> Voice loading… ${percent}%`;
+        });
+
+        voiceReady = true;
+
+        // Dim the cross but keep it visible
+        document.getElementById("voice-status").innerHTML =
+            `<div class="cross" style="opacity:0.4; animation:none;">✝</div> Voice ready`;
+
+    } catch (err) {
+        console.error("TTS init error:", err);
+        document.getElementById("voice-status").innerHTML =
+            `<div class="cross">✝</div> Voice failed to load`;
     }
 }
 
+async function readVerse() {
+    const text = verses[translation][dailyKey] + " — " + dailyKey;
+
+    if (!voiceReady) {
+        alert("Voice is still loading. Try again in a moment.");
+        return;
+    }
+
+    try {
+        const wav = await vits.predict({
+            text,
+            voiceId: "en_US-hfc_female-medium"
+        });
+
+        const audio = new Audio();
+        audio.src = URL.createObjectURL(wav);
+        audio.play();
+    } catch (err) {
+        console.error("TTS error:", err);
+    }
+}
+
+/* ------------------------------
+   COPY + SHARE
+--------------------------------*/
 function copyVerse(){
     navigator.clipboard.writeText(
         `${verses[translation][dailyKey]} — ${dailyKey}`
@@ -268,6 +371,9 @@ function shareVerse(){
     }
 }
 
+/* ------------------------------
+   DATE
+--------------------------------*/
 function displayTodaysDate(){
     const today = new Date();
     const options = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
@@ -309,11 +415,11 @@ async function init(){
 window.addEventListener("load", async () => {
     await init();
     updateTapCounter();
+    initTTS(); // load natural voice
 });
 </script>
 
-<!-- SIMPLE ANALYTICS (OFFICIAL SCRIPT) -->
-<!-- 100% privacy-first analytics -->
+<!-- SIMPLE ANALYTICS -->
 <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
 <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt=""></noscript>
 
