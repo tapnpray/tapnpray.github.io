@@ -279,7 +279,7 @@ async function loadTranslation(trans, url){
 function pickDailyVerse(){
     const keys = Object.keys(verses.nlt);
     const date = new Date();
-    const seed = date.getFullYear()*10000 + (date.getMonth()+1)*100 + date.getDate();
+    const seed = date.getUTCFullYear()*10000 + (date.getUTCMonth()+1)*100 + date.getUTCDate();
     dailyKey = keys[seed % keys.length];
 }
 
@@ -441,14 +441,15 @@ async function init(){
 
     pickDailyVerse();
 
-    /* --- TEMPORARY OVERRIDE FOR TODAY --- */
-    const today = new Date();
-    const overrideDate = new Date("2026-04-05");
+    /* --- UTC-SAFE OVERRIDE FOR TODAY --- */
+    const now = new Date();
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const overrideDate = new Date(Date.UTC(2026, 3, 5)); // April 5, 2026
 
     if (
-        today.getFullYear() === overrideDate.getFullYear() &&
-        today.getMonth() === overrideDate.getMonth() &&
-        today.getDate() === overrideDate.getDate()
+        todayUTC.getUTCFullYear() === overrideDate.getUTCFullYear() &&
+        todayUTC.getUTCMonth() === overrideDate.getUTCMonth() &&
+        todayUTC.getUTCDate() === overrideDate.getUTCDate()
     ) {
         dailyKey = "Matthew 28:6";
     }
