@@ -218,6 +218,9 @@ body::after {
         <button class="btn" onclick="shareVerse()">Share</button>
     </div>
 
+    <!-- MUTE BUTTON -->
+    <button class="btn" id="mute-btn" onclick="toggleMute()">Mute Audio</button>
+
     <div id="tap-counter">Total taps: Loading...</div>
 
     <!-- CROSS PULSE LOADER -->
@@ -232,9 +235,10 @@ body::after {
 
 <script>
 /* ------------------------------
-   BACKGROUND AUDIO AUTOPLAY FIX
+   BACKGROUND AUDIO AUTOPLAY + MUTE
 --------------------------------*/
 let bgAudioStarted = false;
+let isMuted = false;
 
 function fadeInAudio(audio) {
     audio.volume = 0;
@@ -255,11 +259,35 @@ function startBackgroundAudio() {
     bgAudioStarted = true;
 
     const audio = document.getElementById("bg-audio");
-    fadeInAudio(audio);
+    if (!isMuted) fadeInAudio(audio);
 }
 
 window.addEventListener("click", startBackgroundAudio);
 window.addEventListener("touchstart", startBackgroundAudio);
+
+function toggleMute() {
+    const audio = document.getElementById("bg-audio");
+    const btn = document.getElementById("mute-btn");
+
+    if (!isMuted) {
+        audio.volume = 0;
+        isMuted = true;
+        btn.innerText = "Unmute Audio";
+    } else {
+        let v = 0;
+        const fade = setInterval(() => {
+            if (v < 0.35) {
+                v += 0.02;
+                audio.volume = v;
+            } else {
+                clearInterval(fade);
+            }
+        }, 200);
+
+        isMuted = false;
+        btn.innerText = "Mute Audio";
+    }
+}
 
 /* ------------------------------
    BACKGROUND ROTATION
