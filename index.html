@@ -31,7 +31,7 @@ body::before {
     z-index:-1;
 }
 
-/* --- LOGO (STATIC, NO FILTERS) --- */
+/* --- LOGO (STATIC, UNALTERED SVG) --- */
 .logo-container {margin-top:15px;}
 .logo-container img {
     max-width:260px;
@@ -276,14 +276,14 @@ function displayTodaysDate(){
 }
 
 /* ------------------------------
-   TOTAL TAP COUNTER (NEVER RESETS)
+   TOTAL TAPS (SIMPLE ANALYTICS)
 --------------------------------*/
 async function updateTapCounter() {
     try {
-        const res = await fetch("https://api.countapi.xyz/hit/tapnpray_github_io/taps_total");
+        const res = await fetch("https://simpleanalytics.com/tapnpray.github.io.json?version=5");
         const data = await res.json();
         document.getElementById("tap-counter").innerText =
-            `Total taps: ${data.value}`;
+            `Total taps: ${data.pageviews}`;
     } catch (err) {
         console.error("Tap counter error:", err);
         document.getElementById("tap-counter").innerText =
@@ -311,6 +311,11 @@ window.addEventListener("load", async () => {
     updateTapCounter();
 });
 </script>
+
+<!-- SIMPLE ANALYTICS (OFFICIAL SCRIPT) -->
+<!-- 100% privacy-first analytics -->
+<script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+<noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt=""></noscript>
 
 </body>
 </html>
