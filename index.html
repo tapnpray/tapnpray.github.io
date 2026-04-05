@@ -148,6 +148,14 @@ body::after {
     opacity:0.8;
 }
 
+/* --- TAP STREAK --- */
+#tap-streak {
+    color:white;
+    margin-top:10px;
+    font-size:14px;
+    opacity:0.9;
+}
+
 /* --- CROSS PULSE LOADER --- */
 #voice-status {
     margin-top:12px;
@@ -219,6 +227,8 @@ body::after {
     </div>
 
     <div id="tap-counter">Total Taps: Loading...</div>
+
+    <div id="tap-streak">Tap Streak: Loading...</div>
 
     <!-- CROSS PULSE LOADER -->
     <div id="voice-status">
@@ -422,6 +432,48 @@ async function updateTapCounter() {
 }
 
 /* ------------------------------
+   TAP STREAK SYSTEM
+--------------------------------*/
+function updateTapStreak() {
+    const streakKey = "tapnpray_streak";
+    const lastTapKey = "tapnpray_lastTap";
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    let streak = parseInt(localStorage.getItem(streakKey)) || 0;
+    let lastTap = localStorage.getItem(lastTapKey);
+
+    if (lastTap) {
+        lastTap = new Date(lastTap);
+        const last = new Date(lastTap.getFullYear(), lastTap.getMonth(), lastTap.getDate());
+
+        const diffDays = Math.floor((today - last) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+            // Already tapped today — streak stays the same
+        } else if (diffDays === 1) {
+            // New day — streak continues
+            streak += 1;
+        } else {
+            // Missed a day — streak resets
+            streak = 1;
+        }
+    } else {
+        // First ever tap
+        streak = 1;
+    }
+
+    // Save updates
+    localStorage.setItem(streakKey, streak);
+    localStorage.setItem(lastTapKey, today.toISOString());
+
+    // Display streak
+    const streakEl = document.getElementById("tap-streak");
+    streakEl.innerText = `Tap Streak: ${streak} day${streak === 1 ? "" : "s"}`;
+}
+
+/* ------------------------------
    INIT
 --------------------------------*/
 async function init(){
@@ -454,6 +506,7 @@ window.addEventListener("load", async () => {
     await init();
     updateTapCounter();
     initTTS();
+    updateTapStreak();
 });
 </script>
 
