@@ -18,8 +18,6 @@ body {
     align-items:center;
     height:100vh;
     text-align:center;
-
-    /* Smooth fade-in */
     opacity:0;
     animation:bgFadeIn 1.5s ease forwards;
 }
@@ -96,15 +94,10 @@ body::after {
     max-width:92%;
     max-height:65vh;
     overflow:auto;
-
-    /* Glow */
     box-shadow:
         0 0 25px rgba(255,255,255,0.25),
         0 0 60px rgba(255,255,255,0.15);
-
-    /* Blur behind verse box */
     backdrop-filter: blur(6px);
-
     opacity:0;
     transform:translateY(10px);
     transition:opacity .6s ease, transform .6s ease;
@@ -211,6 +204,14 @@ body::after {
         </select>
     </div>
 
+    <!-- VOICE SELECTOR -->
+    <div class="translation" style="margin-top:15px;">
+        Voice:
+        <select id="voice-select" onchange="changeVoice(this.value)">
+            <option>Loading voices…</option>
+        </select>
+    </div>
+
     <div class="action-buttons">
         <button class="btn" onclick="readVerse()">Read</button>
         <button class="btn" onclick="copyVerse()">Copy</button>
@@ -300,17 +301,42 @@ function changeTranslation(val){
 --------------------------------*/
 let voiceReady = false;
 let selectedVoice = null;
+let availableVoices = [];
 
 function initTTS() {
     const loadVoices = () => {
         const voices = speechSynthesis.getVoices();
 
-        // Try to find a neural-quality voice
+        // Filter for English voices only
+        availableVoices = voices.filter(v => v.lang.startsWith("en"));
+
+        // Sort neural voices first
+        availableVoices.sort((a, b) => {
+            const aNeural = a.name.toLowerCase().includes("neural") ? 1 : 0;
+            const bNeural = b.name.toLowerCase().includes("neural") ? 1 : 0;
+            return bNeural - aNeural;
+        });
+
+        // Populate dropdown
+        const select = document.getElementById("voice-select");
+        select.innerHTML = "";
+
+        availableVoices.forEach((v, i) => {
+            const opt = document.createElement("option");
+            opt.value = i;
+            opt.textContent = v.name;
+            select.appendChild(opt);
+        });
+
+        // Pick the best voice automatically
         selectedVoice =
-            voices.find(v => v.name.includes("Neural")) ||
-            voices.find(v => v.name.includes("Natural")) ||
-            voices.find(v => v.lang === "en-US") ||
-            voices[0];
+            availableVoices.find(v => v.name.includes("Neural")) ||
+            availableVoices.find(v => v.name.includes("Natural")) ||
+            availableVoices.find(v => v.lang === "en-US") ||
+            availableVoices[0];
+
+        // Set dropdown to selected voice
+        select.value = availableVoices.indexOf(selectedVoice);
 
         voiceReady = true;
 
@@ -319,9 +345,12 @@ function initTTS() {
             `<div class="cross" style="opacity:0.4; animation:none;">✝</div> Voice ready`;
     };
 
-    // Some browsers load voices async
     speechSynthesis.onvoiceschanged = loadVoices;
     loadVoices();
+}
+
+function changeVoice(index) {
+    selectedVoice = availableVoices[index];
 }
 
 function readVerse() {
@@ -406,7 +435,7 @@ async function init(){
 window.addEventListener("load", async () => {
     await init();
     updateTapCounter();
-    initTTS(); // load neural voice
+    initTTS();
 });
 </script>
 
