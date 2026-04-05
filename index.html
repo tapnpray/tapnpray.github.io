@@ -5,6 +5,15 @@
 <title>Verse of the Day</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-ELQ3E5WGCT');
+</script>
+
 <style>
 /* --- GLOBAL STYLES --- */
 body {
@@ -140,18 +149,10 @@ body::after {
     font-size:14px;
 }
 
-/* --- TAP COUNTER --- */
-#tap-counter {
-    color:white;
-    margin-top:20px;
-    font-size:14px;
-    opacity:0.8;
-}
-
 /* --- TAP STREAK --- */
 #tap-streak {
     color:white;
-    margin-top:10px;
+    margin-top:20px;
     font-size:14px;
     opacity:0.9;
 }
@@ -225,8 +226,6 @@ body::after {
         <button class="btn" onclick="copyVerse()">Copy</button>
         <button class="btn" onclick="shareVerse()">Share</button>
     </div>
-
-    <div id="tap-counter">Total Taps: Loading...</div>
 
     <div id="tap-streak">Tap Streak: Loading...</div>
 
@@ -413,25 +412,6 @@ function displayTodaysDate(){
 }
 
 /* ------------------------------
-   TOTAL TAPS (USING VISITORS)
---------------------------------*/
-async function updateTapCounter() {
-    try {
-        const res = await fetch("https://simpleanalytics.com/tapnpray.github.io.json?version=5");
-        const data = await res.json();
-
-        const total = data?.visitors ?? 0;
-
-        document.getElementById("tap-counter").innerText =
-            `Total Taps: ${total}`;
-    } catch (err) {
-        console.error("Tap counter error:", err);
-        document.getElementById("tap-counter").innerText =
-            "Total Taps: unavailable";
-    }
-}
-
-/* ------------------------------
    TAP STREAK SYSTEM
 --------------------------------*/
 function updateTapStreak() {
@@ -504,15 +484,10 @@ async function init(){
 
 window.addEventListener("load", async () => {
     await init();
-    updateTapCounter();
     initTTS();
     updateTapStreak();
 });
 </script>
-
-<!-- SIMPLE ANALYTICS -->
-<script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
-<noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt=""></noscript>
 
 </body>
 </html>
