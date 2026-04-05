@@ -218,9 +218,6 @@ body::after {
         <button class="btn" onclick="shareVerse()">Share</button>
     </div>
 
-    <!-- MUTE BUTTON -->
-    <button class="btn" id="mute-btn" onclick="toggleMute()">Mute Audio</button>
-
     <div id="tap-counter">Total Taps: Loading...</div>
 
     <!-- CROSS PULSE LOADER -->
@@ -230,65 +227,7 @@ body::after {
     </div>
 </div>
 
-<!-- BACKGROUND AUDIO -->
-<audio id="bg-audio" src="background.mp3" loop></audio>
-
 <script>
-/* ------------------------------
-   BACKGROUND AUDIO AUTOPLAY + MUTE
---------------------------------*/
-let bgAudioStarted = false;
-let isMuted = false;
-
-function fadeInAudio(audio) {
-    audio.volume = 0;
-    audio.play();
-    let v = 0;
-    const fade = setInterval(() => {
-        if (v < 0.35) {
-            v += 0.02;
-            audio.volume = v;
-        } else {
-            clearInterval(fade);
-        }
-    }, 200);
-}
-
-function startBackgroundAudio() {
-    if (bgAudioStarted) return;
-    bgAudioStarted = true;
-
-    const audio = document.getElementById("bg-audio");
-    if (!isMuted) fadeInAudio(audio);
-}
-
-window.addEventListener("click", startBackgroundAudio);
-window.addEventListener("touchstart", startBackgroundAudio);
-
-function toggleMute() {
-    const audio = document.getElementById("bg-audio");
-    const btn = document.getElementById("mute-btn");
-
-    if (!isMuted) {
-        audio.volume = 0;
-        isMuted = true;
-        btn.innerText = "Unmute Audio";
-    } else {
-        let v = 0;
-        const fade = setInterval(() => {
-            if (v < 0.35) {
-                v += 0.02;
-                audio.volume = v;
-            } else {
-                clearInterval(fade);
-            }
-        }, 200);
-
-        isMuted = false;
-        btn.innerText = "Mute Audio";
-    }
-}
-
 /* ------------------------------
    BACKGROUND ROTATION
 --------------------------------*/
@@ -358,7 +297,7 @@ function changeTranslation(val){
 }
 
 /* ------------------------------
-   NATURAL TTS (DEFAULT: GOOGLE UK ENGLISH MALE)
+   SMART DEFAULT VOICE SELECTION
 --------------------------------*/
 let voiceReady = false;
 let selectedVoice = null;
@@ -367,7 +306,6 @@ let availableVoices = [];
 function initTTS() {
     const loadVoices = () => {
         const voices = speechSynthesis.getVoices();
-
         availableVoices = voices.filter(v => v.lang.startsWith("en"));
 
         const select = document.getElementById("voice-select");
@@ -380,14 +318,33 @@ function initTTS() {
             select.appendChild(opt);
         });
 
-        /* DEFAULT TO GOOGLE UK ENGLISH MALE */
-        selectedVoice =
-            availableVoices.find(v => v.name.includes("Google UK English Male")) ||
-            availableVoices.find(v => v.lang === "en-GB") ||
-            availableVoices.find(v => v.name.includes("Neural")) ||
-            availableVoices.find(v => v.name.includes("Natural")) ||
-            availableVoices.find(v => v.lang === "en-US") ||
-            availableVoices[0];
+        /* DEVICE DETECTION */
+        const ua = navigator.userAgent.toLowerCase();
+        const isIOS = /iphone|ipad|ipod/.test(ua);
+        const isAndroidChrome = /android/.test(ua) && /chrome/.test(ua);
+
+        if (isIOS) {
+            selectedVoice =
+                availableVoices.find(v => v.name.includes("Samantha")) ||
+                availableVoices.find(v => v.lang === "en-US") ||
+                availableVoices[0];
+        }
+        else if (isAndroidChrome) {
+            selectedVoice =
+                availableVoices.find(v => v.name.includes("Google UK English Male")) ||
+                availableVoices.find(v => v.lang === "en-GB") ||
+                availableVoices.find(v => v.name.includes("Google")) ||
+                availableVoices[0];
+        }
+        else {
+            selectedVoice =
+                availableVoices.find(v => v.name.includes("Google UK English Male")) ||
+                availableVoices.find(v => v.lang === "en-GB") ||
+                availableVoices.find(v => v.name.includes("Neural")) ||
+                availableVoices.find(v => v.name.includes("Natural")) ||
+                availableVoices.find(v => v.lang === "en-US") ||
+                availableVoices[0];
+        }
 
         select.value = availableVoices.indexOf(selectedVoice);
 
