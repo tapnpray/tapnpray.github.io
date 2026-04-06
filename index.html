@@ -5,100 +5,105 @@
 <title>Tap N Pray – Verse of the Day</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="description" content="Tap N Pray – Get a daily Bible verse, listen, reflect, and grow closer to Christ with one tap.">
+<meta name="description" content="Tap N Pray – Get a daily Bible verse and grow closer to Christ.">
 <meta name="theme-color" content="#000000">
-<link rel="icon" href="favicon.ico">
-
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-ELQ3E5WGCT');
-</script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
 body {
     margin:0;
-    font-family:Arial,sans-serif;
-    background-size:cover;
-    background-position:center;
-    background-attachment:fixed;
+    font-family:'Inter',sans-serif;
+    color:white;
     display:flex;
     flex-direction:column;
     align-items:center;
     min-height:100vh;
-    text-align:center;
-    opacity:0;
-    animation:fade 1.5s forwards;
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
 }
-@keyframes fade { to {opacity:1;} }
 
+/* overlays */
 body::before {
     content:"";
     position:fixed;
     width:100%; height:100%;
-    background:linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+    background:linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.75));
     z-index:-2;
 }
 body::after {
     content:"";
     position:fixed;
     width:100%; height:100%;
-    backdrop-filter:blur(5px);
+    backdrop-filter:blur(10px);
     z-index:-1;
 }
 
-.logo-container img {max-width:240px;width:70%;}
-.tagline {color:white;font-weight:bold;margin-top:10px;}
-
-.center {flex:1;display:flex;flex-direction:column;align-items:center;}
-
-#votd {
-    margin-top:15px;
+/* layout */
+.center {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
     padding:20px;
-    background:rgba(0,0,0,0.6);
-    border-radius:16px;
-    color:white;
-    max-width:90%;
-    box-shadow:0 0 25px rgba(255,255,255,0.2);
+    width:100%;
+}
+
+/* card */
+#votd {
+    background:rgba(255,255,255,0.08);
+    border-radius:20px;
+    padding:24px;
+    max-width:500px;
+    width:100%;
+    backdrop-filter:blur(20px);
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    text-align:center;
+}
+
+/* text */
+#verse {
+    font-size:clamp(20px,5vw,28px);
+    line-height:1.6;
+}
+#ref {
+    opacity:0.7;
+    margin-top:10px;
+}
+
+/* buttons */
+.actions {
+    margin-top:15px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
 }
 
 .btn {
-    margin:6px;
     padding:10px 14px;
+    border-radius:999px;
     border:none;
-    border-radius:8px;
-    background:#4db8ff;
+    background:rgba(255,255,255,0.15);
     color:white;
-    font-weight:bold;
     cursor:pointer;
 }
-.btn:hover {background:#3399dd;}
-.btn:active {transform:scale(0.96);}
+.btn:hover { background:rgba(255,255,255,0.25); }
+.btn:active { transform:scale(0.95); }
 
-.small {font-size:13px;opacity:0.85;color:white;}
-
-#loading {color:white;margin-top:20px;}
-
+.small {font-size:13px; opacity:0.8; margin-top:10px;}
 </style>
 </head>
 
 <body>
 
-<div class="logo-container">
-    <img src="logo.svg" alt="Tap N Pray logo">
-    <div class="tagline">One Tap Closer to Christ</div>
-</div>
-
 <div class="center">
 
-<div id="loading">Loading scripture...</div>
-
-<div id="votd" style="display:none;">
+<div id="votd">
     <div id="date"></div>
-    <h2 id="verse"></h2>
+    <div id="verse">Loading...</div>
     <div id="ref"></div>
 
     <div class="small">
@@ -106,39 +111,74 @@ body::after {
         <select id="translationSelect"></select>
     </div>
 
-    <div>
+    <div class="actions">
         <button class="btn" onclick="playVerse()">Listen</button>
         <button class="btn" onclick="copyVerse()">Copy</button>
         <button class="btn" onclick="shareVerse()">Share</button>
-        <button class="btn" onclick="saveFavorite()">⭐ Save</button>
+        <button class="btn" onclick="saveFavorite()">⭐</button>
     </div>
 
-    <div class="small" id="streak"></div>
-    <div class="small" id="status"></div>
+    <div id="streak" class="small"></div>
+    <div id="status" class="small"></div>
 
     <button class="btn" onclick="togglePrayer()">Daily Prayer</button>
     <div id="prayer" class="small" style="display:none;"></div>
 
-    <button class="btn" onclick="toggleAutoplay()">Autoplay: OFF</button>
+    <button class="btn" onclick="toggleAutoplay()" id="autoplayBtn">Autoplay: OFF</button>
 </div>
 
 </div>
 
 <script>
-const backgrounds = ["backgrounds/Background1.png","backgrounds/Background2.png"];
-document.body.style.backgroundImage = `url('${backgrounds[Math.floor(Math.random()*backgrounds.length)]}')`;
+/* ================= BACKGROUND SYSTEM ================= */
+
+const backgrounds = [
+  "backgrounds/morning1.jpg",
+  "backgrounds/morning2.jpg",
+  "backgrounds/day1.jpg"
+];
+
+let bgIndex = 0;
+
+function setBackground(index) {
+  const newBg = backgrounds[index];
+
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundImage = `url('${newBg}')`;
+  overlay.style.backgroundSize = "cover";
+  overlay.style.backgroundPosition = "center";
+  overlay.style.zIndex = "-3";
+  overlay.style.opacity = "0";
+  overlay.style.transition = "opacity 1.5s ease";
+
+  document.body.appendChild(overlay);
+
+  setTimeout(() => overlay.style.opacity = "1", 50);
+
+  setTimeout(() => {
+    document.body.style.backgroundImage = `url('${newBg}')`;
+    overlay.remove();
+  }, 1500);
+}
+
+function cycleBackground() {
+  bgIndex = (bgIndex + 1) % backgrounds.length;
+  setBackground(bgIndex);
+}
+
+setBackground(bgIndex);
+setInterval(cycleBackground, 8000);
+
+/* ================= VERSE SYSTEM ================= */
 
 let verses = {};
 let currentKey = "";
 let translation = localStorage.getItem("translation") || "nlt";
-let autoplay = localStorage.getItem("autoplay") === "true";
-
-const translations = ["kjv","niv","nlt"];
-
-function seedIndex(length){
-    const d = new Date();
-    return (d.getFullYear()*10000 + d.getMonth()*100 + d.getDate()) % length;
-}
 
 async function loadTranslation(t){
     if (verses[t]) return;
@@ -154,9 +194,13 @@ async function loadTranslation(t){
     verses[t] = flat;
 }
 
+function seedIndex(length){
+    const d = new Date();
+    return (d.getFullYear()*10000 + d.getMonth()*100 + d.getDate()) % length;
+}
+
 async function init(){
     await loadTranslation(translation);
-
     const keys = Object.keys(verses[translation]);
     currentKey = keys[seedIndex(keys.length)];
 
@@ -164,39 +208,37 @@ async function init(){
     setupDropdown();
     updateStreak();
 
-    document.getElementById("loading").style.display="none";
-    document.getElementById("votd").style.display="block";
-
-    if (autoplay) playVerse();
+    if (localStorage.getItem("autoplay")==="true") {
+        document.getElementById("autoplayBtn").innerText="Autoplay: ON";
+        playVerse();
+    }
 }
 
 function updateUI(){
     document.getElementById("verse").innerText = verses[translation][currentKey];
     document.getElementById("ref").innerText = `${currentKey} (${translation.toUpperCase()})`;
-
-    const d = new Date();
-    document.getElementById("date").innerText = d.toDateString();
+    document.getElementById("date").innerText = new Date().toDateString();
 }
 
 function setupDropdown(){
     const sel = document.getElementById("translationSelect");
-    sel.innerHTML = "";
-
-    translations.forEach(t=>{
-        const opt = document.createElement("option");
-        opt.value = t;
-        opt.textContent = t.toUpperCase();
-        if (t===translation) opt.selected=true;
+    ["kjv","niv","nlt"].forEach(t=>{
+        const opt=document.createElement("option");
+        opt.value=t;
+        opt.textContent=t.toUpperCase();
+        if(t===translation) opt.selected=true;
         sel.appendChild(opt);
     });
 
     sel.onchange = async e=>{
-        translation = e.target.value;
+        translation=e.target.value;
         localStorage.setItem("translation",translation);
         await loadTranslation(translation);
         updateUI();
     };
 }
+
+/* ================= ACTIONS ================= */
 
 function copyVerse(){
     navigator.clipboard.writeText(`${verses[translation][currentKey]} — ${currentKey}`);
@@ -214,10 +256,11 @@ function saveFavorite(){
     alert("Saved!");
 }
 
+/* ================= STREAK ================= */
+
 function updateStreak(){
     let s = parseInt(localStorage.getItem("streak")) || 0;
     let last = localStorage.getItem("last");
-
     const today = new Date().toDateString();
 
     if(last!==today){
@@ -229,6 +272,8 @@ function updateStreak(){
     document.getElementById("streak").innerText = `🔥 Streak: ${s}`;
 }
 
+/* ================= PRAYER ================= */
+
 const prayers = [
 "Lord, quiet my heart today.",
 "Father, guide my steps.",
@@ -237,18 +282,22 @@ const prayers = [
 ];
 
 function togglePrayer(){
-    const el = document.getElementById("prayer");
+    const el=document.getElementById("prayer");
     if(el.style.display==="none"){
         el.style.display="block";
-        el.innerText = prayers[seedIndex(prayers.length)];
+        el.innerText=prayers[seedIndex(prayers.length)];
     } else el.style.display="none";
 }
 
+/* ================= AUTOPLAY ================= */
+
 function toggleAutoplay(){
-    autoplay = !autoplay;
-    localStorage.setItem("autoplay",autoplay);
-    event.target.innerText = `Autoplay: ${autoplay ? "ON":"OFF"}`;
+    const current = localStorage.getItem("autoplay")==="true";
+    localStorage.setItem("autoplay", !current);
+    document.getElementById("autoplayBtn").innerText = `Autoplay: ${!current ? "ON":"OFF"}`;
 }
+
+/* ================= AUDIO ================= */
 
 function playVerse(){
     const text = verses[translation][currentKey];
@@ -256,6 +305,8 @@ function playVerse(){
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
 }
+
+/* ================= INIT ================= */
 
 window.onload = init;
 </script>
