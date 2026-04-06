@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Tap N Pray – Verse of the Day</title>
@@ -12,13 +14,10 @@
   gtag('config', 'G-ELQ3E5WGCT');
 </script>
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
 <style>
 body {
     margin:0;
-    font-family:'Inter', sans-serif;
+    font-family:Arial,sans-serif;
     background-size:cover;
     background-position:center;
     background-attachment:fixed;
@@ -50,17 +49,126 @@ body::after {
     backdrop-filter: blur(4px);
     z-index:-1;
 }
+.logo-container {margin-top:15px;}
+.logo-container img {
+    max-width:260px;
+    width:70%;
+}
+.tagline {
+    margin-top:10px;
+    color:white;
+    font-weight:bold;
+    font-size:clamp(14px,4vw,18px);
+    text-shadow:0 2px 6px rgba(0,0,0,0.8);
+}
+.center-container {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    width:100%;
+    padding:10px;
+}
+#votd-header {
+    color:white;
+    font-weight:bold;
+    font-size:clamp(18px,5vw,26px);
+    margin-bottom:12px;
+    text-shadow:0 2px 6px rgba(0,0,0,0.7);
+}
+#votd-container {
+    font-size:clamp(22px,6.5vw,34px);
+    font-weight:bold;
+    line-height:1.5;
+    color:white;
+    background:rgba(0,0,0,0.55);
+    padding:22px;
+    border-radius:16px;
+    max-width:92%;
+    max-height:50vh;
+    overflow:auto;
+    box-shadow:
+        0 0 25px rgba(255,255,255,0.25),
+        0 0 60px rgba(255,255,255,0.15);
+    backdrop-filter: blur(6px);
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity .6s ease, transform .6s ease;
+}
+#votd-container.show {
+    opacity:1;
+    transform:translateY(0);
+}
+#verse-ref {
+    margin-top:12px;
+    font-size:0.7em;
+    opacity:0.85;
+}
+.btn {
+    margin-top:12px;
+    padding:10px 16px;
+    border:none;
+    border-radius:8px;
+    background:#4db8ff;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:background .2s;
+}
+.btn:hover {background:#3399dd;}
+.action-buttons {
+    margin-top:10px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+}
+.translation {
+    margin-top:10px;
+    color:white;
+    font-size:14px;
+}
+#daily-prayer-container {
+    margin-top:18px;
+    max-width:92%;
+}
+#daily-prayer {
+    margin-top:10px;
+    color:white;
+    font-size:clamp(16px,4.5vw,20px);
+    line-height:1.5;
+    background:rgba(0,0,0,0.45);
+    padding:16px;
+    border-radius:14px;
+    box-shadow:0 0 18px rgba(0,0,0,0.5);
+    display:none;
+}
+#tap-streak {
+    color:white;
+    margin-top:16px;
+    font-size:14px;
+    opacity:0.9;
+}
+#listen-status {
+    margin-top:10px;
+    color:white;
+    font-size:13px;
+    opacity:0.85;
+}
+@media (max-width:480px) {
+    .logo-container img {max-width:200px;}
+}
 </style>
 </head>
 <body>
 
 <div class="logo-container">
-    <img src="logo.svg" alt="Tap N Pray Logo">
+    <img src="logo.svg" alt="Logo">
     <div class="tagline">One Tap Closer to Christ</div>
 </div>
 
 <div class="center-container">
-
     <div id="votd-header">
         Verse of the Day - <span id="todays-date"></span>
     </div>
@@ -83,7 +191,6 @@ body::after {
         <button class="btn" onclick="playVerse()">Listen</button>
         <button class="btn" onclick="copyVerse()">Copy</button>
         <button class="btn" onclick="shareVerse()">Share</button>
-        <button class="btn" onclick="shareVerseAsImage()">Share as Image</button>
     </div>
 
     <div id="listen-status">Using your device’s best devotional voice…</div>
@@ -94,26 +201,19 @@ body::after {
     </div>
 
     <div id="tap-streak">Tap Streak: Loading...</div>
-
 </div>
+
 <script>
-// MAIN SITE BACKGROUNDS
+/* BACKGROUND ROTATION */
 const backgrounds = [
   "backgrounds/Background1.png",
   "backgrounds/Background2.png",
   "backgrounds/Background3.png"
 ];
+document.body.style.backgroundImage =
+    `url('${backgrounds[Math.floor(Math.random() * backgrounds.length)]}')`;
 
-function setRandomBackground() {
-  const randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-  document.body.style.backgroundImage = `url('${randomBackground}')`;
-}
-
-setRandomBackground();
-/* ---------------------------------------------
-   VERSE SYSTEM + BIBLE LOADING
---------------------------------------------- */
-
+/* VERSE SYSTEM */
 let verses = { kjv:{}, niv:{}, nlt:{} };
 let dailyKey = "";
 let translation = "nlt";
@@ -142,9 +242,7 @@ async function loadTranslation(trans, url){
 function pickDailyVerse(){
     const keys = Object.keys(verses.nlt);
     const date = new Date();
-    const seed = date.getUTCFullYear()*10000 +
-                 (date.getUTCMonth()+1)*100 +
-                 date.getUTCDate();
+    const seed = date.getUTCFullYear()*10000 + (date.getUTCMonth()+1)*100 + date.getUTCDate();
     dailyKey = keys[seed % keys.length];
 }
 
@@ -161,98 +259,210 @@ function changeTranslation(val){
     displayVerse();
 }
 
+/* COPY + SHARE */
+function copyVerse(){
+    navigator.clipboard.writeText(
+        `${verses[translation][dailyKey]} — ${dailyKey}`
+    );
+    alert("Verse copied!");
+}
+
+function shareVerse(){
+    if (navigator.share){
+        navigator.share({
+            title:"Verse of the Day",
+            text:`${verses[translation][dailyKey]} — ${dailyKey}`,
+            url:"https://tapnpray.github.io"
+        });
+    } else {
+        copyVerse();
+    }
+}
+
+/* DATE */
 function displayTodaysDate(){
     const today = new Date();
     const options = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
     document.getElementById("todays-date").innerText =
         today.toLocaleDateString('en-US', options);
 }
-</script>
-<script>
-/* ---------------------------------------------
-   SHARE AS IMAGE SYSTEM (fixed + isolated)
---------------------------------------------- */
 
-/* Share-image backgrounds (new naming structure) */
-const shareBackgrounds = [
-    "share-backgrounds/bg1.jpg",
-    "share-backgrounds/bg2.jpg",
-    "share-backgrounds/bg3.jpg"
-];
+/* TAP STREAK (UNCHANGED) */
+function updateTapStreak() {
+    const streakKey = "tapnpray_streak";
+    const lastTapKey = "tapnpray_lastTap";
 
-/* Wrap text for canvas */
-function wrapText(ctx, text, maxWidth) {
-    const words = text.split(" ");
-    const lines = [];
-    let line = "";
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + " ";
-        const metrics = ctx.measureText(testLine);
-        const testWidth = metrics.width;
+    let streak = parseInt(localStorage.getItem(streakKey)) || 0;
+    let lastTap = localStorage.getItem(lastTapKey);
 
-        if (testWidth > maxWidth && n > 0) {
-            lines.push(line.trim());
-            line = words[n] + " ";
+    if (lastTap) {
+        lastTap = new Date(lastTap);
+        const last = new Date(lastTap.getFullYear(), lastTap.getMonth(), lastTap.getDate());
+        const diffDays = Math.floor((today - last) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+            // same day, streak unchanged
+        } else if (diffDays === 1) {
+            streak += 1;
         } else {
-            line = testLine;
+            streak = 1;
         }
+    } else {
+        streak = 1;
     }
 
-    lines.push(line.trim());
-    return lines;
+    localStorage.setItem(streakKey, streak);
+    localStorage.setItem(lastTapKey, today.toISOString());
+
+    const streakEl = document.getElementById("tap-streak");
+    streakEl.innerText = `Tap Streak: ${streak} day${streak === 1 ? "" : "s"}`;
 }
 
-/* Share verse as image */
-async function shareVerseAsImage() {
+/* DAILY PRAYER POOL (MIXED LENGTH + MIXED SOURCES) */
+const dailyPrayers = [
+    // Short
+    "Lord, quiet my heart and draw me close to You today.",
+    "Father, fill me with Your peace and guide my steps with purpose.",
+    "Jesus, help me see this day the way You see it.",
+    "Holy Spirit, steady my thoughts and center my heart on You.",
+    // Medium
+    "Heavenly Father, thank You for the gift of this new day. Strengthen my spirit and help me walk in Your truth. Let Your love shape my thoughts, my words, and my actions.",
+    "Lord Jesus, I surrender this day into Your hands. Lead me in every decision, every conversation, and every moment. May my life reflect Your grace and kindness.",
+    "Gracious God, thank You for never leaving me alone. When I feel weak, remind me that Your strength is made perfect in my weakness. Help me trust You more deeply today.",
+    // Long
+    "Lord Jesus, I come before You with a grateful heart. Thank You for Your mercy that meets me every morning and Your grace that carries me through every challenge. Teach me to trust You more deeply, to rest in Your promises, and to walk boldly in the calling You’ve placed on my life. Help me love others with the same compassion You’ve shown me. Keep my mind fixed on You and my heart anchored in Your peace.",
+    "Father, I bring You my worries, my hopes, and my questions. You see every detail of my life and care about each one. Remind me that I am held in Your hands and that nothing can separate me from Your love. Give me courage when I feel afraid, wisdom when I feel unsure, and joy that is rooted in who You are, not in what I see.",
+    // AI-style devotional (still static here, but written in that tone)
+    "Father, breathe new strength into my spirit today. Remind me that I am held, guided, and never alone. Shape my desires to match Your will, and let Your presence be the calm that steadies my soul.",
+    "God of hope, speak into the places of my heart that feel tired or discouraged. Replace my anxiety with trust, my fear with faith, and my restlessness with Your perfect peace. Help me remember that You are working even when I cannot see it.",
+    "Lord, thank You for walking with me through every season. When the path feels unclear, be my light. When my heart feels heavy, be my comfort. When I am tempted to give up, remind me that You are not finished with my story."
+];
 
-    // Pick a random share background
-    const bg = shareBackgrounds[Math.floor(Math.random() * shareBackgrounds.length)];
-
-    // Load image
-    const img = new Image();
-    img.src = bg;
-    await img.decode();
-
-    // Create canvas
-    const canvas = document.createElement("canvas");
-    canvas.width = 1080;
-    canvas.height = 1920;
-    const ctx = canvas.getContext("2d");
-
-    // Draw background
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-    // Verse text
-    const verse = document.getElementById("verse-text").innerText;
-    const ref = document.getElementById("verse-ref").innerText;
-
-    ctx.fillStyle = "white";
-    ctx.font = "48px Inter";
-    ctx.textAlign = "center";
-
-    const lines = wrapText(ctx, verse, 900);
-    let y = 700;
-
-    lines.forEach(line => {
-        ctx.fillText(line, canvas.width / 2, y);
-        y += 60;
-    });
-
-    // Reference
-    ctx.font = "40px Inter";
-    ctx.fillText(ref, canvas.width / 2, y + 40);
-
-    // Share
-    canvas.toBlob(blob => {
-        const file = new File([blob], "tapnpray_verse.jpg", { type: "image/jpeg" });
-        navigator.share({
-            files: [file],
-            title: "Verse of the Day",
-            text: "Shared from Tap N Pray"
-        });
-    });
+function getRandomPrayer() {
+    const idx = Math.floor(Math.random() * dailyPrayers.length);
+    return dailyPrayers[idx];
 }
+
+let prayerVisible = false;
+
+function toggleDailyPrayer() {
+    const prayerEl = document.getElementById("daily-prayer");
+    const toggleBtn = document.getElementById("daily-prayer-toggle");
+
+    if (!prayerVisible) {
+        prayerEl.innerText = getRandomPrayer();
+        prayerEl.style.display = "block";
+        toggleBtn.innerText = "Hide Prayer";
+        prayerVisible = true;
+    } else {
+        prayerEl.style.display = "none";
+        toggleBtn.innerText = "Show Daily Prayer";
+        prayerVisible = false;
+    }
+}
+
+/* LISTEN (OLD SYSTEM, BEST FEMALE VOICE) */
+let voices = [];
+let voicesLoaded = false;
+
+function loadVoices() {
+    voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+        voicesLoaded = true;
+    }
+}
+
+if (typeof speechSynthesis !== "undefined") {
+    loadVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
+    }
+}
+
+function getBestFemaleVoice() {
+    if (!voicesLoaded) return null;
+
+    const preferredNames = [
+        "Google UK English Female",
+        "Samantha",
+        "Serena"
+    ];
+
+    for (const name of preferredNames) {
+        const v = voices.find(voice => voice.name === name);
+        if (v) return v;
+    }
+
+    const femaleVoice = voices.find(v =>
+        v.name.toLowerCase().includes("female") ||
+        v.name.toLowerCase().includes("woman") ||
+        v.name.toLowerCase().includes("girl")
+    );
+    if (femaleVoice) return femaleVoice;
+
+    return voices[0] || null;
+}
+
+function playVerse() {
+    const statusEl = document.getElementById("listen-status");
+
+    if (typeof speechSynthesis === "undefined") {
+        statusEl.innerText = "Listening not supported on this device.";
+        return;
+    }
+
+    const text = verses[translation][dailyKey] + " — " + dailyKey;
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    const voice = getBestFemaleVoice();
+    if (voice) {
+        utterance.voice = voice;
+    }
+
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    statusEl.innerText = "Playing verse in a devotional voice…";
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+
+    utterance.onend = () => {
+        statusEl.innerText = "Using your device’s best devotional voice…";
+    };
+}
+
+/* INIT */
+async function init(){
+    await Promise.all([
+        loadTranslation("kjv","https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/KJV/KJV_bible.json"),
+        loadTranslation("niv","https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/NIV/NIV_bible.json"),
+        loadTranslation("nlt","https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/NLT/NLT_bible.json")
+    ]);
+
+    pickDailyVerse();
+
+    const now = new Date();
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const overrideDate = new Date(Date.UTC(2026, 3, 5)); // April 5, 2026
+
+    if (
+        todayUTC.getUTCFullYear() === overrideDate.getUTCFullYear() &&
+        todayUTC.getUTCMonth() === overrideDate.getUTCMonth() &&
+        todayUTC.getUTCDate() === overrideDate.getUTCDate()
+    ) {
+        dailyKey = "Matthew 28:6";
+    }
+
+    displayTodaysDate();
+    displayVerse();
+    updateTapStreak();
+}
+
+window.addEventListener("load", init);
 </script>
+
 </body>
 </html>
