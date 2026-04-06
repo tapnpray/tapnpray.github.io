@@ -68,57 +68,75 @@ body::after {
     justify-content:flex-start;
     align-items:center;
     padding-top:120px;
-    padding-bottom:40px;
+    padding-bottom:80px;
     width:100%;
 }
 
 /* card */
 #votd {
-    background:rgba(255,255,255,0.06);
+    background:rgba(0,0,0,0.45);
     border-radius:24px;
-    padding:28px;
+    padding:32px 26px;
     max-width:520px;
-    width:100%;
+    width:92%;
     backdrop-filter:blur(25px);
     box-shadow:
-        0 10px 40px rgba(0,0,0,0.5),
+        0 10px 40px rgba(0,0,0,0.6),
         0 0 25px rgba(16,140,215,0.12);
-    animation:breathe 8s ease-in-out infinite;
 }
 
 /* text */
-#date {color:#108cd7;margin-bottom:8px;}
+#date {
+    color:#108cd7;
+    margin-bottom:8px;
+    text-align:center;
+}
 #verse {
     font-size:clamp(26px,6.5vw,36px);
     line-height:1.7;
+    text-shadow:0 2px 10px rgba(0,0,0,0.6);
+    text-align:center;
 }
-#ref {margin-top:12px;color:#108cd7;}
+#ref {
+    margin-top:12px;
+    color:#108cd7;
+    text-align:center;
+}
 
 /* buttons */
 .actions {
-    margin-top:15px;
+    margin-top:20px;
     display:flex;
-    gap:10px;
+    gap:12px;
     flex-wrap:wrap;
     justify-content:center;
 }
 
 .btn {
-    padding:10px 14px;
+    padding:14px 18px;
     border-radius:999px;
     border:none;
-    background:rgba(255,255,255,0.15);
+    background:rgba(255,255,255,0.18);
     color:white;
+    font-size:15px;
+    font-weight:500;
     cursor:pointer;
     transition:all .2s ease;
 }
-.btn:hover {background:rgba(255,255,255,0.25);}
+.btn:hover {
+    background:rgba(255,255,255,0.28);
+}
 .btn:active {
     transform:scale(0.92);
     box-shadow:0 0 10px rgba(16,140,215,0.4);
 }
 
-.small {font-size:13px;opacity:0.8;margin-top:10px;}
+.small {
+    font-size:13px;
+    opacity:0.85;
+    margin-top:10px;
+    text-align:center;
+}
 
 .favorite-item {
     margin-top:10px;
@@ -127,17 +145,22 @@ body::after {
     background:rgba(255,255,255,0.08);
 }
 
-/* animation */
-@keyframes breathe {
-    0%{transform:scale(1);}
-    50%{transform:scale(1.01);}
-    100%{transform:scale(1);}
+/* tap streak bottom */
+#streak {
+    position:fixed;
+    bottom:18px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:14px;
+    opacity:0.85;
+    text-align:center;
 }
 </style>
 </head>
 
 <body>
 
+<!-- LOGO -->
 <div class="logo-container">
     <img src="logo.svg">
     <div class="tagline">One Tap Closer to Christ</div>
@@ -158,20 +181,21 @@ body::after {
         <button class="btn" onclick="playVerse()">Listen</button>
         <button class="btn" onclick="copyVerse()">Copy</button>
         <button class="btn" onclick="shareVerse()">Share</button>
-        <button class="btn" onclick="saveFavorite()">⭐</button>
+        <button class="btn" onclick="saveFavorite()">⭐ Save</button>
         <button class="btn" onclick="toggleFavorites()">Favorites</button>
-        <button class="btn" onclick="toggleSound()">🌧️</button>
-        <button class="btn" onclick="requestNotificationPermission()">🔔</button>
+        <button class="btn" onclick="toggleSound()" id="soundBtn">🌧️ Ambient Sound</button>
     </div>
 
     <div id="favoritesList" class="small" style="display:none;"></div>
-    <div id="streak" class="small"></div>
 
-    <button class="btn" onclick="togglePrayer()">Prayer</button>
+    <button class="btn" onclick="togglePrayer()">Daily Prayer</button>
     <div id="prayer" class="small" style="display:none;"></div>
+
 </div>
 
 </div>
+
+<div id="streak"></div>
 
 <audio id="ambientAudio" loop>
     <source src="sounds/rain.mp3" type="audio/mpeg">
@@ -186,19 +210,31 @@ const backgrounds=[
 ];
 
 let i=0;
+
 function setBG(n){
  let el=document.createElement("div");
  Object.assign(el.style,{
   position:"fixed",top:0,left:0,width:"100%",height:"100%",
   backgroundImage:`url('${backgrounds[n]}')`,
-  backgroundSize:"cover",zIndex:-3,opacity:0,transition:"1.5s"
+  backgroundSize:"cover",
+  backgroundPosition:"center",
+  zIndex:-3,
+  opacity:0,
+  transition:"opacity 1.5s ease"
  });
  document.body.appendChild(el);
  setTimeout(()=>el.style.opacity=1,50);
- setTimeout(()=>{document.body.style.backgroundImage=`url('${backgrounds[n]}')`;el.remove();},1500);
+ setTimeout(()=>{
+  document.body.style.backgroundImage=`url('${backgrounds[n]}')`;
+  el.remove();
+ },1500);
 }
+
 setBG(i);
-setInterval(()=>{i=(i+1)%backgrounds.length;setBG(i)},25000);
+setInterval(()=>{
+ i=(i+1)%backgrounds.length;
+ setBG(i);
+},60000); // 1 minute
 
 /* VERSES */
 let verses={},key="",translation="nlt";
@@ -211,7 +247,10 @@ async function load(t){
  verses[t]=f;
 }
 
-function seed(l){let d=new Date();return(d.getFullYear()*1e4+d.getMonth()*100+d.getDate())%l;}
+function seed(l){
+ let d=new Date();
+ return (d.getFullYear()*10000 + d.getMonth()*100 + d.getDate()) % l;
+}
 
 async function init(){
  await load(translation);
@@ -224,7 +263,7 @@ async function init(){
 
 function update(){
  document.getElementById("verse").innerText=verses[translation][key];
- document.getElementById("ref").innerHTML=`<span style="color:#108cd7">${key}</span> (${translation})`;
+ document.getElementById("ref").innerHTML=`<span style="color:#108cd7">${key}</span> (${translation.toUpperCase()})`;
  document.getElementById("date").innerText=new Date().toDateString();
 }
 
@@ -232,28 +271,50 @@ function setup(){
  let s=document.getElementById("translationSelect");
  ["kjv","niv","nlt"].forEach(t=>{
   let o=document.createElement("option");
-  o.value=t;o.textContent=t.toUpperCase();s.appendChild(o);
+  o.value=t;
+  o.textContent=t.toUpperCase();
+  s.appendChild(o);
  });
- s.onchange=async e=>{translation=e.target.value;await load(translation);update();};
+ s.onchange=async e=>{
+  translation=e.target.value;
+  await load(translation);
+  update();
+ };
 }
 
 /* FAVORITES */
 function saveFavorite(){
  let v=`${verses[translation][key]} — ${key}`;
  let f=JSON.parse(localStorage.getItem("fav")||"[]");
- if(!f.includes(v)){f.push(v);localStorage.setItem("fav",JSON.stringify(f));alert("Saved");}
+ if(!f.includes(v)){
+  f.push(v);
+  localStorage.setItem("fav",JSON.stringify(f));
+  alert("Saved!");
+ }
 }
 
 function toggleFavorites(){
  let el=document.getElementById("favoritesList");
- if(el.style.display==="none"){renderFav();el.style.display="block";}
- else el.style.display="none";
+ if(el.style.display==="none"){
+  renderFav();
+  el.style.display="block";
+ } else el.style.display="none";
 }
 
 function renderFav(){
  let f=JSON.parse(localStorage.getItem("fav")||"[]");
  let el=document.getElementById("favoritesList");
- el.innerHTML=f.map((v,i)=>`<div class="favorite-item">${v}<br><button class="btn" onclick="del(${i})">Delete</button></div>`).join("");
+ if(f.length===0){
+  el.innerText="No saved verses yet.";
+  return;
+ }
+ el.innerHTML=f.map((v,i)=>`
+  <div class="favorite-item">
+   ${v}
+   <br>
+   <button class="btn" onclick="del(${i})">Delete</button>
+  </div>
+ `).join("");
 }
 
 function del(i){
@@ -271,54 +332,52 @@ function playVerse(){
  setTimeout(()=>speechSynthesis.speak(u),200);
 }
 
-/* AMBIENT */
+/* AMBIENT SOUND */
 let sound=false;
 function toggleSound(){
- let a=document.getElementById("ambientAudio");
- if(!sound){a.volume=.3;a.play();sound=true;}
- else{a.pause();sound=false;}
-}
+ const a=document.getElementById("ambientAudio");
+ const btn=document.getElementById("soundBtn");
 
-/* NOTIFICATIONS */
-function requestNotificationPermission(){
- if("Notification"in window){
-  Notification.requestPermission().then(p=>{
-   if(p==="granted")schedule();
-  });
+ if(!sound){
+  a.volume=0.3;
+  a.play();
+  sound=true;
+  btn.innerText="🔇 Stop Sound";
+ } else {
+  a.pause();
+  sound=false;
+  btn.innerText="🌧️ Ambient Sound";
  }
 }
 
-function schedule(){
- let now=new Date();
- let t=new Date();
- t.setHours(8,0,0,0);
- if(now>t)t.setDate(t.getDate()+1);
- setTimeout(()=>{
-  new Notification("Tap N Pray",{body:"Your daily verse is ready 🙏"});
-  setInterval(()=>new Notification("Tap N Pray",{body:"Your daily verse is ready 🙏"}),86400000);
- },t-now);
-}
-
-/* OTHER */
-function copyVerse(){navigator.clipboard.writeText(verses[translation][key]);}
-function shareVerse(){navigator.share?navigator.share({text:verses[translation][key]}):copyVerse();}
-
+/* STREAK */
 function streak(){
- let s=+localStorage.getItem("s")||0;
+ let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
  let t=new Date().toDateString();
- if(l!==t){s++;localStorage.setItem("l",t);localStorage.setItem("s",s);}
- document.getElementById("streak").innerText="🔥 "+s;
+
+ if(l!==t){
+  s++;
+  localStorage.setItem("l",t);
+  localStorage.setItem("s",s);
+ }
+
+ document.getElementById("streak").innerText=`🔥 Tap Streak: ${s}`;
 }
 
+/* PRAYER */
 function togglePrayer(){
  let p=document.getElementById("prayer");
- p.style.display=p.style.display==="none"?"block":"none";
- p.innerText="Lord guide me today.";
+ if(p.style.display==="none"){
+  p.style.display="block";
+  p.innerText="Lord, guide me today and give me peace.";
+ } else {
+  p.style.display="none";
+ }
 }
 
 /* PWA */
-if("serviceWorker"in navigator){
+if("serviceWorker" in navigator){
  navigator.serviceWorker.register("sw.js");
 }
 
