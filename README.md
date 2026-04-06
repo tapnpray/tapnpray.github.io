@@ -2,60 +2,46 @@
 
 **One Tap Closer to Christ**
 
-Tap N Pray is a simple, beautiful web app that delivers a **daily Bible verse**, allows you to **listen, reflect, and pray**, and helps you build a consistent spiritual habit.
+Tap N Pray is a modern, minimal web app designed to help users pause, reflect, and reconnect with God through a daily Bible verse experience.
 
-🌐 Live Site: https://tapnpray.github.io
+🌐 Live: https://tapnpray.github.io
 
 ---
 
 ## 🌟 Features
 
-* 📖 **Verse of the Day**
+* 📖 Daily Verse (KJV, NIV, NLT)
+* 🎧 Listen to scripture (text-to-speech)
+* 🌅 Dynamic background transitions
+* 🙏 Daily prayer prompts
+* 🔥 Tap streak tracking
+* ⭐ Save favorite verses
+* 🗂 View & delete saved verses
+* 📱 Mobile-first, app-like design
 
-  * Deterministic daily verse (same for all users each day)
-  * Multiple translations: KJV, NIV, NLT
+---
 
-* 🎧 **Listen Mode**
+## 💾 Favorites System
 
-  * Built-in text-to-speech
-  * Calm, devotional pacing
+Saved verses are stored locally using browser storage.
 
-* 🔄 **Dynamic Backgrounds**
+* Users can save multiple verses
+* View saved verses anytime
+* Delete individual favorites
+* No account required
 
-  * Smooth crossfade transitions
-  * Rotating serene imagery
-
-* 🙏 **Daily Prayer**
-
-  * Simple, reflective prompts
-  * Changes daily
-
-* 🔥 **Tap Streak**
-
-  * Encourages daily engagement
-  * Stored locally on device
-
-* ⭐ **Favorites**
-
-  * Save meaningful verses
-
-* 📱 **Mobile-First Design**
-
-  * Clean, app-like experience
-  * Optimized for all screen sizes
+⚠️ Note: Data is stored per device and browser.
 
 ---
 
 ## 🎨 Design Philosophy
 
-Tap N Pray is designed to feel like a **moment of peace**, not just a tool.
+Tap N Pray is designed to feel like a **moment of peace**:
 
-* Minimal UI → less distraction
-* Soft backgrounds → calm atmosphere
-* Centered layout → focused reflection
-* Smooth transitions → meditative experience
-
-Inspired by apps like Calm and modern devotional platforms.
+* Clean, distraction-free UI
+* Soft visuals and motion
+* Centered layout for reflection
+* Calm, immersive experience
 
 ---
 
@@ -64,14 +50,12 @@ Inspired by apps like Calm and modern devotional platforms.
 * HTML5
 * CSS3 (Glassmorphism UI)
 * Vanilla JavaScript
-* GitHub Pages (hosting)
-* Web Speech API (text-to-speech)
-
-No frameworks. Lightweight and fast.
+* GitHub Pages
+* Web Speech API
 
 ---
 
-## 📁 Project Structure
+## 📁 Structure
 
 ```
 tapnpray.github.io/
@@ -83,7 +67,6 @@ tapnpray.github.io/
 │   ├── morning1.png
 │   ├── morning2.png
 │   ├── day1.png
-│   └── ...
 │
 ├── BIBLE/
 │   ├── KJV/
@@ -93,48 +76,29 @@ tapnpray.github.io/
 
 ---
 
-## 🚀 Getting Started (Local Development)
+## 🚀 Getting Started
 
-1. Clone the repo:
+Clone and open locally:
 
 ```
 git clone https://github.com/tapnpray/tapnpray.github.io.git
 ```
 
-2. Open `index.html` in your browser
-
-No build step required.
+Open `index.html` in your browser.
 
 ---
 
 ## 🔮 Roadmap
 
-* 🌅 Time-of-day background system
-* 📲 Progressive Web App (installable)
-* 🔔 Daily verse notifications
-* 🎧 Improved voice selection
+* 🌅 Time-of-day backgrounds
+* 📲 Installable PWA
+* 🔔 Notifications
 * ☁️ Cloud sync for favorites
-
----
-
-## 🤝 Contributing
-
-This project is open to improvements and ideas.
-
-If you’d like to contribute:
-
-* Submit a pull request
-* Suggest features
-* Report issues
-
----
-
-## 📜 License
-
-This project is open source and available under the MIT License.
+* 🎧 Improved voice selection
 
 ---
 
 ## 🙏 Mission
 
-To create a simple digital space where anyone can **pause, reflect, and reconnect with God—one tap at a time.**
+To create a simple space where anyone can
+**pause, reflect, and grow closer to Christ—one tap at a time.**
