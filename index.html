@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Tap N Pray – Verse of the Day</title>
@@ -14,10 +12,13 @@
   gtag('config', 'G-ELQ3E5WGCT');
 </script>
 
+<!-- Google Fonts (Script + Sans Serif) -->
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <style>
 body {
     margin:0;
-    font-family:Arial,sans-serif;
+    font-family:'Inter', sans-serif;
     background-size:cover;
     background-position:center;
     background-attachment:fixed;
@@ -57,7 +58,7 @@ body::after {
 .tagline {
     margin-top:10px;
     color:white;
-    font-weight:bold;
+    font-weight:600;
     font-size:clamp(14px,4vw,18px);
     text-shadow:0 2px 6px rgba(0,0,0,0.8);
 }
@@ -72,14 +73,14 @@ body::after {
 }
 #votd-header {
     color:white;
-    font-weight:bold;
+    font-weight:700;
     font-size:clamp(18px,5vw,26px);
     margin-bottom:12px;
     text-shadow:0 2px 6px rgba(0,0,0,0.7);
 }
 #votd-container {
     font-size:clamp(22px,6.5vw,34px);
-    font-weight:bold;
+    font-weight:600;
     line-height:1.5;
     color:white;
     background:rgba(0,0,0,0.55);
@@ -112,7 +113,7 @@ body::after {
     border-radius:8px;
     background:#4db8ff;
     color:white;
-    font-weight:bold;
+    font-weight:600;
     cursor:pointer;
     transition:background .2s;
 }
@@ -164,20 +165,24 @@ body::after {
 <body>
 
 <div class="logo-container">
-    <img src="logo.svg" alt="Logo">
+    <img src="logo.svg" alt="Tap N Pray Logo">
     <div class="tagline">One Tap Closer to Christ</div>
 </div>
 
 <div class="center-container">
+
+    <!-- Verse of the Day Header -->
     <div id="votd-header">
         Verse of the Day - <span id="todays-date"></span>
     </div>
 
+    <!-- Verse Container -->
     <div id="votd-container">
         <div id="verse-text">Loading daily verse...</div>
         <div id="verse-ref"></div>
     </div>
 
+    <!-- Translation Selector -->
     <div class="translation">
         Translation:
         <select onchange="changeTranslation(this.value)">
@@ -187,37 +192,38 @@ body::after {
         </select>
     </div>
 
+    <!-- Action Buttons -->
     <div class="action-buttons">
         <button class="btn" onclick="playVerse()">Listen</button>
         <button class="btn" onclick="copyVerse()">Copy</button>
         <button class="btn" onclick="shareVerse()">Share</button>
+        <button class="btn" onclick="shareVerseAsImage()">Share as Image</button>
     </div>
 
+    <!-- Listen Status -->
     <div id="listen-status">Using your device’s best devotional voice…</div>
 
+    <!-- Daily Prayer -->
     <div id="daily-prayer-container">
         <button class="btn" id="daily-prayer-toggle" onclick="toggleDailyPrayer()">Show Daily Prayer</button>
         <div id="daily-prayer"></div>
     </div>
 
+    <!-- Tap Streak -->
     <div id="tap-streak">Tap Streak: Loading...</div>
-</div>
 
+</div> <!-- end center-container -->
 <script>
-/* BACKGROUND ROTATION */
-const backgrounds = [
-  "backgrounds/Background1.png",
-  "backgrounds/Background2.png",
-  "backgrounds/Background3.png"
-];
-document.body.style.backgroundImage =
-    `url('${backgrounds[Math.floor(Math.random() * backgrounds.length)]}')`;
+/* ---------------------------------------------
+   VERSE SYSTEM + BIBLE LOADING
+--------------------------------------------- */
 
-/* VERSE SYSTEM */
+/* Storage for all translations */
 let verses = { kjv:{}, niv:{}, nlt:{} };
 let dailyKey = "";
 let translation = "nlt";
 
+/* Flatten Bible JSON into "Book Chapter:Verse" → text */
 function flattenJSON(json){
     let flat = {};
     for (const book in json) {
@@ -233,121 +239,157 @@ function flattenJSON(json){
     return flat;
 }
 
+/* Load a translation from GitHub */
 async function loadTranslation(trans, url){
     const res = await fetch(url);
     const data = await res.json();
     verses[trans] = flattenJSON(data);
 }
 
+/* Pick a deterministic daily verse */
 function pickDailyVerse(){
     const keys = Object.keys(verses.nlt);
     const date = new Date();
-    const seed = date.getUTCFullYear()*10000 + (date.getUTCMonth()+1)*100 + date.getUTCDate();
+
+    // Deterministic seed based on YYYYMMDD
+    const seed = date.getUTCFullYear()*10000 +
+                 (date.getUTCMonth()+1)*100 +
+                 date.getUTCDate();
+
     dailyKey = keys[seed % keys.length];
 }
 
+/* Display the verse in the UI */
 function displayVerse(){
     document.getElementById("votd-container").classList.add("show");
+
     document.getElementById("verse-text").innerText =
         verses[translation][dailyKey] || "Verse not available";
+
     document.getElementById("verse-ref").innerText =
         `${dailyKey} (${translation.toUpperCase()})`;
 }
 
+/* Switch translation */
 function changeTranslation(val){
     translation = val;
     displayVerse();
 }
 
-/* COPY + SHARE */
-function copyVerse(){
-    navigator.clipboard.writeText(
-        `${verses[translation][dailyKey]} — ${dailyKey}`
-    );
-    alert("Verse copied!");
-}
-
-function shareVerse(){
-    if (navigator.share){
-        navigator.share({
-            title:"Verse of the Day",
-            text:`${verses[translation][dailyKey]} — ${dailyKey}`,
-            url:"https://tapnpray.github.io"
-        });
-    } else {
-        copyVerse();
-    }
-}
-
-/* DATE */
+/* Display today's date */
 function displayTodaysDate(){
     const today = new Date();
     const options = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
     document.getElementById("todays-date").innerText =
         today.toLocaleDateString('en-US', options);
 }
+</script>
+<script>
+/* ---------------------------------------------
+   LISTEN SYSTEM (Speech Synthesis)
+--------------------------------------------- */
 
-/* TAP STREAK (UNCHANGED) */
-function updateTapStreak() {
-    const streakKey = "tapnpray_streak";
-    const lastTapKey = "tapnpray_lastTap";
+let voices = [];
+let voicesLoaded = false;
 
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    let streak = parseInt(localStorage.getItem(streakKey)) || 0;
-    let lastTap = localStorage.getItem(lastTapKey);
-
-    if (lastTap) {
-        lastTap = new Date(lastTap);
-        const last = new Date(lastTap.getFullYear(), lastTap.getMonth(), lastTap.getDate());
-        const diffDays = Math.floor((today - last) / (1000 * 60 * 60 * 24));
-
-        if (diffDays === 0) {
-            // same day, streak unchanged
-        } else if (diffDays === 1) {
-            streak += 1;
-        } else {
-            streak = 1;
-        }
-    } else {
-        streak = 1;
-    }
-
-    localStorage.setItem(streakKey, streak);
-    localStorage.setItem(lastTapKey, today.toISOString());
-
-    const streakEl = document.getElementById("tap-streak");
-    streakEl.innerText = `Tap Streak: ${streak} day${streak === 1 ? "" : "s"}`;
+/* Load available system voices */
+function loadVoices() {
+    voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) voicesLoaded = true;
 }
 
-/* DAILY PRAYER POOL (MIXED LENGTH + MIXED SOURCES) */
+/* Ensure voices load on browsers that fire onvoiceschanged */
+if (typeof speechSynthesis !== "undefined") {
+    loadVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
+    }
+}
+
+/* Pick the best available female devotional voice */
+function getBestFemaleVoice() {
+    if (!voicesLoaded) return null;
+
+    const preferred = [
+        "Google UK English Female",
+        "Samantha",
+        "Serena"
+    ];
+
+    // Try preferred voices first
+    for (const name of preferred) {
+        const v = voices.find(voice => voice.name === name);
+        if (v) return v;
+    }
+
+    // Fallback: any female voice
+    const female = voices.find(v =>
+        v.name.toLowerCase().includes("female") ||
+        v.name.toLowerCase().includes("woman") ||
+        v.name.toLowerCase().includes("girl")
+    );
+    if (female) return female;
+
+    // Last fallback: first available voice
+    return voices[0] || null;
+}
+
+/* Play the verse aloud */
+function playVerse() {
+    const statusEl = document.getElementById("listen-status");
+
+    if (typeof speechSynthesis === "undefined") {
+        statusEl.innerText = "Listening not supported on this device.";
+        return;
+    }
+
+    const text = verses[translation][dailyKey] + " — " + dailyKey;
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    const voice = getBestFemaleVoice();
+    if (voice) utterance.voice = voice;
+
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    statusEl.innerText = "Playing verse in a devotional voice…";
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+
+    utterance.onend = () => {
+        statusEl.innerText = "Using your device’s best devotional voice…";
+    };
+}
+</script>
+<script>
+/* ---------------------------------------------
+   DAILY PRAYER SYSTEM
+--------------------------------------------- */
+
 const dailyPrayers = [
-    // Short
     "Lord, quiet my heart and draw me close to You today.",
     "Father, fill me with Your peace and guide my steps with purpose.",
     "Jesus, help me see this day the way You see it.",
     "Holy Spirit, steady my thoughts and center my heart on You.",
-    // Medium
-    "Heavenly Father, thank You for the gift of this new day. Strengthen my spirit and help me walk in Your truth. Let Your love shape my thoughts, my words, and my actions.",
-    "Lord Jesus, I surrender this day into Your hands. Lead me in every decision, every conversation, and every moment. May my life reflect Your grace and kindness.",
-    "Gracious God, thank You for never leaving me alone. When I feel weak, remind me that Your strength is made perfect in my weakness. Help me trust You more deeply today.",
-    // Long
-    "Lord Jesus, I come before You with a grateful heart. Thank You for Your mercy that meets me every morning and Your grace that carries me through every challenge. Teach me to trust You more deeply, to rest in Your promises, and to walk boldly in the calling You’ve placed on my life. Help me love others with the same compassion You’ve shown me. Keep my mind fixed on You and my heart anchored in Your peace.",
-    "Father, I bring You my worries, my hopes, and my questions. You see every detail of my life and care about each one. Remind me that I am held in Your hands and that nothing can separate me from Your love. Give me courage when I feel afraid, wisdom when I feel unsure, and joy that is rooted in who You are, not in what I see.",
-    // AI-style devotional (still static here, but written in that tone)
-    "Father, breathe new strength into my spirit today. Remind me that I am held, guided, and never alone. Shape my desires to match Your will, and let Your presence be the calm that steadies my soul.",
-    "God of hope, speak into the places of my heart that feel tired or discouraged. Replace my anxiety with trust, my fear with faith, and my restlessness with Your perfect peace. Help me remember that You are working even when I cannot see it.",
-    "Lord, thank You for walking with me through every season. When the path feels unclear, be my light. When my heart feels heavy, be my comfort. When I am tempted to give up, remind me that You are not finished with my story."
+    "Heavenly Father, thank You for the gift of this new day. Strengthen my spirit and help me walk in Your truth.",
+    "Lord Jesus, I surrender this day into Your hands. Lead me in every decision and every moment.",
+    "Gracious God, thank You for never leaving me alone. Help me trust You more deeply today.",
+    "Lord Jesus, thank You for Your mercy that meets me every morning and Your grace that carries me through every challenge.",
+    "Father, I bring You my worries and my hopes. Remind me that I am held in Your hands.",
+    "Father, breathe new strength into my spirit today. Let Your presence steady my soul.",
+    "God of hope, replace my anxiety with trust and my fear with faith.",
+    "Lord, thank You for walking with me through every season. Be my light and my comfort today."
 ];
 
+/* Pick a random prayer */
 function getRandomPrayer() {
-    const idx = Math.floor(Math.random() * dailyPrayers.length);
-    return dailyPrayers[idx];
+    return dailyPrayers[Math.floor(Math.random() * dailyPrayers.length)];
 }
 
 let prayerVisible = false;
 
+/* Toggle prayer visibility */
 function toggleDailyPrayer() {
     const prayerEl = document.getElementById("daily-prayer");
     const toggleBtn = document.getElementById("daily-prayer-toggle");
@@ -364,86 +406,198 @@ function toggleDailyPrayer() {
     }
 }
 
-/* LISTEN (OLD SYSTEM, BEST FEMALE VOICE) */
-let voices = [];
-let voicesLoaded = false;
+/* ---------------------------------------------
+   TAP STREAK SYSTEM
+--------------------------------------------- */
 
-function loadVoices() {
-    voices = window.speechSynthesis.getVoices();
-    if (voices.length > 0) {
-        voicesLoaded = true;
-    }
-}
+function updateTapStreak() {
+    const streakKey = "tapnpray_streak";
+    const lastTapKey = "tapnpray_lastTap";
 
-if (typeof speechSynthesis !== "undefined") {
-    loadVoices();
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = loadVoices;
-    }
-}
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-function getBestFemaleVoice() {
-    if (!voicesLoaded) return null;
+    let streak = parseInt(localStorage.getItem(streakKey)) || 0;
+    let lastTap = localStorage.getItem(lastTapKey);
 
-    const preferredNames = [
-        "Google UK English Female",
-        "Samantha",
-        "Serena"
-    ];
+    if (lastTap) {
+        lastTap = new Date(lastTap);
+        const last = new Date(lastTap.getFullYear(), lastTap.getMonth(), lastTap.getDate());
+        const diffDays = Math.floor((today - last) / (1000 * 60 * 60 * 24));
 
-    for (const name of preferredNames) {
-        const v = voices.find(voice => voice.name === name);
-        if (v) return v;
+        if (diffDays === 0) {
+            // Already counted today
+        } else if (diffDays === 1) {
+            streak += 1; // Continued streak
+        } else {
+            streak = 1; // Reset streak
+        }
+    } else {
+        streak = 1; // First ever tap
     }
 
-    const femaleVoice = voices.find(v =>
-        v.name.toLowerCase().includes("female") ||
-        v.name.toLowerCase().includes("woman") ||
-        v.name.toLowerCase().includes("girl")
-    );
-    if (femaleVoice) return femaleVoice;
+    localStorage.setItem(streakKey, streak);
+    localStorage.setItem(lastTapKey, today.toISOString());
 
-    return voices[0] || null;
+    const streakEl = document.getElementById("tap-streak");
+    streakEl.innerText = `Tap Streak: ${streak} day${streak === 1 ? "" : "s"}`;
+}
+</script>
+<script>
+/* ---------------------------------------------
+   TEXT WRAP HELPER FOR CANVAS
+--------------------------------------------- */
+function wrapText(ctx, text, maxWidth) {
+    const words = text.split(" ");
+    const lines = [];
+    let line = "";
+
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + " ";
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+
+        if (testWidth > maxWidth && n > 0) {
+            lines.push(line.trim());
+            line = words[n] + " ";
+        } else {
+            line = testLine;
+        }
+    }
+
+    lines.push(line.trim());
+    return lines;
 }
 
-function playVerse() {
-    const statusEl = document.getElementById("listen-status");
+/* ---------------------------------------------
+   SHARE-AS-IMAGE SYSTEM
+--------------------------------------------- */
 
-    if (typeof speechSynthesis === "undefined") {
-        statusEl.innerText = "Listening not supported on this device.";
+/* Backgrounds for share images */
+const shareBackgrounds = [
+    "share-backgrounds/bg1.jpg",
+    "share-backgrounds/bg2.jpg",
+    "share-backgrounds/bg3.jpg"
+];
+
+function shareVerseAsImage() {
+    const verse = verses[translation][dailyKey];
+    const ref = dailyKey;
+
+    if (!verse || !ref) {
+        alert("Verse not ready yet.");
         return;
     }
 
-    const text = verses[translation][dailyKey] + " — " + dailyKey;
-    const utterance = new SpeechSynthesisUtterance(text);
-
-    const voice = getBestFemaleVoice();
-    if (voice) {
-        utterance.voice = voice;
+    if (!shareBackgrounds.length) {
+        alert("No share backgrounds configured.");
+        return;
     }
 
-    utterance.rate = 0.95;
-    utterance.pitch = 1.0;
+    const bgPath = shareBackgrounds[Math.floor(Math.random() * shareBackgrounds.length)];
 
-    statusEl.innerText = "Playing verse in a devotional voice…";
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utterance);
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1080;
+    const ctx = canvas.getContext("2d");
 
-    utterance.onend = () => {
-        statusEl.innerText = "Using your device’s best devotional voice…";
+    const bg = new Image();
+    bg.crossOrigin = "anonymous";
+    bg.src = bgPath;
+
+    bg.onload = () => {
+        /* Draw background */
+        ctx.drawImage(bg, 0, 0, 1080, 1080);
+
+        /* Soft vignette */
+        const gradient = ctx.createRadialGradient(
+            540, 540, 200,
+            540, 540, 700
+        );
+        gradient.addColorStop(0, "rgba(0,0,0,0)");
+        gradient.addColorStop(1, "rgba(0,0,0,0.35)");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1080, 1080);
+
+        /* Verse text */
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+
+        const maxWidth = 900;
+        let fontSize = 64;
+        ctx.font = `${fontSize}px Inter`;
+
+        let lines = wrapText(ctx, verse, maxWidth);
+
+        /* Dynamic sizing */
+        while (lines.length > 5 && fontSize > 28) {
+            fontSize -= 4;
+            ctx.font = `${fontSize}px Inter`;
+            lines = wrapText(ctx, verse, maxWidth);
+        }
+
+        /* Draw verse lines */
+        let y = 420;
+        lines.forEach(line => {
+            ctx.fillText(line, 540, y);
+            y += fontSize * 1.3;
+        });
+
+        /* Reference in script font */
+        ctx.font = "48px 'Dancing Script'";
+        ctx.fillText(`— ${ref}`, 540, y + 40);
+
+        /* White cross watermark */
+        ctx.font = "80px Inter";
+        ctx.fillText("✝", 1000, 1030);
+
+        /* Export as PNG */
+        canvas.toBlob(blob => {
+            const file = new File([blob], "tapnpray-verse.png", { type: "image/png" });
+
+            /* Native share if supported */
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({
+                    files: [file],
+                    title: "Verse of the Day",
+                    text: `${verse} — ${ref}`
+                }).catch(() => {
+                    downloadImage(canvas);
+                });
+            } else {
+                downloadImage(canvas);
+            }
+        }, "image/png");
+    };
+
+    bg.onerror = () => {
+        alert("Could not load share background image.");
     };
 }
 
-/* INIT */
+/* Download fallback */
+function downloadImage(canvas) {
+    const link = document.createElement("a");
+    link.download = "tapnpray-verse.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+}
+
+/* ---------------------------------------------
+   INITIALIZATION
+--------------------------------------------- */
 async function init(){
+    /* Load all translations */
     await Promise.all([
         loadTranslation("kjv","https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/KJV/KJV_bible.json"),
         loadTranslation("niv","https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/NIV/NIV_bible.json"),
         loadTranslation("nlt","https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/NLT/NLT_bible.json")
     ]);
 
+    /* Pick daily verse */
     pickDailyVerse();
 
+    /* Easter override (April 5, 2026) */
     const now = new Date();
     const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const overrideDate = new Date(Date.UTC(2026, 3, 5)); // April 5, 2026
@@ -456,6 +610,7 @@ async function init(){
         dailyKey = "Matthew 28:6";
     }
 
+    /* Update UI */
     displayTodaysDate();
     displayVerse();
     updateTapStreak();
@@ -463,6 +618,5 @@ async function init(){
 
 window.addEventListener("load", init);
 </script>
-
 </body>
 </html>
