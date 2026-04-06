@@ -188,8 +188,6 @@ body::after {
 
     <div id="favoritesList" class="small" style="display:none;"></div>
 
-    <button class="btn" onclick="togglePrayer()">Daily Prayer</button>
-    <div id="prayer" class="small" style="display:none;"></div>
 
 </div>
 
@@ -363,17 +361,6 @@ function streak(){
  }
 
  document.getElementById("streak").innerText=`🔥 Tap Streak: ${s}`;
-}
-
-/* PRAYER */
-function togglePrayer(){
- let p=document.getElementById("prayer");
- if(p.style.display==="none"){
-  p.style.display="block";
-  p.innerText="Lord, guide me today and give me peace.";
- } else {
-  p.style.display="none";
- }
 }
 
 /* PWA */
