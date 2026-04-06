@@ -1,104 +1,118 @@
-# ✝️ Tap N Pray
+# 🙏 Tap N Pray
 
 **One Tap Closer to Christ**
 
-Tap N Pray is a modern, minimal web app designed to help users pause, reflect, and reconnect with God through a daily Bible verse experience.
-
-🌐 Live: https://tapnpray.github.io
+Tap N Pray is a simple, beautifully designed web app that delivers a **daily Bible verse** with a calm, distraction-free experience. Built as a Progressive Web App (PWA), it feels like a native mobile app while remaining lightweight and accessible.
 
 ---
 
-## 🌟 Features
+## ✨ Features
 
-* 📖 Daily Verse (KJV, NIV, NLT)
-* 🎧 Listen to scripture (text-to-speech)
-* 🌅 Dynamic background transitions
-* 🙏 Daily prayer prompts
-* 🔥 Tap streak tracking
-* ⭐ Save favorite verses
-* 🗂 View & delete saved verses
-* 📱 Mobile-first, app-like design
+* 📖 **Verse of the Day**
+  Automatically displays a new Bible verse each day
 
----
+* 🎧 **Listen to the Verse**
+  Built-in audio playback using your device’s voice
 
-## 💾 Favorites System
+* 🌧️ **Ambient Background Sound**
+  Optional calming rain audio for a more meditative experience
 
-Saved verses are stored locally using browser storage.
+* ⭐ **Save Favorite Verses**
+  Store and revisit meaningful verses locally on your device
 
-* Users can save multiple verses
-* View saved verses anytime
-* Delete individual favorites
-* No account required
+* 🔄 **Multiple Translations**
+  Switch between KJV, NIV, and NLT instantly
 
-⚠️ Note: Data is stored per device and browser.
+* 🔥 **Tap Streak**
+  Track your daily engagement and build a habit
 
----
+* 🌅 **Dynamic Backgrounds**
+  Peaceful rotating backgrounds that enhance focus
 
-## 🎨 Design Philosophy
-
-Tap N Pray is designed to feel like a **moment of peace**:
-
-* Clean, distraction-free UI
-* Soft visuals and motion
-* Centered layout for reflection
-* Calm, immersive experience
+* 📲 **Installable App (PWA)**
+  Add to your home screen for a native app-like experience
 
 ---
 
-## ⚙️ Tech Stack
+## 📱 How to Install (Mobile)
+
+### iPhone (Safari)
+
+1. Open the site
+2. Tap the **Share** button
+3. Select **“Add to Home Screen”**
+
+### Android (Chrome)
+
+1. Open the site
+2. Tap the **menu (⋮)**
+3. Select **“Install App”**
+
+---
+
+## 🛠️ Tech Stack
 
 * HTML5
-* CSS3 (Glassmorphism UI)
+* CSS3 (Glassmorphism + responsive design)
 * Vanilla JavaScript
-* GitHub Pages
-* Web Speech API
+* Web Speech API (text-to-speech)
+* LocalStorage (favorites + streak tracking)
+* Progressive Web App (manifest + service worker)
 
 ---
 
-## 📁 Structure
+## 📁 Project Structure
 
 ```
 tapnpray.github.io/
 │
 ├── index.html
+├── manifest.json
+├── sw.js
 ├── logo.svg
+├── icon-192.png
+├── icon-512.png
 │
 ├── backgrounds/
 │   ├── morning1.png
 │   ├── morning2.png
-│   ├── day1.png
+│   └── day1.png
 │
-├── BIBLE/
-│   ├── KJV/
-│   ├── NIV/
-│   └── NLT/
+├── sounds/
+│   └── rain.mp3
+│
+└── BIBLE/
+    ├── KJV/
+    ├── NIV/
+    └── NLT/
 ```
 
 ---
 
-## 🚀 Getting Started
+## ⚙️ How It Works
 
-Clone and open locally:
-
-```
-git clone https://github.com/tapnpray/tapnpray.github.io.git
-```
-
-Open `index.html` in your browser.
+* A daily verse is selected using a **date-based seed**
+* Bible data is fetched from JSON files stored in the repository
+* Favorites and streak data are stored locally using **LocalStorage**
+* Backgrounds rotate automatically for a calm, immersive experience
+* The app runs fully client-side—no backend required
 
 ---
 
-## 🔮 Roadmap
+## 🚀 Future Improvements
 
-* 🌅 Time-of-day backgrounds
-* 📲 Installable PWA
-* 🔔 Notifications
-* ☁️ Cloud sync for favorites
-* 🎧 Improved voice selection
+* Push notifications (daily verse reminders)
+* User accounts + cloud sync
+* More ambient sound options
+* Expanded devotional content
+* Native app deployment (iOS / Android)
 
 ---
 
-## 🙏 Mission
+## 🙌 Mission
 
-To create a simple space where anyone can
-**pause, reflect, and grow closer to Christ—one tap at a time.**
+Tap N Pray was created to make it easier to pause, reflect, and connect with God—one simple tap at a time.
+
+---
+
+**“Be still, and know that I am God.” – Psalm 46:10**
