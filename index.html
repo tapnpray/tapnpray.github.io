@@ -11,7 +11,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
-/* LOCK APP HEIGHT */
+/* LOCK APP */
 html, body {
     height:100%;
     margin:0;
@@ -22,7 +22,6 @@ html, body {
     color:white;
 
     -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
 
     background:#000;
     background-size:cover;
@@ -33,7 +32,7 @@ html, body {
     padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* tap behavior */
+/* touch */
 button, select {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -65,13 +64,13 @@ body::after {
     z-index:10;
 }
 .logo-container img {
-    max-width:130px;
+    max-width:120px;
     width:50%;
 }
 .tagline {
-    margin-top:4px;
-    font-size:12px;
-    opacity:0.85;
+    margin-top:2px;
+    font-size:11px;
+    opacity:0.8;
 }
 
 /* layout */
@@ -79,29 +78,44 @@ body::after {
     height:100%;
     display:flex;
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start;
     align-items:center;
-    padding:100px 16px 80px;
+
+    padding-top:150px;
+    padding-bottom:90px;
+    padding-left:16px;
+    padding-right:16px;
+
     box-sizing:border-box;
 }
 
 /* card */
 #votd {
-    background:rgba(0,0,0,0.5);
+    background:rgba(0,0,0,0.55);
     border-radius:24px;
-    padding:32px 26px;
+    padding:36px 26px;
     max-width:520px;
     width:100%;
+
     backdrop-filter:blur(25px);
+
     box-shadow:
-        0 10px 40px rgba(0,0,0,0.6),
-        0 0 25px rgba(16,140,215,0.12);
+        0 12px 45px rgba(0,0,0,0.65),
+        0 0 30px rgba(16,140,215,0.15);
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+
+    animation:fadeUp 0.8s ease;
 }
 
 /* text */
 #date {
     color:#108cd7;
-    margin-bottom:8px;
+    font-size:14px;
+    letter-spacing:0.5px;
     text-align:center;
 }
 #verse {
@@ -111,47 +125,66 @@ body::after {
     text-shadow:0 2px 10px rgba(0,0,0,0.6);
 }
 #ref {
-    margin-top:12px;
     color:#108cd7;
+    font-size:14px;
+    opacity:0.95;
     text-align:center;
 }
 
-/* buttons */
-.actions {
-    margin-top:20px;
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    justify-content:center;
-    max-width:320px;
-}
-
-.btn {
-    padding:14px 18px;
-    border-radius:999px;
-    border:none;
-    background:rgba(255,255,255,0.18);
-    color:white;
-    font-size:15px;
-    font-weight:500;
-    cursor:pointer;
-    transition:all .2s ease;
-}
-.btn:hover {
-    background:rgba(255,255,255,0.28);
-}
-.btn:active {
-    transform:scale(0.92);
-    box-shadow:0 0 10px rgba(16,140,215,0.4);
-}
-
+/* dropdown */
 .small {
     font-size:13px;
     opacity:0.85;
-    margin-top:10px;
+    margin:6px 0;
     text-align:center;
 }
 
+/* BUTTON GRID */
+.actions {
+    margin-top:18px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+    width:100%;
+    max-width:320px;
+}
+
+/* buttons */
+.btn {
+    padding:14px 0;
+    border-radius:999px;
+    border:none;
+
+    background:rgba(255,255,255,0.18);
+    color:white;
+
+    font-size:15px;
+    font-weight:500;
+
+    cursor:pointer;
+    transition:all .2s ease;
+
+    width:100%;
+}
+
+.btn:hover {
+    background:rgba(255,255,255,0.28);
+}
+
+.btn:active {
+    transform:scale(0.94);
+    box-shadow:0 0 12px rgba(16,140,215,0.4);
+}
+
+/* primary button */
+.primary {
+    background:rgba(16,140,215,0.9);
+}
+.primary:hover {
+    background:rgba(16,140,215,1);
+}
+
+/* favorites */
 .favorite-item {
     margin-top:10px;
     padding:10px;
@@ -159,7 +192,7 @@ body::after {
     background:rgba(255,255,255,0.08);
 }
 
-/* tap streak */
+/* streak */
 #streak {
     position:fixed;
     bottom:18px;
@@ -167,6 +200,12 @@ body::after {
     transform:translateX(-50%);
     font-size:14px;
     opacity:0.85;
+}
+
+/* animation */
+@keyframes fadeUp {
+    from {opacity:0; transform:translateY(10px);}
+    to {opacity:1; transform:translateY(0);}
 }
 </style>
 </head>
@@ -190,12 +229,12 @@ body::after {
     </div>
 
     <div class="actions">
-        <button class="btn" onclick="playVerse()">Listen</button>
+        <button class="btn primary" onclick="playVerse()">Listen</button>
         <button class="btn" onclick="copyVerse()">Copy</button>
         <button class="btn" onclick="shareVerse()">Share</button>
         <button class="btn" onclick="saveFavorite()">⭐ Save</button>
         <button class="btn" onclick="toggleFavorites()">Favorites</button>
-        <button class="btn" onclick="toggleSound()" id="soundBtn">🌧️ Ambient Sound</button>
+        <button class="btn" onclick="toggleSound()" id="soundBtn">🌧️ Ambient</button>
     </div>
 
     <div id="favoritesList" class="small" style="display:none;"></div>
@@ -342,7 +381,7 @@ function playVerse(){
  setTimeout(()=>speechSynthesis.speak(u),200);
 }
 
-/* AMBIENT SOUND */
+/* AMBIENT */
 let sound=false;
 function toggleSound(){
  const a=document.getElementById("ambientAudio");
@@ -356,7 +395,7 @@ function toggleSound(){
  } else {
   a.pause();
   sound=false;
-  btn.innerText="🌧️ Ambient Sound";
+  btn.innerText="🌧️ Ambient";
  }
 }
 
