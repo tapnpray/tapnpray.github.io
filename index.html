@@ -444,6 +444,20 @@ function updateTapStreak() {
 }
 </script>
 <script>
+// MAIN SITE BACKGROUNDS
+const backgrounds = [
+  "backgrounds/Background1.png",
+  "backgrounds/Background2.png",
+  "backgrounds/Background3.png"
+];
+
+function setRandomBackground() {
+  const randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+  document.body.style.backgroundImage = `url('${randomBackground}')`;
+}
+
+setRandomBackground();
+
 /* ---------------------------------------------
    TEXT WRAP HELPER FOR CANVAS
 --------------------------------------------- */
