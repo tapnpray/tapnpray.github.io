@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <meta name="description" content="Tap N Pray – Get a daily Bible verse and grow closer to Christ.">
-<meta name="theme-color" content="#000000">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
@@ -42,21 +41,9 @@ body::after {
 }
 
 /* logo */
-.logo-container {
-    margin-top:20px;
-    text-align:center;
-}
-.logo-container img {
-    max-width:220px;
-    width:70%;
-    opacity:0.95;
-}
-.tagline {
-    margin-top:8px;
-    font-size:14px;
-    opacity:0.8;
-    letter-spacing:0.5px;
-}
+.logo-container {margin-top:20px;text-align:center;}
+.logo-container img {max-width:220px;width:70%;}
+.tagline {margin-top:8px;font-size:14px;opacity:0.8;}
 
 /* layout */
 .center {
@@ -82,23 +69,10 @@ body::after {
 }
 
 /* text */
-#verse {
-    font-size:clamp(20px,5vw,28px);
-    line-height:1.6;
-}
-#ref {
-    opacity:0.7;
-    margin-top:10px;
-}
+#verse {font-size:clamp(20px,5vw,28px);line-height:1.6;}
+#ref {opacity:0.7;margin-top:10px;}
 
-/* buttons */
-.actions {
-    margin-top:15px;
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    justify-content:center;
-}
+.actions {margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
 
 .btn {
     padding:10px 14px;
@@ -108,18 +82,29 @@ body::after {
     color:white;
     cursor:pointer;
 }
-.btn:hover { background:rgba(255,255,255,0.25); }
-.btn:active { transform:scale(0.95); }
+.btn:hover {background:rgba(255,255,255,0.25);}
+.btn:active {transform:scale(0.95);}
 
-.small {font-size:13px; opacity:0.8; margin-top:10px;}
+.small {font-size:13px;opacity:0.8;margin-top:10px;}
+
+.favorite-item {
+    margin-top:10px;
+    padding:10px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.08);
+}
+
+.delete-btn {
+    margin-top:6px;
+    background:#ff4d4d;
+}
 </style>
 </head>
 
 <body>
 
-<!-- LOGO -->
 <div class="logo-container">
-    <img src="logo.svg" alt="Tap N Pray logo">
+    <img src="logo.svg">
     <div class="tagline">One Tap Closer to Christ</div>
 </div>
 
@@ -139,23 +124,23 @@ body::after {
         <button class="btn" onclick="playVerse()">Listen</button>
         <button class="btn" onclick="copyVerse()">Copy</button>
         <button class="btn" onclick="shareVerse()">Share</button>
-        <button class="btn" onclick="saveFavorite()">⭐</button>
+        <button class="btn" onclick="saveFavorite()">⭐ Save</button>
+        <button class="btn" onclick="toggleFavorites()">Favorites</button>
     </div>
 
+    <div id="favoritesList" class="small" style="display:none;"></div>
+
     <div id="streak" class="small"></div>
-    <div id="status" class="small"></div>
 
     <button class="btn" onclick="togglePrayer()">Daily Prayer</button>
     <div id="prayer" class="small" style="display:none;"></div>
 
-    <button class="btn" onclick="toggleAutoplay()" id="autoplayBtn">Autoplay: OFF</button>
 </div>
 
 </div>
 
 <script>
-/* ================= BACKGROUNDS ================= */
-
+/* BACKGROUNDS */
 const backgrounds = [
   "backgrounds/morning1.png",
   "backgrounds/morning2.png",
@@ -166,43 +151,40 @@ let bgIndex = 0;
 
 function setBackground(index) {
   const newBg = backgrounds[index];
-
   const overlay = document.createElement("div");
-  overlay.style.position = "fixed";
-  overlay.style.top = 0;
-  overlay.style.left = 0;
-  overlay.style.width = "100%";
-  overlay.style.height = "100%";
-  overlay.style.backgroundImage = `url('${newBg}')`;
-  overlay.style.backgroundSize = "cover";
-  overlay.style.backgroundPosition = "center";
-  overlay.style.zIndex = "-3";
-  overlay.style.opacity = "0";
-  overlay.style.transition = "opacity 1.5s ease";
+
+  Object.assign(overlay.style, {
+    position:"fixed",top:0,left:0,width:"100%",height:"100%",
+    backgroundImage:`url('${newBg}')`,
+    backgroundSize:"cover",
+    backgroundPosition:"center",
+    zIndex:"-3",
+    opacity:"0",
+    transition:"opacity 2s ease"
+  });
 
   document.body.appendChild(overlay);
 
-  setTimeout(() => overlay.style.opacity = "1", 50);
+  setTimeout(()=>overlay.style.opacity="1",50);
 
-  setTimeout(() => {
-    document.body.style.backgroundImage = `url('${newBg}')`;
+  setTimeout(()=>{
+    document.body.style.backgroundImage=`url('${newBg}')`;
     overlay.remove();
-  }, 1500);
+  },1500);
 }
 
-function cycleBackground() {
-  bgIndex = (bgIndex + 1) % backgrounds.length;
-  setBackground(bgIndex);
+function cycleBackground(){
+    bgIndex=(bgIndex+1)%backgrounds.length;
+    setBackground(bgIndex);
 }
 
 setBackground(bgIndex);
-setInterval(cycleBackground, 8000);
+setInterval(cycleBackground,60000);
 
-/* ================= VERSE SYSTEM ================= */
-
+/* VERSES */
 let verses = {};
 let currentKey = "";
-let translation = localStorage.getItem("translation") || "nlt";
+let translation = "nlt";
 
 async function loadTranslation(t){
     if (verses[t]) return;
@@ -215,55 +197,96 @@ async function loadTranslation(t){
             for (let v in json[b][c])
                 flat[`${b} ${c}:${v}`] = json[b][c][v];
 
-    verses[t] = flat;
+    verses[t]=flat;
 }
 
 function seedIndex(length){
-    const d = new Date();
+    const d=new Date();
     return (d.getFullYear()*10000 + d.getMonth()*100 + d.getDate()) % length;
 }
 
 async function init(){
     await loadTranslation(translation);
-    const keys = Object.keys(verses[translation]);
-    currentKey = keys[seedIndex(keys.length)];
-
+    const keys=Object.keys(verses[translation]);
+    currentKey=keys[seedIndex(keys.length)];
     updateUI();
     setupDropdown();
     updateStreak();
-
-    if (localStorage.getItem("autoplay")==="true") {
-        document.getElementById("autoplayBtn").innerText="Autoplay: ON";
-        playVerse();
-    }
 }
 
 function updateUI(){
-    document.getElementById("verse").innerText = verses[translation][currentKey];
-    document.getElementById("ref").innerText = `${currentKey} (${translation.toUpperCase()})`;
-    document.getElementById("date").innerText = new Date().toDateString();
+    document.getElementById("verse").innerText=verses[translation][currentKey];
+    document.getElementById("ref").innerText=`${currentKey} (${translation.toUpperCase()})`;
+    document.getElementById("date").innerText=new Date().toDateString();
 }
 
 function setupDropdown(){
-    const sel = document.getElementById("translationSelect");
+    const sel=document.getElementById("translationSelect");
     ["kjv","niv","nlt"].forEach(t=>{
         const opt=document.createElement("option");
         opt.value=t;
         opt.textContent=t.toUpperCase();
-        if(t===translation) opt.selected=true;
         sel.appendChild(opt);
     });
 
-    sel.onchange = async e=>{
+    sel.onchange=async e=>{
         translation=e.target.value;
-        localStorage.setItem("translation",translation);
         await loadTranslation(translation);
         updateUI();
     };
 }
 
-/* ================= ACTIONS ================= */
+/* FAVORITES SYSTEM */
+function saveFavorite(){
+    const verse = `${verses[translation][currentKey]} — ${currentKey}`;
+    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
+    if (!favorites.includes(verse)) {
+        favorites.push(verse);
+        localStorage.setItem("favorites", JSON.stringify(favorites));
+        alert("Saved!");
+    } else {
+        alert("Already saved!");
+    }
+}
+
+function toggleFavorites(){
+    const el=document.getElementById("favoritesList");
+
+    if(el.style.display==="none"){
+        renderFavorites();
+        el.style.display="block";
+    } else {
+        el.style.display="none";
+    }
+}
+
+function renderFavorites(){
+    const el=document.getElementById("favoritesList");
+    let favorites=JSON.parse(localStorage.getItem("favorites")) || [];
+
+    if(favorites.length===0){
+        el.innerText="No saved verses yet.";
+        return;
+    }
+
+    el.innerHTML = favorites.map((v,i)=>`
+        <div class="favorite-item">
+            ${v}
+            <br>
+            <button class="btn delete-btn" onclick="deleteFavorite(${i})">Delete</button>
+        </div>
+    `).join("");
+}
+
+function deleteFavorite(index){
+    let favorites=JSON.parse(localStorage.getItem("favorites")) || [];
+    favorites.splice(index,1);
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+    renderFavorites();
+}
+
+/* OTHER */
 function copyVerse(){
     navigator.clipboard.writeText(`${verses[translation][currentKey]} — ${currentKey}`);
     alert("Copied!");
@@ -275,17 +298,10 @@ function shareVerse(){
     } else copyVerse();
 }
 
-function saveFavorite(){
-    localStorage.setItem("favoriteVerse", `${verses[translation][currentKey]} — ${currentKey}`);
-    alert("Saved!");
-}
-
-/* ================= STREAK ================= */
-
 function updateStreak(){
-    let s = parseInt(localStorage.getItem("streak")) || 0;
-    let last = localStorage.getItem("last");
-    const today = new Date().toDateString();
+    let s=parseInt(localStorage.getItem("streak"))||0;
+    let last=localStorage.getItem("last");
+    const today=new Date().toDateString();
 
     if(last!==today){
         s++;
@@ -293,17 +309,10 @@ function updateStreak(){
         localStorage.setItem("streak",s);
     }
 
-    document.getElementById("streak").innerText = `🔥 Streak: ${s}`;
+    document.getElementById("streak").innerText=`🔥 Streak: ${s}`;
 }
 
-/* ================= PRAYER ================= */
-
-const prayers = [
-"Lord, quiet my heart today.",
-"Father, guide my steps.",
-"Jesus, give me peace.",
-"God, strengthen my faith."
-];
+const prayers=["Lord guide me today.","Give me peace.","Strengthen my faith."];
 
 function togglePrayer(){
     const el=document.getElementById("prayer");
@@ -313,26 +322,13 @@ function togglePrayer(){
     } else el.style.display="none";
 }
 
-/* ================= AUTOPLAY ================= */
-
-function toggleAutoplay(){
-    const current = localStorage.getItem("autoplay")==="true";
-    localStorage.setItem("autoplay", !current);
-    document.getElementById("autoplayBtn").innerText = `Autoplay: ${!current ? "ON":"OFF"}`;
-}
-
-/* ================= AUDIO ================= */
-
 function playVerse(){
-    const text = verses[translation][currentKey];
-    const u = new SpeechSynthesisUtterance(text);
+    const u=new SpeechSynthesisUtterance(verses[translation][currentKey]);
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
 }
 
-/* ================= INIT ================= */
-
-window.onload = init;
+window.onload=init;
 </script>
 
 </body>
