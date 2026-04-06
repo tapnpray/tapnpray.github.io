@@ -3,26 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <title>Tap N Pray – Verse of the Day</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#108cd7">
 <link rel="manifest" href="manifest.json">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
-body {
+/* LOCK APP HEIGHT */
+html, body {
+    height:100%;
     margin:0;
+    overflow:hidden;
+    overscroll-behavior:none;
+
     font-family:'Inter',sans-serif;
     color:white;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    min-height:100vh;
+
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+
     background:#000;
     background-size:cover;
     background-position:center;
     background-attachment:fixed;
+
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* tap behavior */
+button, select {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 /* overlays */
@@ -51,8 +65,8 @@ body::after {
     z-index:10;
 }
 .logo-container img {
-    max-width:140px;
-    width:55%;
+    max-width:130px;
+    width:50%;
 }
 .tagline {
     margin-top:4px;
@@ -62,23 +76,22 @@ body::after {
 
 /* layout */
 .center {
-    flex:1;
+    height:100%;
     display:flex;
     flex-direction:column;
-    justify-content:flex-start;
+    justify-content:center;
     align-items:center;
-    padding-top:120px;
-    padding-bottom:80px;
-    width:100%;
+    padding:100px 16px 80px;
+    box-sizing:border-box;
 }
 
 /* card */
 #votd {
-    background:rgba(0,0,0,0.45);
+    background:rgba(0,0,0,0.5);
     border-radius:24px;
     padding:32px 26px;
     max-width:520px;
-    width:92%;
+    width:100%;
     backdrop-filter:blur(25px);
     box-shadow:
         0 10px 40px rgba(0,0,0,0.6),
@@ -92,10 +105,10 @@ body::after {
     text-align:center;
 }
 #verse {
-    font-size:clamp(26px,6.5vw,36px);
+    font-size:clamp(24px,6vw,34px);
     line-height:1.7;
-    text-shadow:0 2px 10px rgba(0,0,0,0.6);
     text-align:center;
+    text-shadow:0 2px 10px rgba(0,0,0,0.6);
 }
 #ref {
     margin-top:12px;
@@ -107,9 +120,10 @@ body::after {
 .actions {
     margin-top:20px;
     display:flex;
-    gap:12px;
+    gap:10px;
     flex-wrap:wrap;
     justify-content:center;
+    max-width:320px;
 }
 
 .btn {
@@ -145,7 +159,7 @@ body::after {
     background:rgba(255,255,255,0.08);
 }
 
-/* tap streak bottom */
+/* tap streak */
 #streak {
     position:fixed;
     bottom:18px;
@@ -153,14 +167,12 @@ body::after {
     transform:translateX(-50%);
     font-size:14px;
     opacity:0.85;
-    text-align:center;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGO -->
 <div class="logo-container">
     <img src="logo.svg">
     <div class="tagline">One Tap Closer to Christ</div>
@@ -187,8 +199,6 @@ body::after {
     </div>
 
     <div id="favoritesList" class="small" style="display:none;"></div>
-
-
 </div>
 
 </div>
@@ -232,7 +242,7 @@ setBG(i);
 setInterval(()=>{
  i=(i+1)%backgrounds.length;
  setBG(i);
-},60000); // 1 minute
+},60000);
 
 /* VERSES */
 let verses={},key="",translation="nlt";
@@ -302,10 +312,12 @@ function toggleFavorites(){
 function renderFav(){
  let f=JSON.parse(localStorage.getItem("fav")||"[]");
  let el=document.getElementById("favoritesList");
+
  if(f.length===0){
   el.innerText="No saved verses yet.";
   return;
  }
+
  el.innerHTML=f.map((v,i)=>`
   <div class="favorite-item">
    ${v}
