@@ -1,4 +1,5 @@
 # 🙏 Tap N Pray
+<img width="300" height="300" alt="logo-black" src="https://github.com/user-attachments/assets/df62fb19-6136-4003-add4-a099b34a8109" />
 
 **One Tap Closer to Christ**
 
