@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#108cd7">
 <link rel="manifest" href="manifest.json">
 
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
 <script>
 window.dataLayer=[];function gtag(){dataLayer.push(arguments);}
@@ -39,22 +40,24 @@ body::after{
  transform:translateX(-50%);
  text-align:center;
 }
-.logo-container img{max-width:90px;}
+.logo-container img{max-width:85px;}
 .tagline{font-size:11px;opacity:.85}
 
 /* MAIN */
 .center{
  height:100%;
- display:flex;flex-direction:column;
+ display:flex;
+ flex-direction:column;
  align-items:center;
  justify-content:center;
- padding:120px 20px;
+ padding:120px 20px 160px;
+ box-sizing:border-box;
 }
 
 /* CARD */
 #votd{
  position:relative;
- background:rgba(0,0,0,.75);
+ background:rgba(0,0,0,.78);
  border-radius:24px;
  padding:30px 22px;
  width:100%;max-width:520px;
@@ -62,32 +65,38 @@ body::after{
  text-align:center;
 }
 
+/* AUDIO TOGGLE */
+#audioToggle{
+ position:absolute;
+ top:12px;
+ right:12px;
+ font-size:20px;
+ cursor:pointer;
+ z-index:10;
+}
+
 /* TEXT */
-#date{color:#108cd7;margin-bottom:10px;}
+#date{color:#108cd7;margin-bottom:10px;font-size:14px;}
 
 #verse{
  font-size:clamp(26px,6vw,36px);
  line-height:1.7;
-
  opacity:0;
- transition:opacity 5s ease; /* 🔥 SLOW FADE */
+ transition:opacity 5s ease;
+ padding:0 10px;
 }
 
-#verse.show{
- opacity:1;
-}
+#verse.show{opacity:1;}
 
 .word{
- opacity:.3;
- transition:opacity .4s ease,color .4s ease;
+ opacity:.35;
+ transition:opacity .4s ease;
 }
-
 .word.active{
  opacity:1;
- color:#ffffff;
 }
 
-#ref{color:#108cd7;margin-top:10px}
+#ref{color:#108cd7;margin-top:10px;font-size:14px}
 
 /* BUTTONS */
 .actions{
@@ -99,15 +108,20 @@ body::after{
  padding:14px;border-radius:999px;
  border:none;background:rgba(255,255,255,.15);
  color:#fff;cursor:pointer;
+ font-weight:bold;
 }
 .primary{background:#108cd7}
 
 /* STREAK */
 #streak{
- position:fixed;bottom:18px;
- left:50%;transform:translateX(-50%);
- background:rgba(0,0,0,.5);
- padding:6px 14px;border-radius:999px;
+ position:fixed;
+ bottom:20px;
+ left:50%;
+ transform:translateX(-50%);
+ background:rgba(0,0,0,.6);
+ padding:8px 16px;
+ border-radius:999px;
+ font-size:14px;
 }
 </style>
 </head>
@@ -121,6 +135,8 @@ body::after{
 
 <div class="center">
 <div id="votd">
+
+<div id="audioToggle" onclick="toggleAudio()">🎧</div>
 
 <div id="date"></div>
 <div id="verse"></div>
@@ -151,17 +167,27 @@ if ('serviceWorker' in navigator) {
  navigator.serviceWorker.register('/sw.js');
 }
 
-/* BACKGROUND */
-const backgrounds=["backgrounds/morning1.png","backgrounds/morning2.png","backgrounds/day1.png"];
-let i=0;
-function setBG(n){document.body.style.backgroundImage=`url('${backgrounds[n]}')`;}
-setBG(i);
-setInterval(()=>{i=(i+1)%backgrounds.length;setBG(i);},60000);
+/* BACKGROUND ROTATION */
+const backgrounds=[
+ "backgrounds/morning1.png",
+ "backgrounds/morning2.png",
+ "backgrounds/day1.png"
+];
+let bgIndex=0;
+function setBG(i){
+ document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
+}
+setBG(bgIndex);
+setInterval(()=>{
+ bgIndex=(bgIndex+1)%backgrounds.length;
+ setBG(bgIndex);
+},60000);
 
 /* VERSES */
 let verses={kjv:{},niv:{},nlt:{}};
 let key="",translation="nlt";
 
+/* LOAD */
 async function loadTranslation(t){
  if(Object.keys(verses[t]).length)return;
  const res=await fetch(`https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
@@ -179,15 +205,18 @@ function seed(len){
  return (d.getFullYear()*10000+d.getMonth()*100+d.getDate())%len;
 }
 
+/* INIT */
 async function init(){
  await loadTranslation("nlt");
  const keys=Object.keys(verses.nlt);
  key=keys[seed(keys.length)];
+
  setupTranslations();
  update();
  streak();
- startAmbient();
- playVerse(); // 🔥 auto play
+
+ setupAudio();
+ playVerse();
 }
 
 /* TRANSLATIONS */
@@ -199,14 +228,16 @@ function setupTranslations(){
   if(t==="nlt")o.selected=true;
   s.appendChild(o);
  });
+
  s.onchange=async e=>{
   translation=e.target.value;
   await loadTranslation(translation);
   update();
+  playVerse();
  };
 }
 
-/* UPDATE (FADE + WORD SPLIT) */
+/* UPDATE */
 function update(){
  const verseEl=document.getElementById("verse");
  const text=verses[translation][key];
@@ -222,7 +253,84 @@ function update(){
  setTimeout(()=>verseEl.classList.add("show"),200);
 }
 
-/* 🔊 SPEECH + SYNC */
+/* AUDIO */
+let audioOn=true;
+
+function setupAudio(){
+ const saved=localStorage.getItem("audioOn");
+ audioOn = saved !== "false";
+
+ const icon=document.getElementById("audioToggle");
+
+ if(audioOn){
+  icon.innerText="🎧";
+  startAmbient();
+ } else {
+  icon.innerText="🔇";
+ }
+}
+
+function startAmbient(){
+ const a=document.getElementById("ambientAudio");
+ a.volume=0;
+ a.play().catch(()=>{});
+
+ fadeAudio(a,0.25,2000);
+}
+
+function fadeAudio(audio,target,duration){
+ const step=(target-audio.volume)/(duration/50);
+
+ const fade=setInterval(()=>{
+  audio.volume+=step;
+
+  if(
+   (step>0 && audio.volume>=target) ||
+   (step<0 && audio.volume<=target)
+  ){
+   audio.volume=target;
+   clearInterval(fade);
+  }
+ },50);
+}
+
+function toggleAudio(){
+ const a=document.getElementById("ambientAudio");
+ const icon=document.getElementById("audioToggle");
+
+ if(audioOn){
+  fadeAudio(a,0,800);
+  icon.innerText="🔇";
+  audioOn=false;
+ } else {
+  a.play().catch(()=>{});
+  fadeAudio(a,0.25,1200);
+  icon.innerText="🎧";
+  audioOn=true;
+ }
+
+ localStorage.setItem("audioOn",audioOn);
+}
+
+/* BETTER VOICE */
+function getBestVoice(){
+ const voices=speechSynthesis.getVoices();
+
+ const preferred=[
+  "Google UK English Female",
+  "Samantha",
+  "Serena"
+ ];
+
+ for(const name of preferred){
+  const v=voices.find(v=>v.name===name);
+  if(v) return v;
+ }
+
+ return voices[0];
+}
+
+/* SPEECH */
 function playVerse(){
  const text=verses[translation][key];
  const words=document.querySelectorAll(".word");
@@ -230,7 +338,10 @@ function playVerse(){
  let i=0;
 
  const utter=new SpeechSynthesisUtterance(text);
- utter.rate=.9;
+ utter.rate=.85;
+
+ const voice=getBestVoice();
+ if(voice) utter.voice=voice;
 
  utter.onboundary=(event)=>{
   if(event.name==="word" && words[i]){
@@ -243,22 +354,16 @@ function playVerse(){
  speechSynthesis.speak(utter);
 }
 
-/* 🎧 AMBIENT AUTO */
-function startAmbient(){
- const a=document.getElementById("ambientAudio");
- a.volume=0;
- a.play();
-
- let fade=setInterval(()=>{
-  if(a.volume<0.25)a.volume+=0.01;
-  else clearInterval(fade);
- },100);
-}
-
 /* OTHER */
-function copyVerse(){navigator.clipboard.writeText(verses[translation][key]+" — "+key);}
-function shareVerse(){navigator.share?.({text:verses[translation][key]+" — "+key});}
-function donate(){window.open("https://venmo.com/u/tapnpray");}
+function copyVerse(){
+ navigator.clipboard.writeText(verses[translation][key]+" — "+key);
+}
+function shareVerse(){
+ navigator.share?.({text:verses[translation][key]+" — "+key});
+}
+function donate(){
+ window.open("https://venmo.com/u/tapnpray");
+}
 
 /* STREAK */
 function streak(){
