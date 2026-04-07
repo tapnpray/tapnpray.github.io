@@ -63,7 +63,7 @@ body::after{
 /* HEADER */
 #title{
  font-size:14px;
- opacity:.8;
+ opacity:.85;
  margin-bottom:5px;
 }
 
@@ -99,6 +99,24 @@ body::after{
 }
 .primary{background:#108cd7}
 
+/* FAVORITES MODAL */
+#favoritesModal{
+ position:fixed;top:0;left:0;width:100%;height:100%;
+ background:rgba(0,0,0,.95);
+ display:none;
+ overflow:auto;
+ padding:20px;
+}
+#favoritesContent{
+ max-width:600px;margin:auto;
+}
+.favorite-item{
+ margin-bottom:15px;
+ padding:15px;
+ background:rgba(255,255,255,.1);
+ border-radius:12px;
+}
+
 /* FOOTER */
 #bottomTagline{
  position:fixed;bottom:70px;width:100%;
@@ -120,7 +138,7 @@ body::after{
 <div class="center">
 <div id="votd">
 
-<div id="favoriteStar">☆</div>
+<div id="favoriteStar" onclick="toggleFavorite()">☆</div>
 <div id="ambientToggle" onclick="toggleAmbient()">🌿</div>
 
 <div id="title">Daily Bible Verse</div>
@@ -139,9 +157,9 @@ body::after{
 
 <div class="actions">
 <button class="btn primary" onclick="readVerse()">Read Verse</button>
+<button class="btn" onclick="openFavorites()">Favorites</button>
 <button class="btn" onclick="copyVerse()">Copy</button>
 <button class="btn" onclick="shareVerse()">Share</button>
-<button class="btn" onclick="donate()">💙 Support</button>
 </div>
 
 </div>
@@ -149,6 +167,10 @@ body::after{
 
 <div id="bottomTagline">One Tap Closer to Christ</div>
 <div id="streak"></div>
+
+<div id="favoritesModal" onclick="closeFavorites(event)">
+  <div id="favoritesContent"></div>
+</div>
 
 <audio id="ambientAudio" loop>
 <source src="sounds/calm.mp3">
@@ -166,7 +188,7 @@ setInterval(()=>{
 },60000);
 
 /* DATA */
-let verses={},key="",dailyKey="",mode="daily";
+let verses={},key="",dailyKey="";
 
 /* LOAD */
 async function load(){
@@ -183,16 +205,23 @@ async function load(){
  setDailyVerse();
 }
 
-/* DAILY LOCK */
+/* TRUE DAILY RANDOM */
 function setDailyVerse(){
  const keys=Object.keys(verses);
- const d=new Date();
- const seed=(d.getFullYear()*10000 + d.getMonth()*100 + d.getDate()) % keys.length;
+ const today=new Date().toISOString().slice(0,10);
 
- dailyKey=keys[seed];
+ let hash=0;
+ for(let i=0;i<today.length;i++){
+  hash=(hash<<5)-hash+today.charCodeAt(i);
+  hash|=0;
+ }
+
+ const index=Math.abs(hash)%keys.length;
+
+ dailyKey=keys[index];
  key=dailyKey;
- mode="daily";
 
+ updateTitle("Daily");
  update();
  streak();
 }
@@ -212,6 +241,14 @@ function update(){
  now.toLocaleDateString(undefined,{
   weekday:'short',month:'short',day:'numeric',year:'numeric'
  });
+
+ updateStar();
+}
+
+/* TITLE */
+function updateTitle(label){
+ document.getElementById("title").innerText =
+ label==="Daily" ? "Daily Bible Verse" : `Daily Bible Verse - ${label}`;
 }
 
 /* TOPICS */
@@ -231,15 +268,15 @@ function pickTopic(t,btn){
  }
 
  key=list.length ? list[Math.floor(Math.random()*list.length)] : dailyKey;
- mode="topic";
 
+ updateTitle(btn.innerText);
  update();
  setActive(btn);
 }
 
 function goDaily(btn){
  key=dailyKey;
- mode="daily";
+ updateTitle("Daily");
  update();
  setActive(btn);
 }
@@ -247,6 +284,50 @@ function goDaily(btn){
 function setActive(btn){
  document.querySelectorAll("#topics button").forEach(b=>b.classList.remove("active"));
  btn.classList.add("active");
+}
+
+/* FAVORITES */
+function getFavs(){
+ return JSON.parse(localStorage.getItem("favs")||"[]");
+}
+
+function toggleFavorite(){
+ let favs=getFavs();
+ if(favs.includes(key)){
+  favs=favs.filter(f=>f!==key);
+ }else{
+  favs.push(key);
+ }
+ localStorage.setItem("favs",JSON.stringify(favs));
+ updateStar();
+}
+
+function updateStar(){
+ document.getElementById("favoriteStar").innerText=
+ getFavs().includes(key)?"⭐":"☆";
+}
+
+function openFavorites(){
+ let modal=document.getElementById("favoritesModal");
+ let content=document.getElementById("favoritesContent");
+
+ let favs=getFavs();
+ content.innerHTML="<h2>Saved Verses</h2>";
+
+ favs.forEach(ref=>{
+  content.innerHTML+=`
+   <div class="favorite-item">
+   <b>${ref}</b><br>${verses[ref]}
+   </div>`;
+ });
+
+ modal.style.display="block";
+}
+
+function closeFavorites(e){
+ if(e.target.id==="favoritesModal"){
+  document.getElementById("favoritesModal").style.display="none";
+ }
 }
 
 /* AUDIO */
@@ -277,14 +358,13 @@ function fadeAudio(audio,target,duration){
  },50);
 }
 
-/* READ + HIGHLIGHT */
+/* READ */
 function readVerse(){
 
  const words=document.querySelectorAll(".word");
  words.forEach(w=>w.classList.remove("active"));
 
- const intro=`Daily Bible Verse. ${new Date().toDateString()}. `;
- const text=intro + verses[key];
+ const text = key + ". " + verses[key];
 
  const utter=new SpeechSynthesisUtterance(text);
  utter.rate=0.85;
@@ -309,10 +389,6 @@ function copyVerse(){
 
 function shareVerse(){
  navigator.share?.({text:verses[key]+" — "+key});
-}
-
-function donate(){
- window.open("https://venmo.com/u/tapnpray");
 }
 
 /* STREAK */
