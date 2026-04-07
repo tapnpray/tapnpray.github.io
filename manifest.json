@@ -1,6 +1,6 @@
 {
   "name": "Tap N Pray",
-  "short_name": "TapNPray",
+  "short_name": "Tap N Pray",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
