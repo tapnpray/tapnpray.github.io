@@ -150,6 +150,14 @@ body::after{
 </audio>
 
 <script>
+
+/* ✅ SERVICE WORKER REGISTRATION */
+if ('serviceWorker' in navigator) {
+ navigator.serviceWorker.register('/sw.js')
+  .then(() => console.log("Service Worker Registered"))
+  .catch(err => console.log("SW error:", err));
+}
+
 /* BACKGROUND */
 const backgrounds=["backgrounds/morning1.png","backgrounds/morning2.png","backgrounds/day1.png"];
 let i=0;
@@ -298,7 +306,7 @@ function streak(){
  document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
 }
 
-/* INSTALL (SMART) */
+/* INSTALL */
 function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
 function isAndroid(){return /android/i.test(navigator.userAgent);}
 
@@ -330,7 +338,7 @@ async function installApp(){
  if(!deferredPrompt)return;
  deferredPrompt.prompt();
  await deferredPrompt.userChoice;
- b.style.display="none";
+ document.getElementById("installBanner").style.display="none";
 }
 </script>
 
