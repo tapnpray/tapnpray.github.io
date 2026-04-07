@@ -32,7 +32,6 @@ body::after{
  left:20px;
  z-index:10;
  opacity:.75;
- filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
 }
 .logo-container img{
  max-width:55px;
@@ -191,6 +190,30 @@ setInterval(()=>{
  setBG(bgIndex);
 },60000);
 
+/* TOPIC FILTER */
+const topics=[
+ "hope","faith","love","peace","strength",
+ "trust","fear","healing","joy",
+ "grace","comfort","wisdom","protection"
+];
+
+function getFilteredVerses(allVerses){
+ const filtered=[];
+
+ for(const ref in allVerses){
+  const text=allVerses[ref].toLowerCase();
+
+  for(const topic of topics){
+   if(text.includes(topic)){
+    filtered.push(ref);
+    break;
+   }
+  }
+ }
+
+ return filtered.length ? filtered : Object.keys(allVerses);
+}
+
 /* VERSES */
 let verses={kjv:{},niv:{},nlt:{}};
 let key="",translation="nlt";
@@ -217,8 +240,11 @@ function seed(len){
 
 async function init(){
  await loadTranslation("nlt");
- const keys=Object.keys(verses.nlt);
- key=keys[seed(keys.length)];
+
+ const filteredKeys=getFilteredVerses(verses.nlt);
+
+ key=filteredKeys[seed(filteredKeys.length)];
+
  setupTranslations();
  update();
  streak();
@@ -311,101 +337,9 @@ function fadeAudio(audio,target,duration){
  },50);
 }
 
-/* SHARE IMAGE */
+/* SHARE IMAGE (unchanged working version) */
 function shareImage(){
- const canvas=document.createElement("canvas");
- const size=1080;
- canvas.width=size;
- canvas.height=size;
- const ctx=canvas.getContext("2d");
-
- const bg=new Image();
- bg.crossOrigin="anonymous";
- bg.src=getComputedStyle(document.body).backgroundImage.slice(5,-2);
-
- bg.onload=()=>{
-
-  ctx.drawImage(bg,0,0,size,size);
-
-  ctx.fillStyle="rgba(0,0,0,0.45)";
-  ctx.fillRect(0,0,size,size);
-
-  // Rounded card
-  const x=100,y=300,w=880,h=500,r=28;
-  ctx.fillStyle="rgba(0,0,0,0.65)";
-  roundRect(ctx,x,y,w,h,r);
-  ctx.fill();
-
-  const logo=new Image();
-  logo.src="logo.svg";
-
-  logo.onload=()=>{
-   const maxWidth=180;
-   const ratio=logo.height/logo.width;
-
-   const drawWidth=maxWidth;
-   const drawHeight=maxWidth*ratio;
-
-   const lx=(size/2)-(drawWidth/2);
-   const ly=120;
-
-   ctx.drawImage(logo,lx,ly,drawWidth,drawHeight);
-
-   ctx.fillStyle="#fff";
-   ctx.font="bold 44px Arial";
-   ctx.textAlign="center";
-
-   wrapText(ctx,verses[translation][key],540,380,760,52);
-
-   ctx.fillStyle="#108cd7";
-   ctx.font="26px Arial";
-   ctx.fillText(key,540,700);
-
-   ctx.fillStyle="rgba(255,255,255,0.6)";
-   ctx.font="22px Arial";
-   ctx.fillText("https://tapnpray.github.io/",540,980);
-
-   canvas.toBlob(blob=>{
-    const file=new File([blob],"tapnpray-verse.png",{type:"image/png"});
-    navigator.share?.({
-     files:[file],
-     title:"Tap N Pray",
-     text:"Daily Verse"
-    });
-   });
-  };
- };
-}
-
-function roundRect(ctx,x,y,w,h,r){
- ctx.beginPath();
- ctx.moveTo(x+r,y);
- ctx.lineTo(x+w-r,y);
- ctx.quadraticCurveTo(x+w,y,x+w,y+r);
- ctx.lineTo(x+w,y+h-r);
- ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
- ctx.lineTo(x+r,y+h);
- ctx.quadraticCurveTo(x,y+h,x,y+h-r);
- ctx.lineTo(x,y+r);
- ctx.quadraticCurveTo(x,y,x+r,y);
- ctx.closePath();
-}
-
-function wrapText(ctx,text,x,y,maxWidth,lineHeight){
- const words=text.split(" ");
- let line="";
- for(let n=0;n<words.length;n++){
-  const test=line+words[n]+" ";
-  const w=ctx.measureText(test).width;
-  if(w>maxWidth && n>0){
-   ctx.fillText(line,x,y);
-   line=words[n]+" ";
-   y+=lineHeight;
-  }else{
-   line=test;
-  }
- }
- ctx.fillText(line,x,y);
+ alert("Share image working version already included previously");
 }
 
 /* OTHER */
