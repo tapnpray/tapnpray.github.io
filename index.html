@@ -205,7 +205,7 @@ async function load(){
  setDailyVerse();
 }
 
-/* TRUE DAILY RANDOM */
+/* DAILY RANDOM */
 function setDailyVerse(){
  const keys=Object.keys(verses);
  const today=new Date().toISOString().slice(0,10);
@@ -317,11 +317,19 @@ function openFavorites(){
  favs.forEach(ref=>{
   content.innerHTML+=`
    <div class="favorite-item">
-   <b>${ref}</b><br>${verses[ref]}
+     <b>${ref}</b><br>${verses[ref]}<br><br>
+     <button onclick="deleteFavorite('${ref}')">🗑 Remove</button>
    </div>`;
  });
 
  modal.style.display="block";
+}
+
+function deleteFavorite(ref){
+ let favs=getFavs().filter(f=>f!==ref);
+ localStorage.setItem("favs",JSON.stringify(favs));
+ openFavorites();
+ updateStar();
 }
 
 function closeFavorites(e){
@@ -364,9 +372,10 @@ function readVerse(){
  const words=document.querySelectorAll(".word");
  words.forEach(w=>w.classList.remove("active"));
 
- const text = key + ". " + verses[key];
+ const verseText = verses[key];
+ const refText = key;
 
- const utter=new SpeechSynthesisUtterance(text);
+ const utter=new SpeechSynthesisUtterance(verseText);
  utter.rate=0.85;
 
  let i=0;
@@ -378,17 +387,107 @@ function readVerse(){
   }
  };
 
+ utter.onend=()=>{
+  const refUtter=new SpeechSynthesisUtterance(refText);
+  refUtter.rate=0.9;
+  speechSynthesis.speak(refUtter);
+ };
+
  speechSynthesis.cancel();
  speechSynthesis.speak(utter);
+}
+
+/* SHARE IMAGE */
+function shareVerse(){
+
+ const canvas=document.createElement("canvas");
+ canvas.width=1080;
+ canvas.height=1080;
+ const ctx=canvas.getContext("2d");
+
+ const bg=new Image();
+ bg.src=document.body.style.backgroundImage.slice(5,-2);
+
+ bg.onload=()=>{
+
+  ctx.drawImage(bg,0,0,1080,1080);
+
+  ctx.fillStyle="rgba(0,0,0,0.45)";
+  ctx.fillRect(0,0,1080,1080);
+
+  ctx.fillStyle="rgba(0,0,0,0.55)";
+  roundRect(ctx,140,260,800,420,30,true,false);
+
+  ctx.fillStyle="#fff";
+  ctx.font="42px Arial";
+  ctx.textAlign="center";
+  wrapText(ctx,verses[key],540,340,700,52);
+
+  ctx.fillStyle="#108cd7";
+  ctx.font="28px Arial";
+  ctx.fillText(key,540,640);
+
+  const logo=new Image();
+  logo.src="logo.svg";
+
+  logo.onload=()=>{
+   ctx.drawImage(logo,40,900,120,120);
+
+   ctx.fillStyle="#fff";
+   ctx.font="22px Arial";
+   ctx.textAlign="left";
+   ctx.fillText("tapnpray.github.io",40,1040);
+
+   canvas.toBlob(blob=>{
+    const file=new File([blob],"tapnpray.png",{type:"image/png"});
+
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+     navigator.share({files:[file]});
+    }else{
+     const link=document.createElement("a");
+     link.download="tapnpray.png";
+     link.href=URL.createObjectURL(blob);
+     link.click();
+    }
+   });
+  };
+ };
+}
+
+/* HELPERS */
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){
+ let words=text.split(' ');
+ let line='';
+ for(let n=0;n<words.length;n++){
+  let testLine=line+words[n]+' ';
+  let testWidth=ctx.measureText(testLine).width;
+  if(testWidth>maxWidth && n>0){
+   ctx.fillText(line,x,y);
+   line=words[n]+' ';
+   y+=lineHeight;
+  }else line=testLine;
+ }
+ ctx.fillText(line,x,y);
+}
+
+function roundRect(ctx,x,y,w,h,r,fill){
+ ctx.beginPath();
+ ctx.moveTo(x+r,y);
+ ctx.lineTo(x+w-r,y);
+ ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+ ctx.lineTo(x+w,y+h-r);
+ ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+ ctx.lineTo(x+r,y+h);
+ ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+ ctx.lineTo(x,y+r);
+ ctx.quadraticCurveTo(x,y,x+r,y);
+ ctx.closePath();
+ if(fill)ctx.fill();
 }
 
 /* OTHER */
 function copyVerse(){
  navigator.clipboard.writeText(verses[key]+" — "+key);
-}
-
-function shareVerse(){
- navigator.share?.({text:verses[key]+" — "+key});
 }
 
 /* STREAK */
