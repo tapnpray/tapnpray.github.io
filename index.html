@@ -22,14 +22,16 @@ html,body{
  font-family:Inter,sans-serif;color:#fff;
  background-size:cover;background-position:center;
 }
+
+/* BACKGROUND OVERLAY */
 body::before{
  content:"";position:fixed;width:100%;height:100%;
- background:linear-gradient(to bottom,rgba(0,0,0,.3),rgba(0,0,0,.8));
+ background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.85));
  z-index:-2;
 }
 body::after{
  content:"";position:fixed;width:100%;height:100%;
- backdrop-filter:blur(10px);z-index:-1;
+ backdrop-filter:blur(12px);z-index:-1;
 }
 
 /* HEADER */
@@ -38,8 +40,8 @@ body::after{
  transform:translateX(-50%);
  text-align:center;
 }
-.logo-container img{max-width:100px;}
-.tagline{font-size:11px;opacity:.8}
+.logo-container img{max-width:90px;}
+.tagline{font-size:11px;opacity:.85}
 
 /* MAIN */
 .center{
@@ -53,27 +55,51 @@ body::after{
 /* CARD */
 #votd{
  position:relative;
- background:rgba(0,0,0,.7);
+ background:rgba(0,0,0,.75);
  border-radius:24px;
- padding:30px 22px;
+ padding:32px 24px;
  width:92%;max-width:520px;
  backdrop-filter:blur(20px);
  display:flex;flex-direction:column;
- align-items:center;gap:14px;
+ align-items:center;gap:16px;
 }
 
 /* SOUND ICON */
 #soundIcon{
  position:absolute;top:14px;right:16px;
  cursor:pointer;
+ font-size:18px;
 }
 
 /* TEXT */
 #date{color:#108cd7;font-size:14px;}
+
 #verse{
  font-size:clamp(26px,6vw,36px);
- text-align:center;line-height:1.6;
+ text-align:center;
+ line-height:1.7;
+
+ opacity:0;
+ transform:translateY(12px);
+ transition:opacity .8s ease, transform .8s ease;
 }
+
+#verse.show{
+ opacity:1;
+ transform:translateY(0);
+}
+
+/* CURSOR */
+#verse::after{
+ content:"|";
+ margin-left:4px;
+ animation:blink 1s infinite;
+}
+@keyframes blink{
+ 0%,100%{opacity:1;}
+ 50%{opacity:0;}
+}
+
 #ref{color:#108cd7}
 
 /* BUTTONS */
@@ -86,6 +112,7 @@ body::after{
  padding:14px;border-radius:999px;
  border:none;background:rgba(255,255,255,.15);
  color:#fff;cursor:pointer;
+ font-weight:bold;
 }
 .primary{background:#108cd7}
 
@@ -135,17 +162,26 @@ body::after{
 
 <script>
 
-/* SERVICE WORKER (kept silently) */
+/* SERVICE WORKER */
 if ('serviceWorker' in navigator) {
  navigator.serviceWorker.register('/sw.js');
 }
 
-/* BACKGROUND */
-const backgrounds=["backgrounds/morning1.png","backgrounds/morning2.png","backgrounds/day1.png"];
-let i=0;
-function setBG(n){document.body.style.backgroundImage=`url('${backgrounds[n]}')`;}
-setBG(i);
-setInterval(()=>{i=(i+1)%backgrounds.length;setBG(i);},60000);
+/* BACKGROUND ROTATION */
+const backgrounds=[
+ "backgrounds/morning1.png",
+ "backgrounds/morning2.png",
+ "backgrounds/day1.png"
+];
+let bgIndex=0;
+function setBG(i){
+ document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
+}
+setBG(bgIndex);
+setInterval(()=>{
+ bgIndex=(bgIndex+1)%backgrounds.length;
+ setBG(bgIndex);
+},60000);
 
 /* VERSES */
 let verses={kjv:{},niv:{},nlt:{}};
@@ -177,7 +213,7 @@ async function init(){
  streak();
 }
 
-/* TRANSLATION */
+/* TRANSLATIONS */
 function setupTranslations(){
  const s=document.getElementById("translationSelect");
  ["kjv","niv","nlt"].forEach(t=>{
@@ -193,11 +229,50 @@ function setupTranslations(){
  };
 }
 
-/* UPDATE */
+/* ✨ UPDATE WITH ANIMATION */
 function update(){
- document.getElementById("verse").innerText=verses[translation][key];
- document.getElementById("ref").innerHTML=`<span style="color:#108cd7">${key}</span> (${translation.toUpperCase()})`;
+ const verseEl=document.getElementById("verse");
+ const text=verses[translation][key];
+
+ verseEl.classList.remove("show");
+ verseEl.innerHTML="";
+
+ document.getElementById("ref").innerHTML=
+ `<span style="color:#108cd7">${key}</span> (${translation.toUpperCase()})`;
+
  document.getElementById("date").innerText=new Date().toDateString();
+
+ setTimeout(()=>{
+  verseEl.classList.add("show");
+
+  setTimeout(()=>{
+   typeWriterNatural(verseEl,text,22);
+  },300);
+
+ },200);
+}
+
+/* ✨ NATURAL TYPEWRITER */
+function typeWriterNatural(el,text,speed){
+ let i=0;
+
+ function type(){
+  if(i<text.length){
+   const char=text.charAt(i);
+   el.innerHTML+=char;
+   i++;
+
+   let delay=speed;
+
+   if(char===","||char===";") delay=speed*6;
+   if(char==="."||char==="!"||char==="?") delay=speed*10;
+   if(char===" ") delay=speed*0.6;
+
+   setTimeout(type,delay);
+  }
+ }
+
+ type();
 }
 
 /* SOUND */
@@ -205,8 +280,23 @@ let sound=false;
 function toggleSound(){
  const a=document.getElementById("ambientAudio");
  const icon=document.getElementById("soundIcon");
- if(!sound){a.volume=0;a.play();a.volume=.35;icon.innerText="🔊";sound=true;}
- else{a.pause();icon.innerText="🎧";sound=false;}
+
+ if(!sound){
+  a.volume=0;a.play();
+  let fade=setInterval(()=>{
+   if(a.volume<0.35)a.volume+=0.02;
+   else clearInterval(fade);
+  },50);
+  icon.innerText="🔊";
+  sound=true;
+ }else{
+  let fade=setInterval(()=>{
+   if(a.volume>0)a.volume-=0.02;
+   else{a.pause();clearInterval(fade);}
+  },50);
+  icon.innerText="🎧";
+  sound=false;
+ }
 }
 
 /* SHARE */
@@ -217,9 +307,15 @@ function shareVerse(){
 }
 
 /* OTHER */
-function playVerse(){speechSynthesis.speak(new SpeechSynthesisUtterance(verses[translation][key]));}
-function copyVerse(){navigator.clipboard.writeText(verses[translation][key]+" — "+key);}
-function donate(){window.open("https://venmo.com/u/tapnpray");}
+function playVerse(){
+ speechSynthesis.speak(new SpeechSynthesisUtterance(verses[translation][key]));
+}
+function copyVerse(){
+ navigator.clipboard.writeText(verses[translation][key]+" — "+key);
+}
+function donate(){
+ window.open("https://venmo.com/u/tapnpray");
+}
 
 /* STREAK */
 function streak(){
