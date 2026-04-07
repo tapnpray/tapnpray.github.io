@@ -8,7 +8,6 @@
 <meta name="theme-color" content="#108cd7">
 <link rel="manifest" href="manifest.json">
 
-<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
 <script>
 window.dataLayer=[];function gtag(){dataLayer.push(arguments);}
@@ -23,10 +22,10 @@ html,body{
  background-size:cover;background-position:center;
 }
 
-/* BACKGROUND OVERLAY */
+/* BACKGROUND */
 body::before{
  content:"";position:fixed;width:100%;height:100%;
- background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.85));
+ background:linear-gradient(to bottom,rgba(0,0,0,.4),rgba(0,0,0,.9));
  z-index:-2;
 }
 body::after{
@@ -48,8 +47,8 @@ body::after{
  height:100%;
  display:flex;flex-direction:column;
  align-items:center;
- padding-top:140px;
- padding-bottom:140px;
+ justify-content:center;
+ padding:120px 20px;
 }
 
 /* CARD */
@@ -57,62 +56,49 @@ body::after{
  position:relative;
  background:rgba(0,0,0,.75);
  border-radius:24px;
- padding:32px 24px;
- width:92%;max-width:520px;
+ padding:30px 22px;
+ width:100%;max-width:520px;
  backdrop-filter:blur(20px);
- display:flex;flex-direction:column;
- align-items:center;gap:16px;
-}
-
-/* SOUND ICON */
-#soundIcon{
- position:absolute;top:14px;right:16px;
- cursor:pointer;
- font-size:18px;
+ text-align:center;
 }
 
 /* TEXT */
-#date{color:#108cd7;font-size:14px;}
+#date{color:#108cd7;margin-bottom:10px;}
 
 #verse{
  font-size:clamp(26px,6vw,36px);
- text-align:center;
  line-height:1.7;
 
  opacity:0;
- transform:translateY(12px);
- transition:opacity .8s ease, transform .8s ease;
+ transition:opacity 5s ease; /* 🔥 SLOW FADE */
 }
 
 #verse.show{
  opacity:1;
- transform:translateY(0);
 }
 
-/* CURSOR */
-#verse::after{
- content:"|";
- margin-left:4px;
- animation:blink 1s infinite;
-}
-@keyframes blink{
- 0%,100%{opacity:1;}
- 50%{opacity:0;}
+.word{
+ opacity:.3;
+ transition:opacity .4s ease,color .4s ease;
 }
 
-#ref{color:#108cd7}
+.word.active{
+ opacity:1;
+ color:#ffffff;
+}
+
+#ref{color:#108cd7;margin-top:10px}
 
 /* BUTTONS */
 .actions{
  display:grid;
  grid-template-columns:repeat(2,1fr);
- gap:12px;width:100%;max-width:320px;
+ gap:12px;margin-top:20px;
 }
 .btn{
  padding:14px;border-radius:999px;
  border:none;background:rgba(255,255,255,.15);
  color:#fff;cursor:pointer;
- font-weight:bold;
 }
 .primary{background:#108cd7}
 
@@ -136,10 +122,8 @@ body::after{
 <div class="center">
 <div id="votd">
 
-<div id="soundIcon" onclick="toggleSound()">🎧</div>
-
 <div id="date"></div>
-<div id="verse">Loading...</div>
+<div id="verse"></div>
 <div id="ref"></div>
 
 <select id="translationSelect"></select>
@@ -167,21 +151,12 @@ if ('serviceWorker' in navigator) {
  navigator.serviceWorker.register('/sw.js');
 }
 
-/* BACKGROUND ROTATION */
-const backgrounds=[
- "backgrounds/morning1.png",
- "backgrounds/morning2.png",
- "backgrounds/day1.png"
-];
-let bgIndex=0;
-function setBG(i){
- document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
-}
-setBG(bgIndex);
-setInterval(()=>{
- bgIndex=(bgIndex+1)%backgrounds.length;
- setBG(bgIndex);
-},60000);
+/* BACKGROUND */
+const backgrounds=["backgrounds/morning1.png","backgrounds/morning2.png","backgrounds/day1.png"];
+let i=0;
+function setBG(n){document.body.style.backgroundImage=`url('${backgrounds[n]}')`;}
+setBG(i);
+setInterval(()=>{i=(i+1)%backgrounds.length;setBG(i);},60000);
 
 /* VERSES */
 let verses={kjv:{},niv:{},nlt:{}};
@@ -211,6 +186,8 @@ async function init(){
  setupTranslations();
  update();
  streak();
+ startAmbient();
+ playVerse(); // 🔥 auto play
 }
 
 /* TRANSLATIONS */
@@ -229,93 +206,59 @@ function setupTranslations(){
  };
 }
 
-/* ✨ UPDATE WITH ANIMATION */
+/* UPDATE (FADE + WORD SPLIT) */
 function update(){
  const verseEl=document.getElementById("verse");
  const text=verses[translation][key];
 
- verseEl.classList.remove("show");
- verseEl.innerHTML="";
+ const words=text.split(" ");
+ verseEl.innerHTML=words.map(w=>`<span class="word">${w}</span>`).join(" ");
 
  document.getElementById("ref").innerHTML=
  `<span style="color:#108cd7">${key}</span> (${translation.toUpperCase()})`;
 
  document.getElementById("date").innerText=new Date().toDateString();
 
- setTimeout(()=>{
-  verseEl.classList.add("show");
-
-  setTimeout(()=>{
-   typeWriterNatural(verseEl,text,22);
-  },300);
-
- },200);
+ setTimeout(()=>verseEl.classList.add("show"),200);
 }
 
-/* ✨ NATURAL TYPEWRITER */
-function typeWriterNatural(el,text,speed){
+/* 🔊 SPEECH + SYNC */
+function playVerse(){
+ const text=verses[translation][key];
+ const words=document.querySelectorAll(".word");
+
  let i=0;
 
- function type(){
-  if(i<text.length){
-   const char=text.charAt(i);
-   el.innerHTML+=char;
+ const utter=new SpeechSynthesisUtterance(text);
+ utter.rate=.9;
+
+ utter.onboundary=(event)=>{
+  if(event.name==="word" && words[i]){
+   words[i].classList.add("active");
    i++;
-
-   let delay=speed;
-
-   if(char===","||char===";") delay=speed*6;
-   if(char==="."||char==="!"||char==="?") delay=speed*10;
-   if(char===" ") delay=speed*0.6;
-
-   setTimeout(type,delay);
   }
- }
+ };
 
- type();
+ speechSynthesis.cancel();
+ speechSynthesis.speak(utter);
 }
 
-/* SOUND */
-let sound=false;
-function toggleSound(){
+/* 🎧 AMBIENT AUTO */
+function startAmbient(){
  const a=document.getElementById("ambientAudio");
- const icon=document.getElementById("soundIcon");
+ a.volume=0;
+ a.play();
 
- if(!sound){
-  a.volume=0;a.play();
-  let fade=setInterval(()=>{
-   if(a.volume<0.35)a.volume+=0.02;
-   else clearInterval(fade);
-  },50);
-  icon.innerText="🔊";
-  sound=true;
- }else{
-  let fade=setInterval(()=>{
-   if(a.volume>0)a.volume-=0.02;
-   else{a.pause();clearInterval(fade);}
-  },50);
-  icon.innerText="🎧";
-  sound=false;
- }
-}
-
-/* SHARE */
-function shareVerse(){
- navigator.share?.({
-  text:verses[translation][key]+" — "+key
- });
+ let fade=setInterval(()=>{
+  if(a.volume<0.25)a.volume+=0.01;
+  else clearInterval(fade);
+ },100);
 }
 
 /* OTHER */
-function playVerse(){
- speechSynthesis.speak(new SpeechSynthesisUtterance(verses[translation][key]));
-}
-function copyVerse(){
- navigator.clipboard.writeText(verses[translation][key]+" — "+key);
-}
-function donate(){
- window.open("https://venmo.com/u/tapnpray");
-}
+function copyVerse(){navigator.clipboard.writeText(verses[translation][key]+" — "+key);}
+function shareVerse(){navigator.share?.({text:verses[translation][key]+" — "+key});}
+function donate(){window.open("https://venmo.com/u/tapnpray");}
 
 /* STREAK */
 function streak(){
