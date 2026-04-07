@@ -14,7 +14,7 @@ html,body{
  transition:background-image 2s ease-in-out;
 }
 
-/* BACKGROUND OVERLAY */
+/* BACKGROUND */
 body::before{
  content:"";position:fixed;width:100%;height:100%;
  background:linear-gradient(to bottom,rgba(0,0,0,.4),rgba(0,0,0,.9));
@@ -45,18 +45,24 @@ body::after{
  box-sizing:border-box;
 }
 
-/* CARD */
+/* GLASS CARD */
 #votd{
  position:relative;
- background:rgba(0,0,0,.78);
- border-radius:24px;
- padding:30px 22px;
- width:100%;max-width:520px;
- backdrop-filter:blur(20px);
+ background:rgba(0,0,0,0.82);
+ border-radius:28px;
+ padding:34px 24px;
+ width:100%;
+ max-width:520px;
+ backdrop-filter:blur(28px);
+ -webkit-backdrop-filter:blur(28px);
+ border:1px solid rgba(255,255,255,0.08);
+ box-shadow:
+ 0 10px 40px rgba(0,0,0,0.6),
+ inset 0 1px 0 rgba(255,255,255,0.05);
  text-align:center;
 }
 
-/* AMBIENT ICON */
+/* AMBIENT BUTTON */
 #ambientToggle{
  position:absolute;
  top:12px;
@@ -67,6 +73,7 @@ body::after{
 
 /* TEXT */
 #date{color:#108cd7;margin-bottom:10px;font-size:14px;}
+
 #verse{
  font-size:clamp(26px,6vw,36px);
  line-height:1.7;
@@ -75,8 +82,10 @@ body::after{
  padding:0 10px;
 }
 #verse.show{opacity:1;}
+
 .word{opacity:.35;transition:.3s;}
 .word.active{opacity:1;}
+
 #ref{color:#108cd7;margin-top:10px;font-size:14px}
 
 /* BUTTONS */
@@ -142,12 +151,23 @@ body::after{
 
 <script>
 
-/* BACKGROUND */
-const backgrounds=["backgrounds/morning1.png","backgrounds/morning2.png","backgrounds/day1.png"];
-let i=0;
-function setBG(n){document.body.style.backgroundImage=`url('${backgrounds[n]}')`;}
-setBG(i);
-setInterval(()=>{i=(i+1)%backgrounds.length;setBG(i);},60000);
+/* BACKGROUNDS */
+const backgrounds=[
+ "backgrounds/morning1.png",
+ "backgrounds/morning2.png",
+ "backgrounds/day1.png"
+];
+let bgIndex=0;
+
+function setBG(i){
+ document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
+}
+setBG(bgIndex);
+
+setInterval(()=>{
+ bgIndex=(bgIndex+1)%backgrounds.length;
+ setBG(bgIndex);
+},60000);
 
 /* VERSES */
 let verses={kjv:{},niv:{},nlt:{}};
@@ -157,11 +177,13 @@ async function loadTranslation(t){
  if(Object.keys(verses[t]).length)return;
  const res=await fetch(`https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
  const data=await res.json();
+
  let flat={};
  for(let b in data)
   for(let c in data[b])
    for(let v in data[b][c])
     flat[`${b} ${c}:${v}`]=data[b][c][v];
+
  verses[t]=flat;
 }
 
@@ -179,15 +201,18 @@ async function init(){
  streak();
 }
 
-/* TRANSLATION */
+/* TRANSLATIONS */
 function setupTranslations(){
  const s=document.getElementById("translationSelect");
+
  ["kjv","niv","nlt"].forEach(t=>{
   let o=document.createElement("option");
-  o.value=t;o.textContent=t.toUpperCase();
+  o.value=t;
+  o.textContent=t.toUpperCase();
   if(t==="nlt")o.selected=true;
   s.appendChild(o);
  });
+
  s.onchange=async e=>{
   translation=e.target.value;
   await loadTranslation(translation);
@@ -195,13 +220,14 @@ function setupTranslations(){
  };
 }
 
-/* UPDATE */
+/* DISPLAY */
 function update(){
  const verseEl=document.getElementById("verse");
  verseEl.classList.remove("show");
 
  const text=verses[translation][key];
  const words=text.split(" ");
+
  verseEl.innerHTML=words.map(w=>`<span class="word">${w}</span>`).join(" ");
 
  document.getElementById("ref").innerHTML=`<span style="color:#108cd7">${key}</span>`;
@@ -254,6 +280,7 @@ function fadeAudio(audio,target,duration){
  const step=(target-audio.volume)/(duration/50);
  const fade=setInterval(()=>{
   audio.volume+=step;
+
   if((step>0 && audio.volume>=target)||(step<0 && audio.volume<=target)){
    audio.volume=target;
    if(target===0) audio.pause();
@@ -262,7 +289,7 @@ function fadeAudio(audio,target,duration){
  },50);
 }
 
-/* SHARE IMAGE (🔥 ELITE) */
+/* SHARE IMAGE (BRANDED) */
 function shareImage(){
  const canvas=document.createElement("canvas");
  const size=1080;
@@ -275,30 +302,45 @@ function shareImage(){
  bg.src=getComputedStyle(document.body).backgroundImage.slice(5,-2);
 
  bg.onload=()=>{
+
   ctx.drawImage(bg,0,0,size,size);
 
-  // dark overlay
-  ctx.fillStyle="rgba(0,0,0,0.5)";
+  ctx.fillStyle="rgba(0,0,0,0.55)";
   ctx.fillRect(0,0,size,size);
 
-  // glass box
-  ctx.fillStyle="rgba(0,0,0,0.65)";
-  ctx.fillRect(80,300,920,480);
+  // Glass card
+  ctx.fillStyle="rgba(0,0,0,0.75)";
+  ctx.fillRect(100,260,880,520);
 
-  ctx.fillStyle="#fff";
-  ctx.font="42px serif";
-  ctx.textAlign="center";
+  const logo=new Image();
+  logo.src="logo.svg";
 
-  wrapText(ctx,verses[translation][key],540,400,800,50);
+  logo.onload=()=>{
+   ctx.drawImage(logo,440,120,200,80);
 
-  ctx.font="28px sans-serif";
-  ctx.fillStyle="#108cd7";
-  ctx.fillText(key,540,720);
+   ctx.fillStyle="#fff";
+   ctx.font="bold 44px serif";
+   ctx.textAlign="center";
 
-  canvas.toBlob(blob=>{
-   const file=new File([blob],"verse.png",{type:"image/png"});
-   navigator.share?.({files:[file],title:"Tap N Pray"});
-  });
+   wrapText(ctx,verses[translation][key],540,380,760,52);
+
+   ctx.fillStyle="#108cd7";
+   ctx.font="28px sans-serif";
+   ctx.fillText(key,540,720);
+
+   ctx.fillStyle="rgba(255,255,255,0.6)";
+   ctx.font="22px sans-serif";
+   ctx.fillText("tapnpray.com",540,980);
+
+   canvas.toBlob(blob=>{
+    const file=new File([blob],"tapnpray-verse.png",{type:"image/png"});
+    navigator.share?.({
+     files:[file],
+     title:"Tap N Pray",
+     text:"Daily Verse"
+    });
+   });
+  };
  };
 }
 
@@ -320,15 +362,25 @@ function wrapText(ctx,text,x,y,maxWidth,lineHeight){
 }
 
 /* OTHER */
-function copyVerse(){navigator.clipboard.writeText(verses[translation][key]+" — "+key);}
-function donate(){window.open("https://venmo.com/u/tapnpray");}
+function copyVerse(){
+ navigator.clipboard.writeText(verses[translation][key]+" — "+key);
+}
+function donate(){
+ window.open("https://venmo.com/u/tapnpray");
+}
 
 /* STREAK */
 function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
  let t=new Date().toDateString();
- if(l!==t){s++;localStorage.setItem("s",s);localStorage.setItem("l",t);}
+
+ if(l!==t){
+  s++;
+  localStorage.setItem("s",s);
+  localStorage.setItem("l",t);
+ }
+
  document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
 }
 
