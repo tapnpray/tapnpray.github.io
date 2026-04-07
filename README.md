@@ -4,6 +4,8 @@
 
 Tap N Pray is a simple, beautifully designed web app that delivers a **daily Bible verse** with a calm, distraction-free experience. Built as a Progressive Web App (PWA), it feels like a native mobile app while remaining lightweight and accessible.
 
+https://tapnpray.github.io/
+
 ---
 
 ## ✨ Features
