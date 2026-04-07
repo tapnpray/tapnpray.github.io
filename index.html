@@ -118,6 +118,29 @@ body::after {
     left:50%;
     transform:translateX(-50%);
 }
+
+/* INSTALL BANNER */
+#installBanner {
+    position:fixed;
+    bottom:70px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,0.85);
+    padding:10px 16px;
+    border-radius:999px;
+    display:none;
+    align-items:center;
+    gap:10px;
+    z-index:999;
+}
+
+#installBanner button {
+    background:#108cd7;
+    border:none;
+    color:white;
+    padding:6px 12px;
+    border-radius:999px;
+}
 </style>
 </head>
 
@@ -144,12 +167,18 @@ body::after {
     <button class="btn" onclick="copyVerse()">Copy</button>
     <button class="btn" onclick="shareVerse()">Share</button>
     <button class="btn" onclick="saveFavorite()">⭐ Save</button>
+    <button class="btn" onclick="donate()">💙 Support</button>
 </div>
 
 </div>
 </div>
 
 <div id="streak"></div>
+
+<div id="installBanner">
+    <span>📲 Install Tap N Pray</span>
+    <button onclick="installApp()">Install</button>
+</div>
 
 <audio id="ambientAudio" loop>
     <source src="sounds/calm.mp3" type="audio/mpeg">
@@ -227,7 +256,7 @@ function update(){
  document.getElementById("date").innerText=new Date().toDateString();
 }
 
-/* AUDIO FADE */
+/* AUDIO */
 let sound=false;
 function fadeAudio(a,target,duration=800){
  let step=(target-a.volume)/(duration/50);
@@ -256,7 +285,7 @@ function toggleSound(){
  }
 }
 
-/* SHARE (SQUARE + GLASS) */
+/* SHARE */
 async function shareVerse(){
  const verse=verses[translation][key];
  const ref=key;
@@ -266,54 +295,30 @@ async function shareVerse(){
  const ctx=canvas.getContext("2d");
 
  const bg=new Image();
- bg.crossOrigin="anonymous";
  bg.src=backgrounds[i];
  await new Promise(r=>bg.onload=r);
 
  ctx.drawImage(bg,0,0,1080,1080);
 
- const grad=ctx.createLinearGradient(0,0,0,1080);
- grad.addColorStop(0,"rgba(0,0,0,0.3)");
- grad.addColorStop(1,"rgba(0,0,0,0.8)");
- ctx.fillStyle=grad;
+ ctx.fillStyle="rgba(0,0,0,0.6)";
  ctx.fillRect(0,0,1080,1080);
 
- const x=90,y=180,w=900,h=700;
-
- ctx.fillStyle="rgba(0,0,0,0.45)";
- roundRect(ctx,x,y,w,h,40);
- ctx.fill();
-
- ctx.strokeStyle="rgba(255,255,255,0.15)";
- ctx.lineWidth=2;
- roundRect(ctx,x,y,w,h,40);
- ctx.stroke();
-
  ctx.fillStyle="#fff";
+ ctx.font="bold 48px Arial";
  ctx.textAlign="center";
-
- let fontSize=48;
- while(fontSize>30){
-  ctx.font=`bold ${fontSize}px Inter`;
-  if(getTextHeight(ctx,verse,760,fontSize*1.4)<360) break;
-  fontSize--;
- }
-
- wrapText(ctx,verse,540,y+160,760,fontSize*1.4);
+ wrapText(ctx,verse,540,500,800,60);
 
  ctx.fillStyle="#108cd7";
- ctx.font="bold 28px Inter";
- ctx.fillText(ref,540,y+520);
+ ctx.fillText(ref,540,800);
 
  canvas.toBlob(async blob=>{
   const file=new File([blob],"verse.png",{type:"image/png"});
-  if(navigator.canShare && navigator.canShare({files:[file]})){
+  if(navigator.canShare){
    await navigator.share({files:[file]});
   }
  });
 }
 
-/* HELPERS */
 function wrapText(ctx,text,x,y,maxWidth,lineHeight){
  const words=text.split(" ");
  let line="";
@@ -326,33 +331,6 @@ function wrapText(ctx,text,x,y,maxWidth,lineHeight){
   } else line=test;
  }
  ctx.fillText(line,x,y);
-}
-
-function getTextHeight(ctx,text,maxWidth,lineHeight){
- const words=text.split(" ");
- let line="",height=lineHeight;
- for(let n=0;n<words.length;n++){
-  let test=line+words[n]+" ";
-  if(ctx.measureText(test).width>maxWidth){
-   line=words[n]+" ";
-   height+=lineHeight;
-  } else line=test;
- }
- return height;
-}
-
-function roundRect(ctx,x,y,w,h,r){
- ctx.beginPath();
- ctx.moveTo(x+r,y);
- ctx.lineTo(x+w-r,y);
- ctx.quadraticCurveTo(x+w,y,x+w,y+r);
- ctx.lineTo(x+w,y+h-r);
- ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
- ctx.lineTo(x+r,y+h);
- ctx.quadraticCurveTo(x,y+h,x,y+h-r);
- ctx.lineTo(x,y+r);
- ctx.quadraticCurveTo(x,y,x+r,y);
- ctx.closePath();
 }
 
 /* OTHER */
@@ -372,12 +350,36 @@ function saveFavorite(){
  alert("Saved!");
 }
 
+function donate(){
+ window.open("https://venmo.com/u/tapnpray","_blank");
+}
+
+/* STREAK */
 function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
  let t=new Date().toDateString();
  if(l!==t){s++; localStorage.setItem("s",s); localStorage.setItem("l",t);}
  document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
+}
+
+/* INSTALL */
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt",(e)=>{
+ e.preventDefault();
+ deferredPrompt=e;
+ document.getElementById("installBanner").style.display="flex";
+});
+
+async function installApp(){
+ if(!deferredPrompt) return;
+ deferredPrompt.prompt();
+ const {outcome}=await deferredPrompt.userChoice;
+ if(outcome==="accepted"){
+  document.getElementById("installBanner").style.display="none";
+ }
+ deferredPrompt=null;
 }
 
 window.onload=init;
