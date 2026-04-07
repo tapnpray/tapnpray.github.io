@@ -57,13 +57,21 @@ body::after{
 }
 #ambientToggle{
  position:absolute;top:12px;right:12px;
- cursor:pointer;
+ cursor:pointer;font-size:18px;
+}
+
+/* HEADER */
+#title{
+ font-size:14px;
+ opacity:.8;
+ margin-bottom:5px;
 }
 
 /* TEXT */
-#date{color:#108cd7;margin-bottom:8px}
-#verse{font-size:28px;line-height:1.6;opacity:0;transition:2.5s}
-#verse.show{opacity:1}
+#date{color:#108cd7;margin-bottom:10px}
+#verse{font-size:28px;line-height:1.6;}
+.word{opacity:.35;transition:.3s}
+.word.active{opacity:1}
 #ref{color:#108cd7;margin-top:10px}
 
 /* TOPICS */
@@ -91,24 +99,6 @@ body::after{
 }
 .primary{background:#108cd7}
 
-/* FAVORITES MODAL */
-#favoritesModal{
- position:fixed;top:0;left:0;width:100%;height:100%;
- background:rgba(0,0,0,.95);
- display:none;
- overflow:auto;
- padding:20px;
-}
-#favoritesContent{
- max-width:600px;margin:auto;
-}
-.favorite-item{
- margin-bottom:15px;
- padding:15px;
- background:rgba(255,255,255,.1);
- border-radius:12px;
-}
-
 /* FOOTER */
 #bottomTagline{
  position:fixed;bottom:70px;width:100%;
@@ -130,26 +120,28 @@ body::after{
 <div class="center">
 <div id="votd">
 
-<div id="favoriteStar" onclick="toggleFavorite()">☆</div>
-<div id="ambientToggle">🌿</div>
+<div id="favoriteStar">☆</div>
+<div id="ambientToggle" onclick="toggleAmbient()">🌿</div>
 
+<div id="title">Daily Bible Verse</div>
 <div id="date"></div>
 <div id="verse"></div>
 <div id="ref"></div>
 
 <div id="topics">
-<button onclick="pickTopic('peace')">Peace</button>
-<button onclick="pickTopic('strength')">Strength</button>
-<button onclick="pickTopic('hope')">Hope</button>
-<button onclick="pickTopic('guidance')">Guidance</button>
-<button onclick="pickTopic('faith')">Faith</button>
+<button class="active" onclick="goDaily(this)">Daily</button>
+<button onclick="pickTopic('peace', this)">Peace</button>
+<button onclick="pickTopic('strength', this)">Strength</button>
+<button onclick="pickTopic('hope', this)">Hope</button>
+<button onclick="pickTopic('guidance', this)">Guidance</button>
+<button onclick="pickTopic('faith', this)">Faith</button>
 </div>
 
 <div class="actions">
 <button class="btn primary" onclick="readVerse()">Read Verse</button>
-<button class="btn" onclick="openFavorites()">Favorites</button>
 <button class="btn" onclick="copyVerse()">Copy</button>
 <button class="btn" onclick="shareVerse()">Share</button>
+<button class="btn" onclick="donate()">💙 Support</button>
 </div>
 
 </div>
@@ -158,19 +150,14 @@ body::after{
 <div id="bottomTagline">One Tap Closer to Christ</div>
 <div id="streak"></div>
 
-<!-- FAVORITES MODAL -->
-<div id="favoritesModal" onclick="closeFavorites(event)">
-  <div id="favoritesContent"></div>
-</div>
+<audio id="ambientAudio" loop>
+<source src="sounds/calm.mp3">
+</audio>
 
 <script>
 
 /* BACKGROUND */
-const backgrounds=[
- "backgrounds/morning1.png",
- "backgrounds/morning2.png",
- "backgrounds/day1.png"
-];
+const backgrounds=["backgrounds/morning1.png","backgrounds/morning2.png","backgrounds/day1.png"];
 let i=0;
 document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
 setInterval(()=>{
@@ -178,9 +165,10 @@ setInterval(()=>{
  document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
 },60000);
 
-/* LOAD VERSES */
-let verses={},key="";
+/* DATA */
+let verses={},key="",dailyKey="",mode="daily";
 
+/* LOAD */
 async function load(){
  const res=await fetch("BIBLE/NLT/NLT_bible.json");
  const data=await res.json();
@@ -192,7 +180,38 @@ async function load(){
     flat[`${b} ${c}:${v}`]=data[b][c][v];
 
  verses=flat;
- init();
+ setDailyVerse();
+}
+
+/* DAILY LOCK */
+function setDailyVerse(){
+ const keys=Object.keys(verses);
+ const d=new Date();
+ const seed=(d.getFullYear()*10000 + d.getMonth()*100 + d.getDate()) % keys.length;
+
+ dailyKey=keys[seed];
+ key=dailyKey;
+ mode="daily";
+
+ update();
+ streak();
+}
+
+/* UPDATE */
+function update(){
+ const text=verses[key];
+ const words=text.split(" ");
+
+ document.getElementById("verse").innerHTML=
+ words.map(w=>`<span class="word">${w}</span>`).join(" ");
+
+ document.getElementById("ref").innerText=key;
+
+ const now=new Date();
+ document.getElementById("date").innerText=
+ now.toLocaleDateString(undefined,{
+  weekday:'short',month:'short',day:'numeric',year:'numeric'
+ });
 }
 
 /* TOPICS */
@@ -204,113 +223,96 @@ const topicMap={
  faith:["faith","trust"]
 };
 
-function pickTopic(t){
+function pickTopic(t,btn){
  let list=[];
  for(let ref in verses){
   let text=verses[ref].toLowerCase();
   if(topicMap[t].some(w=>text.includes(w))) list.push(ref);
  }
 
- if(list.length===0){
-  randomVerse();
-  return;
- }
+ key=list.length ? list[Math.floor(Math.random()*list.length)] : dailyKey;
+ mode="topic";
 
- key=list[Math.floor(Math.random()*list.length)];
  update();
+ setActive(btn);
 }
 
-/* INIT */
-function init(){
- randomVerse();
- streak();
-}
-
-function randomVerse(){
- const keys=Object.keys(verses);
- key=keys[Math.floor(Math.random()*keys.length)];
+function goDaily(btn){
+ key=dailyKey;
+ mode="daily";
  update();
+ setActive(btn);
 }
 
-/* UPDATE */
-function update(){
- const el=document.getElementById("verse");
- el.classList.remove("show");
-
- el.innerText=verses[key];
- document.getElementById("ref").innerText=key;
- document.getElementById("date").innerText=new Date().toDateString();
-
- setTimeout(()=>el.classList.add("show"),200);
- updateStar();
+function setActive(btn){
+ document.querySelectorAll("#topics button").forEach(b=>b.classList.remove("active"));
+ btn.classList.add("active");
 }
 
-/* FAVORITES */
-function getFavs(){
- return JSON.parse(localStorage.getItem("favs")||"[]");
-}
+/* AUDIO */
+let ambientOn=false;
+function toggleAmbient(){
+ const a=document.getElementById("ambientAudio");
 
-function toggleFavorite(){
- let favs=getFavs();
- if(favs.includes(key)){
-  favs=favs.filter(f=>f!==key);
+ if(!ambientOn){
+  a.volume=0;
+  a.play();
+  fadeAudio(a,0.3,1500);
  }else{
-  favs.push(key);
+  fadeAudio(a,0,1500);
  }
- localStorage.setItem("favs",JSON.stringify(favs));
- updateStar();
+
+ ambientOn=!ambientOn;
 }
 
-function updateStar(){
- document.getElementById("favoriteStar").innerText=
- getFavs().includes(key)?"⭐":"☆";
+function fadeAudio(audio,target,duration){
+ const step=(target-audio.volume)/(duration/50);
+ const fade=setInterval(()=>{
+  audio.volume+=step;
+  if((step>0 && audio.volume>=target)||(step<0 && audio.volume<=target)){
+   audio.volume=target;
+   if(target===0) audio.pause();
+   clearInterval(fade);
+  }
+ },50);
 }
 
-function openFavorites(){
- let modal=document.getElementById("favoritesModal");
- let content=document.getElementById("favoritesContent");
+/* READ + HIGHLIGHT */
+function readVerse(){
 
- let favs=getFavs();
- content.innerHTML="<h2>Saved Verses</h2>";
+ const words=document.querySelectorAll(".word");
+ words.forEach(w=>w.classList.remove("active"));
 
- favs.forEach(ref=>{
-  content.innerHTML+=`
-   <div class="favorite-item">
-   <b>${ref}</b><br>${verses[ref]}
-   </div>`;
- });
+ const intro=`Daily Bible Verse. ${new Date().toDateString()}. `;
+ const text=intro + verses[key];
 
- modal.style.display="block";
+ const utter=new SpeechSynthesisUtterance(text);
+ utter.rate=0.85;
+
+ let i=0;
+
+ utter.onboundary=(e)=>{
+  if(e.name==="word" && words[i]){
+   words[i].classList.add("active");
+   i++;
+  }
+ };
+
+ speechSynthesis.cancel();
+ speechSynthesis.speak(utter);
 }
 
-function closeFavorites(e){
- if(e.target.id==="favoritesModal"){
-  document.getElementById("favoritesModal").style.display="none";
- }
-}
-
-/* ACTIONS */
+/* OTHER */
 function copyVerse(){
  navigator.clipboard.writeText(verses[key]+" — "+key);
 }
 
 function shareVerse(){
- const text=verses[key]+" — "+key;
-
- if(navigator.share){
-  navigator.share({text});
- }else{
-  copyVerse();
-  alert("Copied! Paste to share.");
- }
+ navigator.share?.({text:verses[key]+" — "+key});
 }
 
-/* VOICE */
-function readVerse(){
- speechSynthesis.cancel();
- const utter=new SpeechSynthesisUtterance(verses[key]);
- utter.rate=0.9;
- speechSynthesis.speak(utter);
+function donate(){
+ window.open("https://venmo.com/u/tapnpray");
 }
 
 /* STREAK */
