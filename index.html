@@ -11,10 +11,8 @@ html,body{
  height:100%;margin:0;overflow:hidden;
  font-family:Arial,sans-serif;color:#fff;
  background-size:cover;background-position:center;
- transition:background-image 2s ease-in-out;
 }
 
-/* BACKGROUND */
 body::before{
  content:"";position:fixed;width:100%;height:100%;
  background:linear-gradient(to bottom,rgba(0,0,0,.4),rgba(0,0,0,.9));
@@ -25,139 +23,133 @@ body::after{
  backdrop-filter:blur(12px);z-index:-1;
 }
 
-/* LOGO (BOTTOM LEFT) */
+/* LOGO */
 .logo-container{
- position:fixed;
- bottom:25px;
- left:20px;
- z-index:10;
- opacity:.75;
+ position:fixed;bottom:25px;left:20px;opacity:.7;
 }
-.logo-container img{
- max-width:55px;
-}
+.logo-container img{max-width:55px}
 
 /* MAIN */
 .center{
  height:100%;
  display:flex;
- flex-direction:column;
  align-items:center;
  justify-content:center;
  padding:120px 20px 180px;
  box-sizing:border-box;
 }
 
-/* GLASS CARD */
+/* CARD */
 #votd{
  position:relative;
  background:rgba(0,0,0,.55);
  border-radius:28px;
- padding:34px 24px;
- width:100%;
- max-width:520px;
-
- backdrop-filter:blur(32px);
- -webkit-backdrop-filter:blur(32px);
-
- border:1px solid rgba(255,255,255,.12);
-
- box-shadow:
- 0 10px 40px rgba(0,0,0,.5),
- inset 0 1px 0 rgba(255,255,255,.08);
-
+ padding:30px;
+ max-width:520px;width:100%;
+ backdrop-filter:blur(30px);
  text-align:center;
 }
 
-/* AMBIENT ICON */
+/* ICONS */
+#favoriteStar{
+ position:absolute;top:12px;left:12px;
+ font-size:22px;cursor:pointer;
+}
 #ambientToggle{
- position:absolute;
- top:12px;
- right:12px;
- font-size:20px;
+ position:absolute;top:12px;right:12px;
  cursor:pointer;
 }
 
 /* TEXT */
-#date{color:#108cd7;margin-bottom:10px;font-size:14px;}
+#date{color:#108cd7;margin-bottom:8px}
+#verse{font-size:28px;line-height:1.6;opacity:0;transition:2.5s}
+#verse.show{opacity:1}
+#ref{color:#108cd7;margin-top:10px}
 
-#verse{
- font-size:clamp(26px,6vw,36px);
- line-height:1.7;
- opacity:0;
- transition:opacity 5s ease;
- padding:0 10px;
+/* TOPICS */
+#topics{
+ display:flex;flex-wrap:wrap;gap:8px;
+ justify-content:center;margin:10px 0;
 }
-#verse.show{opacity:1;}
-
-.word{opacity:.35;transition:.3s;}
-.word.active{opacity:1;}
-
-#ref{color:#108cd7;margin-top:10px;font-size:14px}
+#topics button{
+ padding:6px 12px;border-radius:999px;
+ border:none;background:rgba(255,255,255,.15);
+ color:#fff;font-size:12px;cursor:pointer;
+}
+#topics button.active{background:#108cd7}
 
 /* BUTTONS */
 .actions{
  display:grid;
  grid-template-columns:repeat(2,1fr);
- gap:12px;margin-top:20px;
+ gap:10px;margin-top:15px;
 }
 .btn{
- padding:14px;
- border-radius:999px;
- border:none;
- background:rgba(255,255,255,.15);
- color:#fff;
- cursor:pointer;
- font-weight:bold;
+ padding:12px;border-radius:999px;
+ border:none;background:rgba(255,255,255,.15);
+ color:#fff;cursor:pointer;
 }
 .primary{background:#108cd7}
 
-/* TAGLINE */
-#bottomTagline{
- position:fixed;
- bottom:70px;
- width:100%;
- text-align:center;
- font-size:12px;
- opacity:.8;
+/* FAVORITES MODAL */
+#favoritesModal{
+ position:fixed;top:0;left:0;width:100%;height:100%;
+ background:rgba(0,0,0,.95);
+ display:none;
+ overflow:auto;
+ padding:20px;
+}
+#favoritesContent{
+ max-width:600px;margin:auto;
+}
+.favorite-item{
+ margin-bottom:15px;
+ padding:15px;
+ background:rgba(255,255,255,.1);
+ border-radius:12px;
 }
 
-/* STREAK */
+/* FOOTER */
+#bottomTagline{
+ position:fixed;bottom:70px;width:100%;
+ text-align:center;font-size:12px;
+}
 #streak{
- position:fixed;
- bottom:25px;
- left:50%;
+ position:fixed;bottom:25px;left:50%;
  transform:translateX(-50%);
  background:rgba(0,0,0,.6);
- padding:8px 16px;
- border-radius:999px;
- font-size:14px;
+ padding:8px 16px;border-radius:999px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="logo-container">
-<img src="logo.svg">
-</div>
+<div class="logo-container"><img src="logo.svg"></div>
 
 <div class="center">
 <div id="votd">
 
-<div id="ambientToggle" onclick="toggleAmbient()">🌿</div>
+<div id="favoriteStar" onclick="toggleFavorite()">☆</div>
+<div id="ambientToggle">🌿</div>
 
 <div id="date"></div>
 <div id="verse"></div>
 <div id="ref"></div>
 
-<select id="translationSelect"></select>
+<div id="topics">
+<button onclick="pickTopic('peace')">Peace</button>
+<button onclick="pickTopic('strength')">Strength</button>
+<button onclick="pickTopic('hope')">Hope</button>
+<button onclick="pickTopic('guidance')">Guidance</button>
+<button onclick="pickTopic('faith')">Faith</button>
+</div>
 
 <div class="actions">
 <button class="btn primary" onclick="readVerse()">Read Verse</button>
+<button class="btn" onclick="openFavorites()">Favorites</button>
 <button class="btn" onclick="copyVerse()">Copy</button>
-<button class="btn" onclick="shareImage()">Share</button>
-<button class="btn" onclick="donate()">💙 Support</button>
+<button class="btn" onclick="shareVerse()">Share</button>
 </div>
 
 </div>
@@ -166,62 +158,31 @@ body::after{
 <div id="bottomTagline">One Tap Closer to Christ</div>
 <div id="streak"></div>
 
-<audio id="ambientAudio" loop>
-<source src="sounds/calm.mp3">
-</audio>
+<!-- FAVORITES MODAL -->
+<div id="favoritesModal" onclick="closeFavorites(event)">
+  <div id="favoritesContent"></div>
+</div>
 
 <script>
 
-/* BACKGROUNDS */
+/* BACKGROUND */
 const backgrounds=[
  "backgrounds/morning1.png",
  "backgrounds/morning2.png",
  "backgrounds/day1.png"
 ];
-let bgIndex=0;
-
-function setBG(i){
- document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
-}
-setBG(bgIndex);
-
+let i=0;
+document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
 setInterval(()=>{
- bgIndex=(bgIndex+1)%backgrounds.length;
- setBG(bgIndex);
+ i=(i+1)%backgrounds.length;
+ document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
 },60000);
 
-/* TOPIC FILTER */
-const topics=[
- "hope","faith","love","peace","strength",
- "trust","fear","healing","joy",
- "grace","comfort","wisdom","protection"
-];
+/* LOAD VERSES */
+let verses={},key="";
 
-function getFilteredVerses(allVerses){
- const filtered=[];
-
- for(const ref in allVerses){
-  const text=allVerses[ref].toLowerCase();
-
-  for(const topic of topics){
-   if(text.includes(topic)){
-    filtered.push(ref);
-    break;
-   }
-  }
- }
-
- return filtered.length ? filtered : Object.keys(allVerses);
-}
-
-/* VERSES */
-let verses={kjv:{},niv:{},nlt:{}};
-let key="",translation="nlt";
-
-async function loadTranslation(t){
- if(Object.keys(verses[t]).length)return;
-
- const res=await fetch(`https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
+async function load(){
+ const res=await fetch("BIBLE/NLT/NLT_bible.json");
  const data=await res.json();
 
  let flat={};
@@ -230,124 +191,126 @@ async function loadTranslation(t){
    for(let v in data[b][c])
     flat[`${b} ${c}:${v}`]=data[b][c][v];
 
- verses[t]=flat;
+ verses=flat;
+ init();
 }
 
-function seed(len){
- const d=new Date();
- return (d.getFullYear()*10000+d.getMonth()*100+d.getDate())%len;
-}
+/* TOPICS */
+const topicMap={
+ peace:["peace","rest"],
+ strength:["strength","power"],
+ hope:["hope","future"],
+ guidance:["wisdom","path"],
+ faith:["faith","trust"]
+};
 
-async function init(){
- await loadTranslation("nlt");
+function pickTopic(t){
+ let list=[];
+ for(let ref in verses){
+  let text=verses[ref].toLowerCase();
+  if(topicMap[t].some(w=>text.includes(w))) list.push(ref);
+ }
 
- const filteredKeys=getFilteredVerses(verses.nlt);
+ if(list.length===0){
+  randomVerse();
+  return;
+ }
 
- key=filteredKeys[seed(filteredKeys.length)];
-
- setupTranslations();
+ key=list[Math.floor(Math.random()*list.length)];
  update();
+}
+
+/* INIT */
+function init(){
+ randomVerse();
  streak();
 }
 
-/* TRANSLATIONS */
-function setupTranslations(){
- const s=document.getElementById("translationSelect");
-
- ["kjv","niv","nlt"].forEach(t=>{
-  let o=document.createElement("option");
-  o.value=t;
-  o.textContent=t.toUpperCase();
-  if(t==="nlt")o.selected=true;
-  s.appendChild(o);
- });
-
- s.onchange=async e=>{
-  translation=e.target.value;
-  await loadTranslation(translation);
-  update();
- };
+function randomVerse(){
+ const keys=Object.keys(verses);
+ key=keys[Math.floor(Math.random()*keys.length)];
+ update();
 }
 
-/* DISPLAY */
+/* UPDATE */
 function update(){
- const verseEl=document.getElementById("verse");
- verseEl.classList.remove("show");
+ const el=document.getElementById("verse");
+ el.classList.remove("show");
 
- const text=verses[translation][key];
- const words=text.split(" ");
-
- verseEl.innerHTML=words.map(w=>`<span class="word">${w}</span>`).join(" ");
-
- document.getElementById("ref").innerHTML=`<span style="color:#108cd7">${key}</span>`;
+ el.innerText=verses[key];
+ document.getElementById("ref").innerText=key;
  document.getElementById("date").innerText=new Date().toDateString();
 
- setTimeout(()=>verseEl.classList.add("show"),200);
+ setTimeout(()=>el.classList.add("show"),200);
+ updateStar();
 }
 
-/* READ */
-function readVerse(){
- update();
-
- const text=verses[translation][key];
- const words=document.querySelectorAll(".word");
-
- let i=0;
-
- const utter=new SpeechSynthesisUtterance(text);
- utter.rate=.85;
-
- utter.onboundary=(e)=>{
-  if(e.name==="word" && words[i]){
-   words[i].classList.add("active");
-   i++;
-  }
- };
-
- speechSynthesis.cancel();
- speechSynthesis.speak(utter);
+/* FAVORITES */
+function getFavs(){
+ return JSON.parse(localStorage.getItem("favs")||"[]");
 }
 
-/* AMBIENT */
-let ambientOn=false;
-
-function toggleAmbient(){
- const a=document.getElementById("ambientAudio");
-
- if(!ambientOn){
-  a.volume=0;
-  a.play();
-  fadeAudio(a,0.25,1500);
-  ambientOn=true;
+function toggleFavorite(){
+ let favs=getFavs();
+ if(favs.includes(key)){
+  favs=favs.filter(f=>f!==key);
  }else{
-  fadeAudio(a,0,1000);
-  ambientOn=false;
+  favs.push(key);
+ }
+ localStorage.setItem("favs",JSON.stringify(favs));
+ updateStar();
+}
+
+function updateStar(){
+ document.getElementById("favoriteStar").innerText=
+ getFavs().includes(key)?"⭐":"☆";
+}
+
+function openFavorites(){
+ let modal=document.getElementById("favoritesModal");
+ let content=document.getElementById("favoritesContent");
+
+ let favs=getFavs();
+ content.innerHTML="<h2>Saved Verses</h2>";
+
+ favs.forEach(ref=>{
+  content.innerHTML+=`
+   <div class="favorite-item">
+   <b>${ref}</b><br>${verses[ref]}
+   </div>`;
+ });
+
+ modal.style.display="block";
+}
+
+function closeFavorites(e){
+ if(e.target.id==="favoritesModal"){
+  document.getElementById("favoritesModal").style.display="none";
  }
 }
 
-function fadeAudio(audio,target,duration){
- const step=(target-audio.volume)/(duration/50);
- const fade=setInterval(()=>{
-  audio.volume+=step;
-  if((step>0 && audio.volume>=target)||(step<0 && audio.volume<=target)){
-   audio.volume=target;
-   if(target===0) audio.pause();
-   clearInterval(fade);
-  }
- },50);
-}
-
-/* SHARE IMAGE (unchanged working version) */
-function shareImage(){
- alert("Share image working version already included previously");
-}
-
-/* OTHER */
+/* ACTIONS */
 function copyVerse(){
- navigator.clipboard.writeText(verses[translation][key]+" — "+key);
+ navigator.clipboard.writeText(verses[key]+" — "+key);
 }
-function donate(){
- window.open("https://venmo.com/u/tapnpray");
+
+function shareVerse(){
+ const text=verses[key]+" — "+key;
+
+ if(navigator.share){
+  navigator.share({text});
+ }else{
+  copyVerse();
+  alert("Copied! Paste to share.");
+ }
+}
+
+/* VOICE */
+function readVerse(){
+ speechSynthesis.cancel();
+ const utter=new SpeechSynthesisUtterance(verses[key]);
+ utter.rate=0.9;
+ speechSynthesis.speak(utter);
 }
 
 /* STREAK */
@@ -365,7 +328,7 @@ function streak(){
  document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
 }
 
-window.onload=init;
+load();
 
 </script>
 
