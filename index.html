@@ -11,34 +11,26 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
-/* LOCK APP */
 html, body {
     height:100%;
     margin:0;
     overflow:hidden;
     overscroll-behavior:none;
-
     font-family:'Inter',sans-serif;
     color:white;
-
-    -webkit-font-smoothing:antialiased;
-
     background:#000;
     background-size:cover;
     background-position:center;
     background-attachment:fixed;
-
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* touch */
 button, select {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
 }
 
-/* overlays */
 body::before {
     content:"";
     position:fixed;
@@ -54,94 +46,61 @@ body::after {
     z-index:-1;
 }
 
-/* logo */
+/* HEADER */
 .logo-container {
     position:fixed;
     top:12px;
     left:50%;
     transform:translateX(-50%);
     text-align:center;
-    z-index:10;
 }
 .logo-container img {
     max-width:120px;
-    width:50%;
 }
 .tagline {
-    margin-top:2px;
     font-size:11px;
     opacity:0.8;
 }
 
-/* layout */
+/* LAYOUT */
 .center {
     height:100%;
     display:flex;
     flex-direction:column;
-    justify-content:flex-start;
     align-items:center;
-
     padding-top:150px;
     padding-bottom:90px;
     padding-left:16px;
     padding-right:16px;
-
     box-sizing:border-box;
 }
 
-/* card */
+/* CARD */
 #votd {
     background:rgba(0,0,0,0.55);
     border-radius:24px;
     padding:36px 26px;
     max-width:520px;
     width:100%;
-
     backdrop-filter:blur(25px);
-
-    box-shadow:
-        0 12px 45px rgba(0,0,0,0.65),
-        0 0 30px rgba(16,140,215,0.15);
-
+    box-shadow:0 12px 45px rgba(0,0,0,0.65);
     display:flex;
     flex-direction:column;
     align-items:center;
     gap:12px;
-
-    animation:fadeUp 0.8s ease;
 }
 
-/* text */
-#date {
-    color:#108cd7;
-    font-size:14px;
-    letter-spacing:0.5px;
-    text-align:center;
-}
+/* TEXT */
+#date { color:#108cd7; font-size:14px; }
 #verse {
     font-size:clamp(24px,6vw,34px);
     line-height:1.7;
     text-align:center;
-    text-shadow:0 2px 10px rgba(0,0,0,0.6);
 }
-#ref {
-    color:#108cd7;
-    font-size:14px;
-    opacity:0.95;
-    text-align:center;
-}
-
-/* dropdown */
-.small {
-    font-size:13px;
-    opacity:0.85;
-    margin:6px 0;
-    text-align:center;
-}
+#ref { color:#108cd7; }
 
 /* BUTTON GRID */
 .actions {
-    margin-top:18px;
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:12px;
@@ -149,63 +108,25 @@ body::after {
     max-width:320px;
 }
 
-/* buttons */
 .btn {
     padding:14px 0;
     border-radius:999px;
     border:none;
-
     background:rgba(255,255,255,0.18);
     color:white;
-
-    font-size:15px;
-    font-weight:500;
-
     cursor:pointer;
-    transition:all .2s ease;
-
-    width:100%;
 }
 
-.btn:hover {
-    background:rgba(255,255,255,0.28);
-}
-
-.btn:active {
-    transform:scale(0.94);
-    box-shadow:0 0 12px rgba(16,140,215,0.4);
-}
-
-/* primary button */
 .primary {
-    background:rgba(16,140,215,0.9);
-}
-.primary:hover {
-    background:rgba(16,140,215,1);
+    background:#108cd7;
 }
 
-/* favorites */
-.favorite-item {
-    margin-top:10px;
-    padding:10px;
-    border-radius:10px;
-    background:rgba(255,255,255,0.08);
-}
-
-/* streak */
+/* STREAK */
 #streak {
     position:fixed;
     bottom:18px;
     left:50%;
     transform:translateX(-50%);
-    font-size:14px;
-    opacity:0.85;
-}
-
-/* animation */
-@keyframes fadeUp {
-    from {opacity:0; transform:translateY(10px);}
-    to {opacity:1; transform:translateY(0);}
 }
 </style>
 </head>
@@ -218,28 +139,21 @@ body::after {
 </div>
 
 <div class="center">
-
 <div id="votd">
     <div id="date"></div>
     <div id="verse">Loading...</div>
     <div id="ref"></div>
 
-    <div class="small">
-        <select id="translationSelect"></select>
-    </div>
+    <select id="translationSelect"></select>
 
     <div class="actions">
         <button class="btn primary" onclick="playVerse()">Listen</button>
         <button class="btn" onclick="copyVerse()">Copy</button>
         <button class="btn" onclick="shareVerse()">Share</button>
         <button class="btn" onclick="saveFavorite()">⭐ Save</button>
-        <button class="btn" onclick="toggleFavorites()">Favorites</button>
-        <button class="btn" onclick="toggleSound()" id="soundBtn">🌧️ Ambient</button>
+        <button class="btn" onclick="toggleSound()" id="soundBtn">🌧️ Sound</button>
     </div>
-
-    <div id="favoritesList" class="small" style="display:none;"></div>
 </div>
-
 </div>
 
 <div id="streak"></div>
@@ -249,154 +163,112 @@ body::after {
 </audio>
 
 <script>
-/* BACKGROUNDS */
+/* BACKGROUND */
 const backgrounds=[
  "backgrounds/morning1.png",
  "backgrounds/morning2.png",
  "backgrounds/day1.png"
 ];
-
 let i=0;
 
 function setBG(n){
- let el=document.createElement("div");
- Object.assign(el.style,{
-  position:"fixed",top:0,left:0,width:"100%",height:"100%",
-  backgroundImage:`url('${backgrounds[n]}')`,
-  backgroundSize:"cover",
-  backgroundPosition:"center",
-  zIndex:-3,
-  opacity:0,
-  transition:"opacity 1.5s ease"
- });
- document.body.appendChild(el);
- setTimeout(()=>el.style.opacity=1,50);
- setTimeout(()=>{
-  document.body.style.backgroundImage=`url('${backgrounds[n]}')`;
-  el.remove();
- },1500);
+ document.body.style.backgroundImage=`url('${backgrounds[n]}')`;
 }
-
 setBG(i);
-setInterval(()=>{
- i=(i+1)%backgrounds.length;
- setBG(i);
-},60000);
+setInterval(()=>{i=(i+1)%backgrounds.length; setBG(i);},60000);
 
 /* VERSES */
 let verses={},key="",translation="nlt";
 
-async function load(t){
- if(verses[t])return;
- let r=await fetch(`https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
+async function load(){
+ let r=await fetch("https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/NLT/NLT_bible.json");
  let j=await r.json(),f={};
  for(let b in j)for(let c in j[b])for(let v in j[b][c])f[`${b} ${c}:${v}`]=j[b][c][v];
- verses[t]=f;
-}
-
-function seed(l){
- let d=new Date();
- return (d.getFullYear()*10000 + d.getMonth()*100 + d.getDate()) % l;
-}
-
-async function init(){
- await load(translation);
- let k=Object.keys(verses[translation]);
- key=k[seed(k.length)];
+ verses=f;
+ let k=Object.keys(verses);
+ key=k[new Date().getDate()%k.length];
  update();
- setup();
- streak();
 }
 
 function update(){
- document.getElementById("verse").innerText=verses[translation][key];
- document.getElementById("ref").innerHTML=`<span style="color:#108cd7">${key}</span> (${translation.toUpperCase()})`;
+ document.getElementById("verse").innerText=verses[key];
+ document.getElementById("ref").innerText=key;
  document.getElementById("date").innerText=new Date().toDateString();
 }
 
-function setup(){
- let s=document.getElementById("translationSelect");
- ["kjv","niv","nlt"].forEach(t=>{
-  let o=document.createElement("option");
-  o.value=t;
-  o.textContent=t.toUpperCase();
-  s.appendChild(o);
+/* SHARE ELITE */
+async function shareVerse(){
+ const verse=verses[key];
+ const ref=key;
+
+ const canvas=document.createElement("canvas");
+ canvas.width=1080;
+ canvas.height=1920;
+ const ctx=canvas.getContext("2d");
+
+ const bg=new Image();
+ bg.src=backgrounds[i];
+ await new Promise(r=>bg.onload=r);
+
+ ctx.drawImage(bg,0,0,1080,1920);
+
+ const grad=ctx.createLinearGradient(0,0,0,1920);
+ grad.addColorStop(0,"rgba(0,0,0,0.3)");
+ grad.addColorStop(1,"rgba(0,0,0,0.8)");
+ ctx.fillStyle=grad;
+ ctx.fillRect(0,0,1080,1920);
+
+ ctx.fillStyle="#fff";
+ ctx.font="bold 50px Arial";
+ ctx.textAlign="center";
+ wrapText(ctx,verse,540,700,800,60);
+
+ ctx.fillStyle="#108cd7";
+ ctx.fillText(ref,540,1100);
+
+ canvas.toBlob(async blob=>{
+  const file=new File([blob],"verse.png",{type:"image/png"});
+  if(navigator.canShare){
+   await navigator.share({files:[file]});
+  }
  });
- s.onchange=async e=>{
-  translation=e.target.value;
-  await load(translation);
-  update();
- };
 }
 
-/* FAVORITES */
-function saveFavorite(){
- let v=`${verses[translation][key]} — ${key}`;
- let f=JSON.parse(localStorage.getItem("fav")||"[]");
- if(!f.includes(v)){
-  f.push(v);
-  localStorage.setItem("fav",JSON.stringify(f));
-  alert("Saved!");
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){
+ const words=text.split(" ");
+ let line="";
+ for(let n=0;n<words.length;n++){
+  let test=line+words[n]+" ";
+  if(ctx.measureText(test).width>maxWidth){
+   ctx.fillText(line,x,y);
+   line=words[n]+" ";
+   y+=lineHeight;
+  } else line=test;
  }
-}
-
-function toggleFavorites(){
- let el=document.getElementById("favoritesList");
- if(el.style.display==="none"){
-  renderFav();
-  el.style.display="block";
- } else el.style.display="none";
-}
-
-function renderFav(){
- let f=JSON.parse(localStorage.getItem("fav")||"[]");
- let el=document.getElementById("favoritesList");
-
- if(f.length===0){
-  el.innerText="No saved verses yet.";
-  return;
- }
-
- el.innerHTML=f.map((v,i)=>`
-  <div class="favorite-item">
-   ${v}
-   <br>
-   <button class="btn" onclick="del(${i})">Delete</button>
-  </div>
- `).join("");
-}
-
-function del(i){
- let f=JSON.parse(localStorage.getItem("fav")||"[]");
- f.splice(i,1);
- localStorage.setItem("fav",JSON.stringify(f));
- renderFav();
+ ctx.fillText(line,x,y);
 }
 
 /* AUDIO */
 function playVerse(){
- let u=new SpeechSynthesisUtterance(verses[translation][key]);
- u.rate=.92;
- speechSynthesis.cancel();
- setTimeout(()=>speechSynthesis.speak(u),200);
+ let u=new SpeechSynthesisUtterance(verses[key]);
+ speechSynthesis.speak(u);
 }
 
-/* AMBIENT */
+/* SOUND */
 let sound=false;
 function toggleSound(){
  const a=document.getElementById("ambientAudio");
- const btn=document.getElementById("soundBtn");
+ const b=document.getElementById("soundBtn");
+ if(!sound){a.play(); b.innerText="🔇 Stop"; sound=true;}
+ else{a.pause(); b.innerText="🌧️ Sound"; sound=false;}
+}
 
- if(!sound){
-  a.volume=0.3;
-  a.play();
-  sound=true;
-  btn.innerText="🔇 Stop Sound";
- } else {
-  a.pause();
-  sound=false;
-  btn.innerText="🌧️ Ambient";
- }
+/* FAVORITE */
+function saveFavorite(){
+ let f=JSON.parse(localStorage.getItem("fav")||"[]");
+ f.push(verses[key]+" — "+key);
+ localStorage.setItem("fav",JSON.stringify(f));
+ alert("Saved!");
 }
 
 /* STREAK */
@@ -404,22 +276,11 @@ function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
  let t=new Date().toDateString();
-
- if(l!==t){
-  s++;
-  localStorage.setItem("l",t);
-  localStorage.setItem("s",s);
- }
-
- document.getElementById("streak").innerText=`🔥 Tap Streak: ${s}`;
+ if(l!==t){s++; localStorage.setItem("s",s); localStorage.setItem("l",t);}
+ document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
 }
 
-/* PWA */
-if("serviceWorker" in navigator){
- navigator.serviceWorker.register("sw.js");
-}
-
-window.onload=init;
+load(); streak();
 </script>
 
 </body>
