@@ -8,6 +8,15 @@
 <meta name="theme-color" content="#108cd7">
 <link rel="manifest" href="manifest.json">
 
+<!-- Google Analytics (Advanced) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ELQ3E5WGCT', { send_page_view: true });
+</script>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
@@ -61,7 +70,7 @@ body::after {
 /* CARD */
 #votd {
     position:relative;
-    background:rgba(0,0,0,0.6);
+    background:rgba(0,0,0,0.65);
     border-radius:24px;
     padding:36px 24px;
     max-width:520px;
@@ -70,7 +79,7 @@ body::after {
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:12px;
+    gap:14px;
 }
 
 /* SOUND ICON */
@@ -85,7 +94,7 @@ body::after {
 /* TEXT */
 #date { color:#108cd7; font-size:14px; }
 #verse {
-    font-size:clamp(24px,6vw,34px);
+    font-size:clamp(26px,6vw,36px);
     line-height:1.6;
     text-align:center;
 }
@@ -125,7 +134,7 @@ body::after {
     bottom:70px;
     left:50%;
     transform:translateX(-50%);
-    background:rgba(0,0,0,0.85);
+    background:rgba(0,0,0,0.9);
     padding:10px 16px;
     border-radius:999px;
     display:none;
@@ -230,8 +239,11 @@ async function init(){
  setupTranslations();
  update();
  streak();
+ trackDAU();
+ trackRetention();
 }
 
+/* TRANSLATIONS */
 function setupTranslations(){
  const select=document.getElementById("translationSelect");
 
@@ -247,6 +259,11 @@ function setupTranslations(){
   translation=e.target.value;
   await loadTranslation(translation);
   update();
+
+  gtag('event','translation_change',{
+    event_category:'feature',
+    event_label:translation
+  });
  };
 }
 
@@ -283,10 +300,17 @@ function toggleSound(){
   icon.innerText="🎧";
   sound=false;
  }
+
+ gtag('event','ambient_sound_toggle',{
+   event_category:'feature',
+   event_label:sound?'on':'off'
+ });
 }
 
 /* SHARE */
 async function shareVerse(){
+ gtag('event','share_verse',{event_category:'growth'});
+
  const verse=verses[translation][key];
  const ref=key;
 
@@ -347,10 +371,10 @@ function saveFavorite(){
  let f=JSON.parse(localStorage.getItem("fav")||"[]");
  f.push(`${verses[translation][key]} — ${key}`);
  localStorage.setItem("fav",JSON.stringify(f));
- alert("Saved!");
 }
 
 function donate(){
+ gtag('event','donation_click',{event_category:'monetization'});
  window.open("https://venmo.com/u/tapnpray","_blank");
 }
 
@@ -361,6 +385,32 @@ function streak(){
  let t=new Date().toDateString();
  if(l!==t){s++; localStorage.setItem("s",s); localStorage.setItem("l",t);}
  document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
+
+ gtag('event','streak_update',{
+   event_category:'engagement',
+   value:s
+ });
+}
+
+/* ANALYTICS */
+function trackDAU(){
+ const today=new Date().toDateString();
+ const last=localStorage.getItem("last_visit");
+ if(last!==today){
+  gtag('event','daily_active_user',{event_category:'engagement'});
+  localStorage.setItem("last_visit",today);
+ }
+}
+
+function trackRetention(){
+ let visits=parseInt(localStorage.getItem("visits")||"0");
+ visits++;
+ localStorage.setItem("visits",visits);
+
+ gtag('event','session_visit',{
+   event_category:'engagement',
+   value:visits
+ });
 }
 
 /* INSTALL */
@@ -374,13 +424,22 @@ window.addEventListener("beforeinstallprompt",(e)=>{
 
 async function installApp(){
  if(!deferredPrompt) return;
+
+ gtag('event','install_prompt_clicked',{event_category:'growth'});
+
  deferredPrompt.prompt();
  const {outcome}=await deferredPrompt.userChoice;
+
  if(outcome==="accepted"){
   document.getElementById("installBanner").style.display="none";
  }
+
  deferredPrompt=null;
 }
+
+window.addEventListener('appinstalled',()=>{
+ gtag('event','app_installed',{event_category:'growth'});
+});
 
 window.onload=init;
 </script>
