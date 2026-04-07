@@ -2,153 +2,113 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tap N Pray – Verse of the Day</title>
+<title>Tap N Pray</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#108cd7">
 <link rel="manifest" href="manifest.json">
 
-<!-- Google Analytics (Advanced) -->
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
 <script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
+window.dataLayer=[];function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'G-ELQ3E5WGCT', { send_page_view: true });
+gtag('config','G-ELQ3E5WGCT');
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-
-html, body {
-    height:100%;
-    margin:0;
-    overflow:hidden;
-    font-family:'Inter',sans-serif;
-    color:white;
-    background:#000;
-    background-size:cover;
-    background-position:center;
+html,body{
+ height:100%;margin:0;overflow:hidden;
+ font-family:Inter,sans-serif;color:#fff;
+ background-size:cover;background-position:center;
 }
-
-body::before {
-    content:"";
-    position:fixed;
-    width:100%; height:100%;
-    background:linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.75));
-    z-index:-2;
+body::before{
+ content:"";position:fixed;width:100%;height:100%;
+ background:linear-gradient(to bottom,rgba(0,0,0,.3),rgba(0,0,0,.8));
+ z-index:-2;
 }
-body::after {
-    content:"";
-    position:fixed;
-    width:100%; height:100%;
-    backdrop-filter:blur(10px);
-    z-index:-1;
+body::after{
+ content:"";position:fixed;width:100%;height:100%;
+ backdrop-filter:blur(10px);z-index:-1;
 }
 
 /* HEADER */
-.logo-container {
-    position:fixed;
-    top:12px;
-    left:50%;
-    transform:translateX(-50%);
-    text-align:center;
+.logo-container{
+ position:fixed;top:10px;left:50%;
+ transform:translateX(-50%);
+ text-align:center;
 }
-.logo-container img { max-width:110px; }
-.tagline { font-size:11px; opacity:0.8; }
+.logo-container img{max-width:100px;}
+.tagline{font-size:11px;opacity:.8}
 
-/* LAYOUT */
-.center {
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding-top:150px;
-    padding-bottom:80px;
+/* MAIN */
+.center{
+ height:100%;
+ display:flex;flex-direction:column;
+ align-items:center;
+ padding-top:140px;
+ padding-bottom:140px;
 }
 
 /* CARD */
-#votd {
-    position:relative;
-    background:rgba(0,0,0,0.65);
-    border-radius:24px;
-    padding:36px 24px;
-    max-width:520px;
-    width:92%;
-    backdrop-filter:blur(20px);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:14px;
+#votd{
+ position:relative;
+ background:rgba(0,0,0,.65);
+ border-radius:24px;
+ padding:30px 20px;
+ width:92%;max-width:520px;
+ backdrop-filter:blur(20px);
+ display:flex;flex-direction:column;
+ align-items:center;gap:14px;
 }
 
 /* SOUND ICON */
-#soundIcon {
-    position:absolute;
-    top:14px;
-    right:16px;
-    font-size:18px;
-    cursor:pointer;
+#soundIcon{
+ position:absolute;top:14px;right:16px;
+ cursor:pointer;
 }
 
 /* TEXT */
-#date { color:#108cd7; font-size:14px; }
-#verse {
-    font-size:clamp(26px,6vw,36px);
-    line-height:1.6;
-    text-align:center;
+#date{color:#108cd7;font-size:14px;}
+#verse{
+ font-size:clamp(26px,6vw,36px);
+ text-align:center;line-height:1.6;
 }
-#ref { color:#108cd7; }
+#ref{color:#108cd7}
 
-/* BUTTON GRID */
-.actions {
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
-    width:100%;
-    max-width:320px;
+/* BUTTONS */
+.actions{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:12px;width:100%;max-width:320px;
 }
-
-.btn {
-    padding:14px;
-    border-radius:999px;
-    border:none;
-    background:rgba(255,255,255,0.15);
-    color:white;
-    cursor:pointer;
+.btn{
+ padding:14px;border-radius:999px;
+ border:none;background:rgba(255,255,255,.15);
+ color:#fff;cursor:pointer;
 }
-
-.primary { background:#108cd7; }
+.primary{background:#108cd7}
 
 /* STREAK */
-#streak {
-    position:fixed;
-    bottom:18px;
-    left:50%;
-    transform:translateX(-50%);
+#streak{
+ position:fixed;bottom:18px;
+ left:50%;transform:translateX(-50%);
+ background:rgba(0,0,0,.5);
+ padding:6px 14px;border-radius:999px;
 }
 
-/* INSTALL BANNER */
-#installBanner {
-    position:fixed;
-    bottom:70px;
-    left:50%;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,0.9);
-    padding:10px 16px;
-    border-radius:999px;
-    display:none;
-    align-items:center;
-    gap:10px;
-    z-index:999;
+/* INSTALL */
+#installBanner{
+ position:fixed;bottom:70px;left:50%;
+ transform:translateX(-50%);
+ background:rgba(0,0,0,.9);
+ padding:10px 16px;border-radius:999px;
+ display:none;gap:10px;
 }
-
-#installBanner button {
-    background:#108cd7;
-    border:none;
-    color:white;
-    padding:6px 12px;
-    border-radius:999px;
+#installBanner button{
+ background:#108cd7;color:#fff;
+ border:none;padding:6px 12px;
+ border-radius:999px;
 }
 </style>
 </head>
@@ -156,8 +116,8 @@ body::after {
 <body>
 
 <div class="logo-container">
-    <img src="logo.svg">
-    <div class="tagline">One Tap Closer to Christ</div>
+<img src="logo.svg">
+<div class="tagline">One Tap Closer to Christ</div>
 </div>
 
 <div class="center">
@@ -172,11 +132,10 @@ body::after {
 <select id="translationSelect"></select>
 
 <div class="actions">
-    <button class="btn primary" onclick="playVerse()">Listen</button>
-    <button class="btn" onclick="copyVerse()">Copy</button>
-    <button class="btn" onclick="shareVerse()">Share</button>
-    <button class="btn" onclick="saveFavorite()">⭐ Save</button>
-    <button class="btn" onclick="donate()">💙 Support</button>
+<button class="btn primary" onclick="playVerse()">Listen</button>
+<button class="btn" onclick="copyVerse()">Copy</button>
+<button class="btn" onclick="shareVerse()">Share</button>
+<button class="btn" onclick="donate()">💙 Support</button>
 </div>
 
 </div>
@@ -184,45 +143,33 @@ body::after {
 
 <div id="streak"></div>
 
-<div id="installBanner">
-    <span>📲 Install Tap N Pray</span>
-    <button onclick="installApp()">Install</button>
-</div>
+<div id="installBanner"></div>
 
 <audio id="ambientAudio" loop>
-    <source src="sounds/calm.mp3" type="audio/mpeg">
+<source src="sounds/calm.mp3">
 </audio>
 
 <script>
 /* BACKGROUND */
-const backgrounds=[
- "backgrounds/morning1.png",
- "backgrounds/morning2.png",
- "backgrounds/day1.png"
-];
+const backgrounds=["backgrounds/morning1.png","backgrounds/morning2.png","backgrounds/day1.png"];
 let i=0;
-function setBG(n){
- document.body.style.backgroundImage=`url('${backgrounds[n]}')`;
-}
+function setBG(n){document.body.style.backgroundImage=`url('${backgrounds[n]}')`;}
 setBG(i);
-setInterval(()=>{i=(i+1)%backgrounds.length; setBG(i);},60000);
+setInterval(()=>{i=(i+1)%backgrounds.length;setBG(i);},60000);
 
 /* VERSES */
 let verses={kjv:{},niv:{},nlt:{}};
 let key="",translation="nlt";
 
 async function loadTranslation(t){
- if(Object.keys(verses[t]).length) return;
-
+ if(Object.keys(verses[t]).length)return;
  const res=await fetch(`https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
  const data=await res.json();
-
  let flat={};
  for(let b in data)
   for(let c in data[b])
    for(let v in data[b][c])
     flat[`${b} ${c}:${v}`]=data[b][c][v];
-
  verses[t]=flat;
 }
 
@@ -235,87 +182,62 @@ async function init(){
  await loadTranslation("nlt");
  const keys=Object.keys(verses.nlt);
  key=keys[seed(keys.length)];
-
  setupTranslations();
  update();
  streak();
- trackDAU();
- trackRetention();
 }
 
-/* TRANSLATIONS */
+/* TRANSLATION */
 function setupTranslations(){
- const select=document.getElementById("translationSelect");
-
+ const s=document.getElementById("translationSelect");
  ["kjv","niv","nlt"].forEach(t=>{
   let o=document.createElement("option");
-  o.value=t;
-  o.textContent=t.toUpperCase();
-  if(t==="nlt") o.selected=true;
-  select.appendChild(o);
+  o.value=t;o.textContent=t.toUpperCase();
+  if(t==="nlt")o.selected=true;
+  s.appendChild(o);
  });
-
- select.onchange=async e=>{
+ s.onchange=async e=>{
   translation=e.target.value;
   await loadTranslation(translation);
   update();
-
-  gtag('event','translation_change',{
-    event_category:'feature',
-    event_label:translation
-  });
  };
 }
 
+/* UPDATE */
 function update(){
  document.getElementById("verse").innerText=verses[translation][key];
  document.getElementById("ref").innerHTML=`<span style="color:#108cd7">${key}</span> (${translation.toUpperCase()})`;
  document.getElementById("date").innerText=new Date().toDateString();
 }
 
-/* AUDIO */
+/* SOUND */
 let sound=false;
-function fadeAudio(a,target,duration=800){
- let step=(target-a.volume)/(duration/50);
+function fadeAudio(a,target){
+ let step=(target-a.volume)/16;
  let i=setInterval(()=>{
   a.volume+=step;
-  if((step>0 && a.volume>=target)||(step<0 && a.volume<=target)){
-   a.volume=target; clearInterval(i);
+  if(Math.abs(a.volume-target)<.01){
+   a.volume=target;clearInterval(i);
   }
  },50);
 }
-
 function toggleSound(){
  const a=document.getElementById("ambientAudio");
  const icon=document.getElementById("soundIcon");
-
  if(!sound){
-  a.volume=0; a.play();
-  fadeAudio(a,0.35);
-  icon.innerText="🔊";
-  sound=true;
+  a.volume=0;a.play();fadeAudio(a,.35);
+  icon.innerText="🔊";sound=true;
  } else {
-  fadeAudio(a,0);
-  setTimeout(()=>a.pause(),800);
-  icon.innerText="🎧";
-  sound=false;
+  fadeAudio(a,0);setTimeout(()=>a.pause(),800);
+  icon.innerText="🎧";sound=false;
  }
-
- gtag('event','ambient_sound_toggle',{
-   event_category:'feature',
-   event_label:sound?'on':'off'
- });
 }
 
 /* SHARE */
 async function shareVerse(){
- gtag('event','share_verse',{event_category:'growth'});
-
  const verse=verses[translation][key];
- const ref=key;
-
  const canvas=document.createElement("canvas");
- canvas.width=1080; canvas.height=1080;
+ canvas.width=1080;canvas.height=1080;
  const ctx=canvas.getContext("2d");
 
  const bg=new Image();
@@ -323,17 +245,17 @@ async function shareVerse(){
  await new Promise(r=>bg.onload=r);
 
  ctx.drawImage(bg,0,0,1080,1080);
-
- ctx.fillStyle="rgba(0,0,0,0.6)";
+ ctx.fillStyle="rgba(0,0,0,.6)";
  ctx.fillRect(0,0,1080,1080);
 
  ctx.fillStyle="#fff";
  ctx.font="bold 48px Arial";
  ctx.textAlign="center";
+
  wrapText(ctx,verse,540,500,800,60);
 
  ctx.fillStyle="#108cd7";
- ctx.fillText(ref,540,800);
+ ctx.fillText(key,540,800);
 
  canvas.toBlob(async blob=>{
   const file=new File([blob],"verse.png",{type:"image/png"});
@@ -350,8 +272,7 @@ function wrapText(ctx,text,x,y,maxWidth,lineHeight){
   let test=line+words[n]+" ";
   if(ctx.measureText(test).width>maxWidth){
    ctx.fillText(line,x,y);
-   line=words[n]+" ";
-   y+=lineHeight;
+   line=words[n]+" ";y+=lineHeight;
   } else line=test;
  }
  ctx.fillText(line,x,y);
@@ -359,22 +280,12 @@ function wrapText(ctx,text,x,y,maxWidth,lineHeight){
 
 /* OTHER */
 function playVerse(){
- let u=new SpeechSynthesisUtterance(verses[translation][key]);
- speechSynthesis.speak(u);
+ speechSynthesis.speak(new SpeechSynthesisUtterance(verses[translation][key]));
 }
-
 function copyVerse(){
  navigator.clipboard.writeText(`${verses[translation][key]} — ${key}`);
 }
-
-function saveFavorite(){
- let f=JSON.parse(localStorage.getItem("fav")||"[]");
- f.push(`${verses[translation][key]} — ${key}`);
- localStorage.setItem("fav",JSON.stringify(f));
-}
-
 function donate(){
- gtag('event','donation_click',{event_category:'monetization'});
  window.open("https://venmo.com/u/tapnpray","_blank");
 }
 
@@ -383,65 +294,44 @@ function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
  let t=new Date().toDateString();
- if(l!==t){s++; localStorage.setItem("s",s); localStorage.setItem("l",t);}
+ if(l!==t){s++;localStorage.setItem("s",s);localStorage.setItem("l",t);}
  document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
-
- gtag('event','streak_update',{
-   event_category:'engagement',
-   value:s
- });
 }
 
-/* ANALYTICS */
-function trackDAU(){
- const today=new Date().toDateString();
- const last=localStorage.getItem("last_visit");
- if(last!==today){
-  gtag('event','daily_active_user',{event_category:'engagement'});
-  localStorage.setItem("last_visit",today);
- }
-}
+/* INSTALL (SMART) */
+function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+function isAndroid(){return /android/i.test(navigator.userAgent);}
 
-function trackRetention(){
- let visits=parseInt(localStorage.getItem("visits")||"0");
- visits++;
- localStorage.setItem("visits",visits);
-
- gtag('event','session_visit',{
-   event_category:'engagement',
-   value:visits
- });
-}
-
-/* INSTALL */
 let deferredPrompt;
 
 window.addEventListener("beforeinstallprompt",(e)=>{
  e.preventDefault();
  deferredPrompt=e;
- document.getElementById("installBanner").style.display="flex";
+ if(isAndroid()) showInstall("install");
 });
 
-async function installApp(){
- if(!deferredPrompt) return;
+window.onload=()=>{
+ init();
+ if(isIOS()) showInstall("ios");
+};
 
- gtag('event','install_prompt_clicked',{event_category:'growth'});
-
- deferredPrompt.prompt();
- const {outcome}=await deferredPrompt.userChoice;
-
- if(outcome==="accepted"){
-  document.getElementById("installBanner").style.display="none";
+function showInstall(type){
+ const b=document.getElementById("installBanner");
+ if(type==="ios"){
+  b.innerHTML=`📲 Add to Home Screen <button onclick="alert('Tap Share → Add to Home Screen')">How</button>`;
  }
-
- deferredPrompt=null;
+ if(type==="install"){
+  b.innerHTML=`📲 Install Tap N Pray <button onclick="installApp()">Install</button>`;
+ }
+ b.style.display="flex";
 }
 
-window.addEventListener('appinstalled',()=>{
- gtag('event','app_installed',{event_category:'growth'});
-});
-
-window.onload=init;
+async function installApp(){
+ if(!deferredPrompt)return;
+ deferredPrompt.prompt();
+ await deferredPrompt.userChoice;
+ b.style.display="none";
+}
 </script>
 
 </body>
