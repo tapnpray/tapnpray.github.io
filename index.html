@@ -15,20 +15,11 @@ html, body {
     height:100%;
     margin:0;
     overflow:hidden;
-    overscroll-behavior:none;
     font-family:'Inter',sans-serif;
     color:white;
     background:#000;
     background-size:cover;
     background-position:center;
-    background-attachment:fixed;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-}
-
-button, select {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
 }
 
 body::before {
@@ -54,13 +45,8 @@ body::after {
     transform:translateX(-50%);
     text-align:center;
 }
-.logo-container img {
-    max-width:120px;
-}
-.tagline {
-    font-size:11px;
-    opacity:0.8;
-}
+.logo-container img { max-width:110px; }
+.tagline { font-size:11px; opacity:0.8; }
 
 /* LAYOUT */
 .center {
@@ -69,32 +55,38 @@ body::after {
     flex-direction:column;
     align-items:center;
     padding-top:150px;
-    padding-bottom:90px;
-    padding-left:16px;
-    padding-right:16px;
-    box-sizing:border-box;
+    padding-bottom:80px;
 }
 
 /* CARD */
 #votd {
-    background:rgba(0,0,0,0.55);
+    position:relative;
+    background:rgba(0,0,0,0.6);
     border-radius:24px;
-    padding:36px 26px;
+    padding:36px 24px;
     max-width:520px;
-    width:100%;
-    backdrop-filter:blur(25px);
-    box-shadow:0 12px 45px rgba(0,0,0,0.65);
+    width:92%;
+    backdrop-filter:blur(20px);
     display:flex;
     flex-direction:column;
     align-items:center;
     gap:12px;
 }
 
+/* SOUND ICON */
+#soundIcon {
+    position:absolute;
+    top:14px;
+    right:16px;
+    font-size:18px;
+    cursor:pointer;
+}
+
 /* TEXT */
 #date { color:#108cd7; font-size:14px; }
 #verse {
     font-size:clamp(24px,6vw,34px);
-    line-height:1.7;
+    line-height:1.6;
     text-align:center;
 }
 #ref { color:#108cd7; }
@@ -109,17 +101,15 @@ body::after {
 }
 
 .btn {
-    padding:14px 0;
+    padding:14px;
     border-radius:999px;
     border:none;
-    background:rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.15);
     color:white;
     cursor:pointer;
 }
 
-.primary {
-    background:#108cd7;
-}
+.primary { background:#108cd7; }
 
 /* STREAK */
 #streak {
@@ -140,19 +130,22 @@ body::after {
 
 <div class="center">
 <div id="votd">
-    <div id="date"></div>
-    <div id="verse">Loading...</div>
-    <div id="ref"></div>
 
-    <select id="translationSelect"></select>
+<div id="soundIcon" onclick="toggleSound()">🎧</div>
 
-    <div class="actions">
-        <button class="btn primary" onclick="playVerse()">Listen</button>
-        <button class="btn" onclick="copyVerse()">Copy</button>
-        <button class="btn" onclick="shareVerse()">Share</button>
-        <button class="btn" onclick="saveFavorite()">⭐ Save</button>
-        <button class="btn" onclick="toggleSound()" id="soundBtn">🌧️ Sound</button>
-    </div>
+<div id="date"></div>
+<div id="verse">Loading...</div>
+<div id="ref"></div>
+
+<select id="translationSelect"></select>
+
+<div class="actions">
+    <button class="btn primary" onclick="playVerse()">Listen</button>
+    <button class="btn" onclick="copyVerse()">Copy</button>
+    <button class="btn" onclick="shareVerse()">Share</button>
+    <button class="btn" onclick="saveFavorite()">⭐ Save</button>
+</div>
+
 </div>
 </div>
 
@@ -170,7 +163,6 @@ const backgrounds=[
  "backgrounds/day1.png"
 ];
 let i=0;
-
 function setBG(n){
  document.body.style.backgroundImage=`url('${backgrounds[n]}')`;
 }
@@ -178,62 +170,150 @@ setBG(i);
 setInterval(()=>{i=(i+1)%backgrounds.length; setBG(i);},60000);
 
 /* VERSES */
-let verses={},key="",translation="nlt";
+let verses={kjv:{},niv:{},nlt:{}};
+let key="",translation="nlt";
 
-async function load(){
- let r=await fetch("https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/NLT/NLT_bible.json");
- let j=await r.json(),f={};
- for(let b in j)for(let c in j[b])for(let v in j[b][c])f[`${b} ${c}:${v}`]=j[b][c][v];
- verses=f;
- let k=Object.keys(verses);
- key=k[new Date().getDate()%k.length];
+async function loadTranslation(t){
+ if(Object.keys(verses[t]).length) return;
+
+ const res=await fetch(`https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
+ const data=await res.json();
+
+ let flat={};
+ for(let b in data)
+  for(let c in data[b])
+   for(let v in data[b][c])
+    flat[`${b} ${c}:${v}`]=data[b][c][v];
+
+ verses[t]=flat;
+}
+
+function seed(len){
+ const d=new Date();
+ return (d.getFullYear()*10000+d.getMonth()*100+d.getDate())%len;
+}
+
+async function init(){
+ await loadTranslation("nlt");
+ const keys=Object.keys(verses.nlt);
+ key=keys[seed(keys.length)];
+
+ setupTranslations();
  update();
+ streak();
+}
+
+function setupTranslations(){
+ const select=document.getElementById("translationSelect");
+
+ ["kjv","niv","nlt"].forEach(t=>{
+  let o=document.createElement("option");
+  o.value=t;
+  o.textContent=t.toUpperCase();
+  if(t==="nlt") o.selected=true;
+  select.appendChild(o);
+ });
+
+ select.onchange=async e=>{
+  translation=e.target.value;
+  await loadTranslation(translation);
+  update();
+ };
 }
 
 function update(){
- document.getElementById("verse").innerText=verses[key];
- document.getElementById("ref").innerText=key;
+ document.getElementById("verse").innerText=verses[translation][key];
+ document.getElementById("ref").innerHTML=`<span style="color:#108cd7">${key}</span> (${translation.toUpperCase()})`;
  document.getElementById("date").innerText=new Date().toDateString();
 }
 
-/* SHARE ELITE */
+/* AUDIO FADE */
+let sound=false;
+function fadeAudio(a,target,duration=800){
+ let step=(target-a.volume)/(duration/50);
+ let i=setInterval(()=>{
+  a.volume+=step;
+  if((step>0 && a.volume>=target)||(step<0 && a.volume<=target)){
+   a.volume=target; clearInterval(i);
+  }
+ },50);
+}
+
+function toggleSound(){
+ const a=document.getElementById("ambientAudio");
+ const icon=document.getElementById("soundIcon");
+
+ if(!sound){
+  a.volume=0; a.play();
+  fadeAudio(a,0.35);
+  icon.innerText="🔊";
+  sound=true;
+ } else {
+  fadeAudio(a,0);
+  setTimeout(()=>a.pause(),800);
+  icon.innerText="🎧";
+  sound=false;
+ }
+}
+
+/* SHARE (SQUARE + GLASS) */
 async function shareVerse(){
- const verse=verses[key];
+ const verse=verses[translation][key];
  const ref=key;
 
  const canvas=document.createElement("canvas");
- canvas.width=1080;
- canvas.height=1920;
+ canvas.width=1080; canvas.height=1080;
  const ctx=canvas.getContext("2d");
 
  const bg=new Image();
+ bg.crossOrigin="anonymous";
  bg.src=backgrounds[i];
  await new Promise(r=>bg.onload=r);
 
- ctx.drawImage(bg,0,0,1080,1920);
+ ctx.drawImage(bg,0,0,1080,1080);
 
- const grad=ctx.createLinearGradient(0,0,0,1920);
+ const grad=ctx.createLinearGradient(0,0,0,1080);
  grad.addColorStop(0,"rgba(0,0,0,0.3)");
  grad.addColorStop(1,"rgba(0,0,0,0.8)");
  ctx.fillStyle=grad;
- ctx.fillRect(0,0,1080,1920);
+ ctx.fillRect(0,0,1080,1080);
+
+ const x=90,y=180,w=900,h=700;
+
+ ctx.fillStyle="rgba(0,0,0,0.45)";
+ roundRect(ctx,x,y,w,h,40);
+ ctx.fill();
+
+ ctx.strokeStyle="rgba(255,255,255,0.15)";
+ ctx.lineWidth=2;
+ roundRect(ctx,x,y,w,h,40);
+ ctx.stroke();
 
  ctx.fillStyle="#fff";
- ctx.font="bold 50px Arial";
  ctx.textAlign="center";
- wrapText(ctx,verse,540,700,800,60);
+
+ let fontSize=48;
+ while(fontSize>30){
+  ctx.font=`bold ${fontSize}px Inter`;
+  if(getTextHeight(ctx,verse,760,fontSize*1.4)<360) break;
+  fontSize--;
+ }
+
+ wrapText(ctx,verse,540,y+160,760,fontSize*1.4);
 
  ctx.fillStyle="#108cd7";
- ctx.fillText(ref,540,1100);
+ ctx.font="bold 28px Inter";
+ ctx.fillText(ref,540,y+520);
 
  canvas.toBlob(async blob=>{
   const file=new File([blob],"verse.png",{type:"image/png"});
-  if(navigator.canShare){
+  if(navigator.canShare && navigator.canShare({files:[file]})){
    await navigator.share({files:[file]});
   }
  });
 }
 
+/* HELPERS */
 function wrapText(ctx,text,x,y,maxWidth,lineHeight){
  const words=text.split(" ");
  let line="";
@@ -248,30 +328,50 @@ function wrapText(ctx,text,x,y,maxWidth,lineHeight){
  ctx.fillText(line,x,y);
 }
 
-/* AUDIO */
+function getTextHeight(ctx,text,maxWidth,lineHeight){
+ const words=text.split(" ");
+ let line="",height=lineHeight;
+ for(let n=0;n<words.length;n++){
+  let test=line+words[n]+" ";
+  if(ctx.measureText(test).width>maxWidth){
+   line=words[n]+" ";
+   height+=lineHeight;
+  } else line=test;
+ }
+ return height;
+}
+
+function roundRect(ctx,x,y,w,h,r){
+ ctx.beginPath();
+ ctx.moveTo(x+r,y);
+ ctx.lineTo(x+w-r,y);
+ ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+ ctx.lineTo(x+w,y+h-r);
+ ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+ ctx.lineTo(x+r,y+h);
+ ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+ ctx.lineTo(x,y+r);
+ ctx.quadraticCurveTo(x,y,x+r,y);
+ ctx.closePath();
+}
+
+/* OTHER */
 function playVerse(){
- let u=new SpeechSynthesisUtterance(verses[key]);
+ let u=new SpeechSynthesisUtterance(verses[translation][key]);
  speechSynthesis.speak(u);
 }
 
-/* SOUND */
-let sound=false;
-function toggleSound(){
- const a=document.getElementById("ambientAudio");
- const b=document.getElementById("soundBtn");
- if(!sound){a.play(); b.innerText="🔇 Stop"; sound=true;}
- else{a.pause(); b.innerText="🌧️ Sound"; sound=false;}
+function copyVerse(){
+ navigator.clipboard.writeText(`${verses[translation][key]} — ${key}`);
 }
 
-/* FAVORITE */
 function saveFavorite(){
  let f=JSON.parse(localStorage.getItem("fav")||"[]");
- f.push(verses[key]+" — "+key);
+ f.push(`${verses[translation][key]} — ${key}`);
  localStorage.setItem("fav",JSON.stringify(f));
  alert("Saved!");
 }
 
-/* STREAK */
 function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
@@ -280,7 +380,7 @@ function streak(){
  document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
 }
 
-load(); streak();
+window.onload=init;
 </script>
 
 </body>
