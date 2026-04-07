@@ -27,12 +27,15 @@ body::after{
 
 /* HEADER */
 .logo-container{
- position:fixed;top:10px;left:50%;
+ position:fixed;
+ top:10px;
+ left:50%;
  transform:translateX(-50%);
  text-align:center;
 }
-.logo-container img{max-width:85px;}
-.tagline{font-size:11px;opacity:.85}
+.logo-container img{
+ max-width:70px;
+}
 
 /* MAIN */
 .center{
@@ -41,7 +44,7 @@ body::after{
  flex-direction:column;
  align-items:center;
  justify-content:center;
- padding:120px 20px 160px;
+ padding:120px 20px 180px;
  box-sizing:border-box;
 }
 
@@ -62,7 +65,7 @@ body::after{
  text-align:center;
 }
 
-/* AMBIENT BUTTON */
+/* AMBIENT ICON */
 #ambientToggle{
  position:absolute;
  top:12px;
@@ -95,16 +98,30 @@ body::after{
  gap:12px;margin-top:20px;
 }
 .btn{
- padding:14px;border-radius:999px;
- border:none;background:rgba(255,255,255,.15);
- color:#fff;cursor:pointer;font-weight:bold;
+ padding:14px;
+ border-radius:999px;
+ border:none;
+ background:rgba(255,255,255,.15);
+ color:#fff;
+ cursor:pointer;
+ font-weight:bold;
 }
 .primary{background:#108cd7}
+
+/* TAGLINE */
+#bottomTagline{
+ position:fixed;
+ bottom:70px;
+ width:100%;
+ text-align:center;
+ font-size:12px;
+ opacity:.8;
+}
 
 /* STREAK */
 #streak{
  position:fixed;
- bottom:20px;
+ bottom:25px;
  left:50%;
  transform:translateX(-50%);
  background:rgba(0,0,0,.6);
@@ -119,7 +136,6 @@ body::after{
 
 <div class="logo-container">
 <img src="logo.svg">
-<div class="tagline">One Tap Closer to Christ</div>
 </div>
 
 <div class="center">
@@ -143,6 +159,7 @@ body::after{
 </div>
 </div>
 
+<div id="bottomTagline">One Tap Closer to Christ</div>
 <div id="streak"></div>
 
 <audio id="ambientAudio" loop>
@@ -175,6 +192,7 @@ let key="",translation="nlt";
 
 async function loadTranslation(t){
  if(Object.keys(verses[t]).length)return;
+
  const res=await fetch(`https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/main/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
  const data=await res.json();
 
@@ -236,7 +254,7 @@ function update(){
  setTimeout(()=>verseEl.classList.add("show"),200);
 }
 
-/* READ VERSE */
+/* READ */
 function readVerse(){
  update();
 
@@ -289,7 +307,7 @@ function fadeAudio(audio,target,duration){
  },50);
 }
 
-/* SHARE IMAGE (BRANDED) */
+/* SHARE IMAGE (FINAL) */
 function shareImage(){
  const canvas=document.createElement("canvas");
  const size=1080;
@@ -308,7 +326,6 @@ function shareImage(){
   ctx.fillStyle="rgba(0,0,0,0.55)";
   ctx.fillRect(0,0,size,size);
 
-  // Glass card
   ctx.fillStyle="rgba(0,0,0,0.75)";
   ctx.fillRect(100,260,880,520);
 
@@ -316,7 +333,24 @@ function shareImage(){
   logo.src="logo.svg";
 
   logo.onload=()=>{
-   ctx.drawImage(logo,440,120,200,80);
+
+   const maxWidth=260;
+   const ratio=logo.height/logo.width;
+
+   const drawWidth=maxWidth;
+   const drawHeight=maxWidth*ratio;
+
+   const x=(size/2)-(drawWidth/2);
+   const y=100;
+
+   ctx.globalAlpha=0.95;
+   ctx.shadowColor="rgba(0,0,0,0.5)";
+   ctx.shadowBlur=20;
+
+   ctx.drawImage(logo,x,y,drawWidth,drawHeight);
+
+   ctx.shadowBlur=0;
+   ctx.globalAlpha=1;
 
    ctx.fillStyle="#fff";
    ctx.font="bold 44px serif";
@@ -330,7 +364,7 @@ function shareImage(){
 
    ctx.fillStyle="rgba(255,255,255,0.6)";
    ctx.font="22px sans-serif";
-   ctx.fillText("tapnpray.com",540,980);
+   ctx.fillText("https://tapnpray.github.io/",540,980);
 
    canvas.toBlob(blob=>{
     const file=new File([blob],"tapnpray-verse.png",{type:"image/png"});
@@ -350,6 +384,7 @@ function wrapText(ctx,text,x,y,maxWidth,lineHeight){
  for(let n=0;n<words.length;n++){
   const test=line+words[n]+" ";
   const w=ctx.measureText(test).width;
+
   if(w>maxWidth && n>0){
    ctx.fillText(line,x,y);
    line=words[n]+" ";
