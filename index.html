@@ -135,6 +135,12 @@ body::after{
  padding:8px 16px;border-radius:999px;
  font-size:14px;
 }
+
+select{
+ margin-top:10px;
+ padding:6px;
+ border-radius:8px;
+}
 </style>
 </head>
 
@@ -152,6 +158,12 @@ body::after{
 <div id="date"></div>
 <div id="verse"></div>
 <div id="ref"></div>
+
+<select id="translationSelect">
+<option value="nlt">NLT</option>
+<option value="niv">NIV</option>
+<option value="kjv">KJV</option>
+</select>
 
 <div id="topics">
 <button onclick="goDaily(this)">Daily</button>
@@ -184,7 +196,7 @@ body::after{
 
 <script>
 
-/* ================= BACKGROUNDS ================= */
+/* BACKGROUNDS */
 const bgSets={
  morning:["/backgrounds/morning1.png","/backgrounds/morning2.png"],
  day:["/backgrounds/day1.png","/backgrounds/day2.png"],
@@ -223,11 +235,35 @@ function initBackgrounds(){
  setInterval(rotateBackground,60000);
 }
 
-/* ================= VERSES ================= */
+/* VERSES + TRANSLATIONS */
+let verses={nlt:{},niv:{},kjv:{}};
+let translation="nlt";
+let key="",dailyKey="";
 
-let verses={},key="",dailyKey="";
-let topicCache={};
+async function loadTranslation(t){
+ if(Object.keys(verses[t]).length)return;
 
+ const res=await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
+ const data=await res.json();
+
+ let flat={};
+ for(let b in data)
+  for(let c in data[b])
+   for(let v in data[b][c])
+    flat[`${b} ${c}:${v}`]=data[b][c][v];
+
+ verses[t]=flat;
+}
+
+function setupTranslationUI(){
+ document.getElementById("translationSelect").onchange=async(e)=>{
+  translation=e.target.value;
+  await loadTranslation(translation);
+  update(document.getElementById("title").innerText);
+ };
+}
+
+/* SEED */
 function getSeed(str){
  let hash=0;
  for(let i=0;i<str.length;i++){
@@ -237,174 +273,57 @@ function getSeed(str){
  return Math.abs(hash);
 }
 
-/* Emotion Profiles */
-const emotionProfiles={
- morning:["hope","strength","joy"],
- day:["wisdom","guidance","faith"],
- evening:["gratitude","peace"],
- night:["peace","rest","comfort"]
-};
-
-/* User Tracking */
-function trackTopic(topic){
- let d=JSON.parse(localStorage.getItem("topicUsage")||"{}");
- d[topic]=(d[topic]||0)+1;
- localStorage.setItem("topicUsage",JSON.stringify(d));
-}
-
-function getUserTopThemes(){
- let d=JSON.parse(localStorage.getItem("topicUsage")||"{}");
- return Object.entries(d).sort((a,b)=>b[1]-a[1]).slice(0,2).map(e=>e[0]);
-}
-
-/* Scoring */
-function scoreVerse(text){
- text=text.toLowerCase();
- let score=0;
-
- ["love","peace","hope","joy","grace","faith","strength","comfort","trust"].forEach(w=>{
-  if(text.includes(w))score+=3;
- });
-
- ["god","lord","jesus","truth","life"].forEach(w=>{
-  if(text.includes(w))score+=1;
- });
-
- ["wrath","punishment","evil"].forEach(w=>{
-  if(text.includes(w))score-=3;
- });
-
- return score;
-}
-
-/* Avoid repeats */
-function avoidRecent(ref){
- let h=JSON.parse(localStorage.getItem("recentVerses")||"[]");
- if(h.includes(ref))return false;
- h.push(ref);
- if(h.length>7)h.shift();
- localStorage.setItem("recentVerses",JSON.stringify(h));
- return true;
-}
-
-/* Generate Daily */
+/* DAILY LOCKED */
 function generateDaily(){
- const keys=Object.keys(verses);
  const today=new Date().toDateString();
- const seed=getSeed(today);
+ const stored=JSON.parse(localStorage.getItem("dailyVerse")||"{}");
 
- const timeBlock=getTimeBlock();
- const emotionalTargets=emotionProfiles[timeBlock];
- const userThemes=getUserTopThemes();
-
- let scored=keys.map(ref=>{
-  let text=verses[ref].toLowerCase();
-  let score=scoreVerse(text);
-
-  emotionalTargets.forEach(t=>{
-   if(text.includes(t))score+=3;
-  });
-
-  userThemes.forEach(t=>{
-   if(text.includes(t))score+=2;
-  });
-
-  return {ref,score};
- });
-
- scored.sort((a,b)=>b.score-a.score);
-
- const top=scored.slice(0,Math.floor(scored.length*0.2));
-
- let chosen;
- for(let i=0;i<top.length;i++){
-  let c=top[(seed+i)%top.length].ref;
-  if(avoidRecent(c)){chosen=c;break;}
+ if(stored.date===today){
+  dailyKey=stored.key;
+  key=dailyKey;
+  update("Daily Bible Verse");
+  streak();
+  return;
  }
 
- dailyKey=chosen||top[0].ref;
+ const keys=Object.keys(verses.nlt);
+ const seed=getSeed(today);
+
+ dailyKey=keys[seed%keys.length];
  key=dailyKey;
+
+ localStorage.setItem("dailyVerse",JSON.stringify({
+  date:today,
+  key:dailyKey
+ }));
 
  update("Daily Bible Verse");
  streak();
 }
 
-/* LOAD */
-async function load(){
- const res=await fetch("/BIBLE/NLT/NLT_bible.json");
- const data=await res.json();
-
- let flat={};
- for(let b in data)
-  for(let c in data[b])
-   for(let v in data[b][c])
-    flat[`${b} ${c}:${v}`]=data[b][c][v];
-
- verses=flat;
- generateDaily();
-}
-
 /* UPDATE */
 function update(title){
- const words=verses[key].split(" ");
+ const text=verses[translation][key];
+ const words=text.split(" ");
+
  document.getElementById("title").innerText=title;
  document.getElementById("verse").innerHTML=
   words.map(w=>`<span class="word">${w}</span>`).join(" ");
  document.getElementById("ref").innerText=key;
  document.getElementById("date").innerText=new Date().toDateString();
+
  updateStar();
 }
 
-/* TOPICS */
-function pickTopic(topic,btn){
- trackTopic(topic);
- const today=new Date().toDateString();
-
- if(!topicCache[topic]){
-  const filtered=Object.keys(verses).filter(ref=>{
-   let t=verses[ref].toLowerCase();
-   return t.includes(topic);
-  });
-
-  const seed=getSeed(today+topic);
-  topicCache[topic]=filtered[seed%filtered.length];
- }
-
- key=topicCache[topic];
- update("Daily Bible Verse - "+topic.charAt(0).toUpperCase()+topic.slice(1));
- setActive(btn);
-}
-
-function goDaily(btn){
- key=dailyKey;
- update("Daily Bible Verse");
- setActive(btn);
-}
-
-function setActive(btn){
- document.querySelectorAll("#topics button").forEach(b=>b.classList.remove("active"));
- btn.classList.add("active");
-}
-
 /* AUDIO */
-let ambientOn=false,fadeInterval=null;
+let ambientOn=false;
 function toggleAmbient(){
  const a=document.getElementById("ambientAudio");
- if(fadeInterval)clearInterval(fadeInterval);
-
  if(ambientOn){
-  fadeInterval=setInterval(()=>{
-   a.volume=Math.max(0,a.volume-0.05);
-   if(a.volume===0){a.pause();a.currentTime=0;clearInterval(fadeInterval);}
-  },100);
+  a.pause();a.currentTime=0;a.volume=0;
  }else{
-  a.volume=0;a.play();
-  fadeInterval=setInterval(()=>{
-   a.volume=Math.min(0.3,a.volume+0.05);
-   if(a.volume===0.3)clearInterval(fadeInterval);
-  },100);
+  a.volume=0.3;a.play();
  }
-
  ambientOn=!ambientOn;
  document.getElementById("ambientToggle").classList.toggle("active");
 }
@@ -413,8 +332,9 @@ function toggleAmbient(){
 function readVerse(){
  const words=document.querySelectorAll(".word");
  words.forEach(w=>w.classList.remove("active"));
+
  let i=0;
- const text=verses[key]+" "+key;
+ const text=verses[translation][key]+" "+key;
 
  const utter=new SpeechSynthesisUtterance(text);
  utter.rate=.9;
@@ -448,7 +368,7 @@ function openFavorites(){
  c.innerHTML="<h2>Saved Verses</h2>";
  getFavs().forEach(ref=>{
   c.innerHTML+=`<div class="favorite-item">
-  <b>${ref}</b><br>${verses[ref]}
+  <b>${ref}</b><br>${verses[translation][ref]}
   <br><button onclick="removeFav('${ref}')">Delete</button></div>`;
  });
  document.getElementById("favoritesModal").style.display="block";
@@ -465,10 +385,10 @@ function closeFavorites(e){
 
 /* UTIL */
 function copyVerse(){
- navigator.clipboard.writeText(verses[key]+" — "+key);
+ navigator.clipboard.writeText(verses[translation][key]+" — "+key);
 }
 function shareVerse(){
- navigator.share?.({text:verses[key]+" — "+key});
+ navigator.share?.({text:verses[translation][key]+" — "+key});
 }
 function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
@@ -479,8 +399,14 @@ function streak(){
 }
 
 /* INIT */
-initBackgrounds();
-load();
+async function init(){
+ await loadTranslation("nlt");
+ setupTranslationUI();
+ generateDaily();
+ initBackgrounds();
+}
+
+init();
 
 </script>
 
