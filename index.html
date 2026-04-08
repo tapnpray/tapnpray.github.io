@@ -21,7 +21,7 @@ html,body{
  background-size:cover;background-position:center;
 }
 
-/* Background FX */
+/* Background */
 body{
  transition:background-image 1.5s ease-in-out;
  animation:zoom 60s linear infinite;
@@ -41,15 +41,17 @@ body::after{
  backdrop-filter:blur(12px);z-index:-1;
 }
 
-/* Layout */
+/* CENTER FIX */
 .center{
  height:100%;
  display:flex;
  align-items:center;
  justify-content:center;
- padding:100px 15px 160px;
+ padding:20px;
+ box-sizing:border-box;
 }
 
+/* Verse Box */
 #votd{
  position:relative;
  background:rgba(0,0,0,.6);
@@ -69,7 +71,7 @@ body::after{
 }
 .logo-container img{max-width:55px}
 
-/* Verse */
+/* Text */
 #verse{
  font-size:clamp(22px,5vw,30px);
  line-height:1.6;
@@ -78,7 +80,6 @@ body::after{
 .word{opacity:.35;transition:.2s;}
 .word.active{opacity:1;}
 
-/* Header */
 #title{font-size:14px;opacity:.85;}
 #date{color:#108cd7;font-size:14px;}
 #ref{color:#108cd7;margin-top:8px;font-size:14px;}
@@ -86,7 +87,7 @@ body::after{
 /* Controls */
 #favoriteStar{position:absolute;top:12px;left:12px;cursor:pointer;}
 #ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
-#ambientToggle.active{color:#7CFFB2;text-shadow:0 0 8px #7CFFB2;}
+#ambientToggle.active{color:#7CFFB2;}
 
 /* Translation */
 .translation-select{
@@ -108,6 +109,7 @@ body::after{
  border:none;background:rgba(255,255,255,.15);
  color:#fff;cursor:pointer;font-size:12px;
 }
+#topics button.active{background:#108cd7}
 
 /* Actions */
 .actions{
@@ -169,12 +171,12 @@ body::after{
 </div>
 
 <div id="topics">
-<button onclick="goDaily()">Daily</button>
-<button onclick="pickTopic('peace')">Peace</button>
-<button onclick="pickTopic('strength')">Strength</button>
-<button onclick="pickTopic('hope')">Hope</button>
-<button onclick="pickTopic('guidance')">Guidance</button>
-<button onclick="pickTopic('faith')">Faith</button>
+<button onclick="setMode('daily', this)">Daily</button>
+<button onclick="setMode('peace', this)">Peace</button>
+<button onclick="setMode('strength', this)">Strength</button>
+<button onclick="setMode('hope', this)">Hope</button>
+<button onclick="setMode('guidance', this)">Guidance</button>
+<button onclick="setMode('faith', this)">Faith</button>
 </div>
 
 <div class="actions">
@@ -199,45 +201,12 @@ body::after{
 
 <script>
 
-/* BACKGROUNDS */
-const bgSets={
- morning:["/backgrounds/morning1.png","/backgrounds/morning2.png"],
- day:["/backgrounds/day1.png","/backgrounds/day2.png"],
- evening:["/backgrounds/evening1.png","/backgrounds/evening2.png"],
- night:["/backgrounds/night1.png","/backgrounds/night2.png"]
-};
-
-let bgIndex=0,currentTimeBlock="";
-
-function getTimeBlock(){
- const h=new Date().getHours();
- if(h>=5&&h<11)return"morning";
- if(h>=11&&h<17)return"day";
- if(h>=17&&h<21)return"evening";
- return"night";
-}
-
-function setBackground(){
- const set=bgSets[getTimeBlock()];
- document.body.style.backgroundImage=`url('${set[bgIndex]}')`;
-}
-
-function rotateBackground(){
- const t=getTimeBlock();
- if(t!==currentTimeBlock){bgIndex=0;currentTimeBlock=t;}
- const set=bgSets[t];
- bgIndex=(bgIndex+1)%set.length;
- setBackground();
-}
-
-setBackground();
-setInterval(rotateBackground,60000);
-
 /* VERSES */
 let verses={nlt:{},niv:{},kjv:{}};
 let translation="nlt";
-let key="",dailyKey="";
+let key="";
 
+/* LOAD */
 async function loadTranslation(t){
  if(Object.keys(verses[t]).length) return;
 
@@ -253,13 +222,13 @@ async function loadTranslation(t){
  verses[t]=flat;
 }
 
+/* DAILY */
 function getSeed(str){
  let h=0;
  for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i);h|=0;}
  return Math.abs(h);
 }
 
-/* DAILY LOCK */
 function generateDaily(){
  const today=new Date().toDateString();
  const stored=JSON.parse(localStorage.getItem("dailyVerse")||"{}");
@@ -274,6 +243,14 @@ function generateDaily(){
 
  update("Daily Bible Verse");
  streak();
+}
+
+function goDaily(){
+ const stored=JSON.parse(localStorage.getItem("dailyVerse")||"{}");
+ if(stored.key){
+  key=stored.key;
+  update("Daily Bible Verse");
+ }
 }
 
 /* TOPICS */
@@ -294,6 +271,16 @@ function pickTopic(topic){
  update("Daily Bible Verse - "+topic);
 }
 
+/* MODE SWITCH */
+function setMode(mode, btn){
+ document.querySelectorAll("#topics button")
+  .forEach(b=>b.classList.remove("active"));
+ btn.classList.add("active");
+
+ if(mode==="daily") goDaily();
+ else pickTopic(mode);
+}
+
 /* UPDATE */
 function update(title){
  const text=verses[translation][key];
@@ -307,33 +294,41 @@ function update(title){
  document.getElementById("date").innerText=new Date().toDateString();
 }
 
-/* SHARE */
+/* SHARE FIXED */
 async function shareVerse(){
+
  const canvas=document.createElement("canvas");
  canvas.width=1080;canvas.height=1080;
  const ctx=canvas.getContext("2d");
 
  ctx.fillStyle="#000";ctx.fillRect(0,0,1080,1080);
 
+ const boxW=800,boxH=520;
+ const boxX=(1080-boxW)/2;
+ const boxY=(1080-boxH)/2;
+
+ roundRect(ctx,boxX,boxY,boxW,boxH,40);
  ctx.fillStyle="rgba(255,255,255,0.08)";
- ctx.fillRect(140,260,800,500);
+ ctx.fill();
 
  ctx.fillStyle="#fff";
- ctx.font="40px Arial";
- wrapText(ctx,verses[translation][key],540,400,600,50);
+ ctx.font="bold 44px Arial";
+ ctx.textAlign="center";
+
+ wrapText(ctx,verses[translation][key],540,boxY+120,640,56);
 
  ctx.fillStyle="#108cd7";
- ctx.fillText(key,540,650);
+ ctx.font="30px Arial";
+ ctx.fillText(key,540,boxY+boxH-80);
 
  const logo=new Image();
  logo.src="logo.svg";
-
  await new Promise(r=>logo.onload=r);
 
- ctx.drawImage(logo,60,860,120,120);
+ ctx.drawImage(logo,60,860,100,100);
 
  ctx.fillStyle="rgba(255,255,255,.7)";
- ctx.fillText("tapnpray.github.io",60,1020);
+ ctx.fillText("tapnpray.github.io",60,1000);
 
  canvas.toBlob(blob=>{
   const file=new File([blob],"tapnpray.png",{type:"image/png"});
@@ -341,17 +336,15 @@ async function shareVerse(){
  });
 }
 
-/* HELPERS */
-function wrapText(ctx,text,x,y,maxWidth,lineHeight){
- let words=text.split(" "),line="";
- for(let n=0;n<words.length;n++){
-  let test=line+words[n]+" ";
-  if(ctx.measureText(test).width>maxWidth){
-   ctx.fillText(line,x,y);
-   line=words[n]+" ";y+=lineHeight;
-  }else line=test;
- }
- ctx.fillText(line,x,y);
+/* DRAW ROUNDED */
+function roundRect(ctx,x,y,w,h,r){
+ ctx.beginPath();
+ ctx.moveTo(x+r,y);
+ ctx.arcTo(x+w,y,x+w,y+h,r);
+ ctx.arcTo(x+w,y+h,x,y+h,r);
+ ctx.arcTo(x,y+h,x,y,r);
+ ctx.arcTo(x,y,x+w,y,r);
+ ctx.closePath();
 }
 
 /* AUDIO */
