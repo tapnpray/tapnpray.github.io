@@ -34,16 +34,16 @@ body::before {
   background-size: cover;
   background-position: center;
   background-image: var(--bg-image);
+  filter: brightness(var(--brightness)) blur(2px);
   transform: scale(1.05);
-  filter: blur(2px);
+  transition: filter 1s ease;
   z-index: -1;
 }
 
-/* MOBILE OPTIMIZATION */
 @media (max-width: 600px) {
   body::before {
     transform: scale(1.03);
-    filter: blur(1.5px);
+    filter: brightness(var(--brightness)) blur(1.5px);
   }
 }
 
@@ -249,8 +249,6 @@ const bgSets = {
   night: ["/backgrounds/night1.png","/backgrounds/night2.png"]
 };
 
-let currentBackground = "", currentTimeBlock = "";
-
 function getTimeBlock() {
   const h = new Date().getHours();
   if (h < 11) return "morning";
@@ -260,14 +258,17 @@ function getTimeBlock() {
 }
 
 function updateBackground() {
-  const b = getTimeBlock();
-  if (b !== currentTimeBlock) {
-    currentTimeBlock = b;
-    const set = bgSets[b];
-    currentBackground = set[Math.floor(Math.random() * set.length)];
-    document.body.style.setProperty('--bg-image', `url('${currentBackground}')`);
-  }
+  const block = getTimeBlock();
+  const set = bgSets[block];
+  const img = set[Math.floor(Math.random() * set.length)];
+
+  document.body.style.setProperty('--bg-image', `url('${img}')`);
+
+  // Auto-darkening brightness
+  const brightness = (block === "night" || block === "evening") ? 0.75 : 1.0;
+  document.body.style.setProperty('--brightness', brightness);
 }
+
 updateBackground();
 
 /* VERSES */
@@ -277,7 +278,7 @@ let translation = "nlt", dailyKey = "", currentKey = "";
 async function loadTranslation(t) {
   try {
     const res = await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
-    if (!res.ok) throw new Error("Missing translation");
+    if (!res.ok) return;
     const data = await res.json();
 
     Object.entries(data).forEach(([book, chapters]) => {
@@ -288,9 +289,7 @@ async function loadTranslation(t) {
       });
     });
 
-  } catch (err) {
-    alert("Error loading Bible data.");
-  }
+  } catch {}
 }
 
 function getSeed(s) {
@@ -315,7 +314,7 @@ function generateDaily() {
 
   currentKey = dailyKey;
   update("Daily Bible Verse");
-  streak();
+  updateStreak();
 }
 
 function update(t) {
@@ -327,6 +326,43 @@ function update(t) {
   document.getElementById("date").innerText = new Date().toDateString();
 }
 
+/* REAL DAILY STREAK SYSTEM */
+function updateStreak() {
+  const today = new Date().toDateString();
+  const lastVisit = localStorage.getItem("lastVisit");
+  let streak = parseInt(localStorage.getItem("streak")) || 1;
+
+  if (lastVisit) {
+    const last = new Date(lastVisit);
+    const now = new Date(today);
+
+    const diff = Math.floor((now - last) / (1000 * 60 * 60 * 24));
+
+    if (diff === 1) streak++;
+    else if (diff > 1) streak = 1;
+  }
+
+  localStorage.setItem("streak", streak);
+  localStorage.setItem("lastVisit", today);
+
+  document.getElementById("streak").innerText = "🔥 " + streak + " Day Streak";
+
+  document.getElementById("streakCount").innerText = streak + " Days";
+  document.getElementById("b7").classList.toggle("active", streak >= 7);
+  document.getElementById("b30").classList.toggle("active", streak >= 30);
+  document.getElementById("b100").classList.toggle("active", streak >= 100);
+  document.getElementById("progressBar").style.width = (streak / 100 * 100) + "%";
+}
+
+function openStreak() {
+  document.getElementById("streakModal").style.display = "flex";
+}
+
+function closeStreak(e) {
+  if (e.target === e.currentTarget)
+    document.getElementById("streakModal").style.display = "none";
+}
+
 /* READ */
 function readVerse() {
   const words = document.querySelectorAll(".word");
@@ -335,7 +371,7 @@ function readVerse() {
 
   const u = new SpeechSynthesisUtterance(verses[translation][currentKey] + " " + currentKey);
 
-  u.onboundary = e => {
+  u.onboundary = () => {
     if (words[i]) words[i++].classList.add("active");
   };
 
@@ -372,77 +408,36 @@ function fadeOut(a) {
   }, 100);
 }
 
-/* SHARE */
+/* UNIVERSAL SHARE SYSTEM */
 async function shareVerse() {
   try {
-    const c = document.createElement("canvas");
-    c.width = 1080; c.height = 1080;
-    const x = c.getContext("2d");
+    const text = `${verses[translation][currentKey]}\n\n${currentKey}`;
 
-    const bg = new Image();
-    bg.src = currentBackground;
-    await new Promise(r => bg.onload = r);
-    x.drawImage(bg, 0, 0, 1080, 1080);
-
-    x.fillStyle = "rgba(0,0,0,.5)";
-    x.fillRect(120, 220, 840, 520);
-
-    x.fillStyle = "#fff";
-    x.font = "bold 48px Arial";
-    x.textAlign = "center";
-
-    wrapText(x, verses[translation][currentKey], 540, 320, 720, 60);
-
-    x.fillStyle = "#108cd7";
-    x.fillText(currentKey, 540, 680);
-
-    const logo = new Image();
-    logo.src = "logo.svg";
-    await new Promise(r => logo.onload = r);
-    x.drawImage(logo, 60, 880, 100, 100);
-
-    let blob = await new Promise(r => c.toBlob(r, "image/png"));
-    if (!blob) return;
-
-    const file = new File([blob], "tapnpray.png", { type: "image/png" });
-
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file] }); } catch {}
-      return;
+    // Native share (mobile + some desktops)
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+        return;
+      } catch {}
     }
 
+    // Clipboard fallback
+    if (navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch {}
+    }
+
+    // Download fallback
+    const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "tapnpray.png"; a.click();
+    a.href = url;
+    a.download = "verse.txt";
+    a.click();
 
-  } catch {
-    alert("Unable to share image.");
-  }
-}
-
-/* STREAK */
-function streak() {
-  let s = parseInt(localStorage.getItem("s")) || 1;
-  localStorage.setItem("s", s);
-  document.getElementById("streak").innerText = "🔥 " + s + " Day Streak";
-  updateStreakUI(s);
-}
-
-function updateStreakUI(s) {
-  document.getElementById("streakCount").innerText = s + " Days";
-  document.getElementById("b7").classList.toggle("active", s >= 7);
-  document.getElementById("b30").classList.toggle("active", s >= 30);
-  document.getElementById("b100").classList.toggle("active", s >= 100);
-  document.getElementById("progressBar").style.width = (s / 100 * 100) + "%";
-}
-
-function openStreak() {
-  document.getElementById("streakModal").style.display = "flex";
-}
-
-function closeStreak(e) {
-  if (e.target === e.currentTarget)
-    document.getElementById("streakModal").style.display = "none";
+  } catch {}
 }
 
 /* INIT */
