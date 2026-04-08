@@ -4,6 +4,8 @@
 Tap N Pray is a lightweight, mobile‑optimized Bible verse experience designed for simplicity, beauty, and daily encouragement.  
 The app delivers a daily verse, supports multiple translations, includes ambient audio, and features a real daily streak system to help build consistent spiritual habits.
 
+Live Site: tapnpray.github.io
+
 ## ✨ Features
 
 ### 📖 Daily & Random Bible Verses
@@ -50,3 +52,33 @@ The app delivers a daily verse, supports multiple translations, includes ambient
 - **Responsive design** with mobile‑first layout  
 
 ## 📂 Project Structure
+/BIBLE/
+/NLT/
+/NIV/
+/KJV/
+backgrounds/
+sounds/
+index.html
+logo.svg
+README.md
+
+
+
+## 🚀 Getting Started
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/<your-username>/tapnpray.git
+Open index.html in any modern browser
+
+(Optional) Host on GitHub Pages for instant deployment
+
+📄 License
+This project is open-source under the MIT License.
+
+🙏 Acknowledgements
+Scripture text sourced from public JSON datasets
+
+Background images and audio provided by the project owner
+
+Built with love to encourage daily time in the Word
