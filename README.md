@@ -1,4 +1,4 @@
-<img src="logo.svg" width="120" alt="Tap N Pray Logo" />
+<img src="icon-192.png" width="120" alt="Tap N Pray Logo" />
 Tap N Pray — Daily Bible Verse Web App
 https://tapnpray.github.io/
 A peaceful, mobile‑first Scripture experience with premium sharing, streak tracking, and ambient reflection.
