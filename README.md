@@ -1,227 +1,52 @@
-# 🙏 Tap N Pray
+<img width="192" height="192" alt="icon-192" src="https://github.com/user-attachments/assets/a7f31f77-7f1b-4192-8ad1-8ad41b17b887" />
 
-**Tap N Pray** is a minimalist, distraction-free web app that delivers a daily Bible verse experience with audio playback, ambient sound, and a habit-forming streak system.
 
-Built as a lightweight static site, it focuses on simplicity, consistency, and a calming user experience.
-
----
+Tap N Pray is a lightweight, mobile‑optimized Bible verse experience designed for simplicity, beauty, and daily encouragement.  
+The app delivers a daily verse, supports multiple translations, includes ambient audio, and features a real daily streak system to help build consistent spiritual habits.
 
 ## ✨ Features
 
-### 📖 Daily Verse System
+### 📖 Daily & Random Bible Verses
+- Pulls verses from NLT, NIV, and KJV JSON datasets  
+- Daily verse is generated deterministically using a date‑based seed  
+- Random mode available for exploration  
 
-* Displays a **new Bible verse each day**
-* The verse remains consistent throughout the day
-* Automatically updates the next day
-* Uses a deterministic seed based on the current date
+### 🎧 Ambient Mode
+- Optional calming background audio  
+- Smooth fade‑in / fade‑out transitions  
 
----
+### 🔊 Text‑to‑Speech Reading
+- Tap the verse or speaker icon to hear the verse read aloud  
+- Word‑by‑word highlighting for readability  
 
-### 🔀 Random Verse Mode
+### 🔥 Real Daily Streak System
+- Streak increases only when visiting on a new day  
+- Resets if a day is missed  
+- Includes milestone badges (7, 30, 100 days)  
+- Progress bar toward 100‑day achievement  
 
-* Switch between:
+### 🌄 Auto‑Darkening Backgrounds
+- Background images change based on time of day  
+- Medium darkening applied at night for readability  
+- Smooth transitions  
 
-  * **Daily Verse**
-  * **Random Verse**
-* Instant updates without reloading the page
+### 📤 Universal Sharing
+- Uses native share APIs when available  
+- Clipboard fallback  
+- Download fallback  
+- All errors silently suppressed  
 
----
-
-### 🌍 Multiple Translations
-
-* Supports:
-
-  * NLT (default)
-  * NIV
-  * KJV
-* Loads verse data from local JSON files
-* Remembers user’s selected translation
-
----
-
-### 🔊 Audio Playback (Text-to-Speech)
-
-* Tap the speaker icon or verse to:
-
-  * Hear the verse read aloud
-  * Watch words highlight in sync
-* Uses the browser’s built-in Speech Synthesis API
-
----
-
-### 🌿 Ambient Sound
-
-* Optional background audio for a calming experience
-* Smooth fade-in / fade-out transitions
-
----
-
-### 🎨 Dynamic Backgrounds
-
-* Background changes based on time of day:
-
-  * Morning
-  * Day
-  * Evening
-  * Night
-* Subtle zoom animation for a premium feel
-* Transitions smoothly without flicker
-
----
-
-### 🔥 Tap Streak System
-
-* Tracks daily engagement
-* Displays streak at bottom of screen
-* Includes:
-
-  * Grace day (miss one day without reset)
-  * Milestone badges (7 / 30 / 100 days)
-  * Progress bar toward next goal
-* Tap to open full streak dashboard
-
----
-
-### 📤 Share Feature
-
-* Generates a **shareable image** of the current verse
-* Includes:
-
-  * Current background
-  * Verse text
-  * Reference
-  * Logo (bottom-left)
-  * Website branding
-* Uses Canvas API + native share (if supported)
-
----
-
-## 🧠 How It Works
-
-### Daily Verse Logic
-
-The app generates a consistent daily verse using the current date:
-
-```js
-const today = new Date().toDateString();
-dailyKey = keys[getSeed(today) % keys.length];
-```
-
-This ensures:
-
-* Same verse all day
-* New verse each day
-* No server required
-
----
-
-### Data Source
-
-Bible data is loaded from local JSON files:
-
-```
-/BIBLE/
-  NLT/NLT_bible.json
-  NIV/NIV_bible.json
-  KJV/KJV_bible.json
-```
-
-Each verse is flattened into a key format:
-
-```
-"John 3:16"
-```
-
----
-
-### State Management
-
-Uses `localStorage` to persist:
-
-* Daily verse key
-* Streak count
-* Last visit date
-* Preferred translation
-
----
-
-## 📁 Project Structure
-
-```
-/
-├── index.html
-├── /backgrounds
-├── /sounds
-│   └── calm.mp3
-├── /BIBLE
-│   ├── NLT/
-│   ├── NIV/
-│   └── KJV/
-├── logo.svg
-```
-
----
-
-## ⚙️ Initialization Flow
-
-1. Load Bible translations
-2. Restore saved translation preference
-3. Generate daily verse
-4. Update UI
-5. Start streak tracking
-
----
-
-## 📱 Design Philosophy
-
-* Minimal UI
-* No distractions
-* Mobile-first layout
-* Fast load time
-* No frameworks or dependencies
-
----
-
-## 🚀 Future Improvements
-
-* Background preloading (zero flicker)
-* Swipe navigation between verses
-* Progressive Web App (PWA) support
-* Daily reminders / notifications
-* Global synced daily verse
-
----
+### 📱 Mobile‑First Design
+- Optimized for iOS and Android  
+- Smooth scrolling  
+- Large tap targets  
+- Safe‑area padding for notched devices  
 
 ## 🛠️ Tech Stack
+- **HTML5 / CSS3 / JavaScript**
+- **LocalStorage** for streaks and daily verse caching  
+- **Web Speech API** for text‑to‑speech  
+- **Canvas API** (optional image generation)  
+- **Responsive design** with mobile‑first layout  
 
-* HTML5
-* CSS3 (Glassmorphism + animations)
-* Vanilla JavaScript
-* Web APIs:
-
-  * Speech Synthesis API
-  * Canvas API
-  * LocalStorage API
-  * Web Share API
-
----
-
-## ❤️ Purpose
-
-Tap N Pray is designed to:
-
-* Encourage daily reflection
-* Build a consistent habit
-* Provide a peaceful, focused experience
-
----
-
-## 🌐 Live Site
-
-https://tapnpray.github.io
-
----
-
-## 📜 License
-
-This project is open and free to use for personal or inspirational purposes.
+## 📂 Project Structure
