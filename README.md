@@ -2,31 +2,68 @@
 
 **One Tap Closer to Christ**
 
-Tap N Pray is a minimalist, mobile-first web experience designed to bring **daily scripture, peace, and reflection** into your life.
-
-More than just a verse generator, Tap N Pray delivers a **thoughtfully curated, emotion-aware spiritual experience** that meets users where they are — every single day.
+Tap N Pray is a minimalist, mobile-first web experience that delivers a **true daily Bible verse**, designed to create a consistent, peaceful moment with God each day.
 
 ---
 
-## ✨ Core Features
+## ✨ Core Experience
 
-### 📖 Daily Bible Verse (Emotion-Aware)
+### 📖 True Daily Bible Verse
 
-* A **new verse every day**, consistent across the entire day
-* Powered by an **emotion-aware selection engine**
-* Adapts based on:
+* A **single verse per day**
+* Stays **consistent across refreshes**
+* Changes **only when a new day begins**
+* No randomness during the day — intentional and stable
 
-  * 🕒 Time of day (morning, day, evening, night)
-  * 📱 User interaction (topics you engage with)
-  * 🔁 Anti-repetition logic (avoids recent verses)
-
-> The result: verses that feel *intentional, timely, and personal*
+> This ensures a focused, distraction-free spiritual experience.
 
 ---
 
-### 🎯 Topic-Based Daily Verses
+### 🌍 Multiple Translations
 
-Choose scripture based on what you need:
+* Switch between:
+
+  * NLT (New Living Translation)
+  * NIV (New International Version)
+  * KJV (King James Version)
+* Translation changes **instantly**
+* Keeps the same verse reference across versions
+
+---
+
+### 🔊 Guided Reading Experience
+
+* Tap **"Read Verse"** to hear the verse aloud
+* Smooth voice delivery via Web Speech API
+* **Word-by-word highlighting synced with speech**
+* Verse reference is spoken at the end
+
+---
+
+### 🌿 Ambient Sound
+
+* Toggle calming background audio
+* Clean ON / OFF behavior (no audio bleed)
+* Designed for:
+
+  * Prayer
+  * Reflection
+  * Quiet time
+
+---
+
+### ⭐ Favorites System
+
+* Save meaningful verses
+* View them anytime
+* Delete saved verses
+* Stored locally (no login required)
+
+---
+
+### 🎯 Topic-Based Verses
+
+Explore scripture by need:
 
 * Peace
 * Strength
@@ -34,108 +71,65 @@ Choose scripture based on what you need:
 * Guidance
 * Faith
 
-Each topic provides:
+Each topic:
 
-* A **unique daily verse**
-* Locked per day (no randomness on refresh)
-* Influences future verse selection (adaptive system)
-
----
-
-### 🔊 Immersive Reading Experience
-
-* Tap **"Read Verse"** to hear scripture aloud
-* Smooth voice delivery using Web Speech API
-* **Word-by-word highlighting synced with speech**
-* Verse reference is spoken at the end
-
----
-
-### 🌿 Ambient Sound Experience
-
-* Toggle calming background audio
-* Smooth fade in / fade out
-* Designed for:
-
-  * Prayer
-  * Meditation
-  * Reflection
-
----
-
-### ⭐ Favorites System
-
-* Save meaningful verses with a tap
-* View saved verses in a dedicated modal
-* Remove verses anytime
-* Stored locally (no account required)
+* Generates a **daily verse**
+* Stays consistent for that day
+* Resets the next day
 
 ---
 
 ### 📤 Share & Copy
 
 * Copy verses instantly
-* Native mobile share support
-* Instagram-ready share enhancements (branding + watermark)
+* Native mobile sharing support
+* Ready for social sharing
 
 ---
 
 ### 🔥 Tap Streak
 
 * Tracks daily engagement
-* Encourages consistency in scripture reading
+* Encourages consistency
 * Stored locally
 
 ---
 
-### 🌄 Dynamic Background System
+### 🌄 Dynamic Backgrounds
 
-Backgrounds change automatically based on time of day:
+Backgrounds automatically change based on time of day:
 
-* 🌅 Morning → soft light / renewal
-* 🌤️ Day → bright clarity
-* 🌇 Evening → warm reflection
-* 🌙 Night → calm & peaceful
+* 🌅 Morning → renewal & light
+* 🌤️ Day → clarity & focus
+* 🌇 Evening → reflection
+* 🌙 Night → calm & peace
 
 Includes:
 
 * Smooth transitions
-* Subtle zoom animation
-* Fully immersive visual experience
+* Subtle animation
+* Fully immersive visuals
 
 ---
 
-## 🧠 Emotion-Aware Engine (How It Works)
+## 🧠 How the Daily Verse Works
 
-Tap N Pray uses a **lightweight intelligent system** (no APIs required):
+Tap N Pray uses a **deterministic daily system**:
 
-### Inputs:
-
-* Current date → ensures daily consistency
-* Time of day → sets emotional tone
-* User behavior → tracks preferred topics
-* Verse content → keyword scoring
-
-### Output:
-
-* A verse that feels:
-
-  * Encouraging
-  * Peaceful
-  * Relevant
-  * Spiritually aligned
+* The current date is used as a **seed**
+* A verse is selected and **stored locally**
+* That verse remains the same all day
+* A new verse is generated the next day
 
 ---
 
 ## 📱 Mobile-First Design
 
-Optimized for:
+Built for:
 
-* iPhone (Safari & Chrome)
-* Android devices
-* Full-screen / Add to Home Screen experience
-
-No install required — runs entirely in the browser.
+* iPhone & Android
+* Fullscreen web app experience
+* Smooth performance on mobile browsers
 
 ---
 
@@ -144,9 +138,9 @@ No install required — runs entirely in the browser.
 * HTML5
 * CSS3 (Glassmorphism + animations)
 * Vanilla JavaScript
-* Web Speech API (Text-to-Speech)
+* Web Speech API
 * LocalStorage (state persistence)
-* GitHub Pages (hosting)
+* GitHub Pages
 
 ---
 
@@ -167,7 +161,9 @@ No install required — runs entirely in the browser.
 ├── /sounds
 │   └── calm.mp3
 ├── /BIBLE
-│   └── NLT_bible.json
+│   ├── NLT/
+│   ├── NIV/
+│   ├── KJV/
 └── logo.svg
 ```
 
@@ -181,13 +177,13 @@ No install required — runs entirely in the browser.
 
 ## 📈 Analytics
 
-Google Analytics is integrated to help improve the experience while respecting user privacy.
+Google Analytics is integrated to improve the experience while respecting user privacy.
 
 ---
 
-## 💙 Support the Mission
+## 💙 Support
 
-If Tap N Pray has impacted you and you'd like to support:
+If this app blesses you and you'd like to support:
 
 👉 https://venmo.com/u/tapnpray
 
@@ -195,29 +191,21 @@ If Tap N Pray has impacted you and you'd like to support:
 
 ## 🌱 Vision
 
-Tap N Pray is designed to become a **daily spiritual touchpoint**.
+Tap N Pray is built to be a **daily spiritual touchpoint**.
 
-Future roadmap includes:
+Future ideas:
 
-* 🧎 Prayer Mode (guided scripture experience)
-* 🧠 Smarter emotional intelligence
-* 🎨 Enhanced social sharing visuals
-* 📖 Devotional integrations
-* 🌍 Community features
-
----
-
-## 📜 License
-
-This project is open for personal and inspirational use.
-All scripture belongs to its respective publishers.
+* Prayer Mode (guided experience)
+* Enhanced sharing visuals
+* Devotional content
+* Smarter verse selection
 
 ---
 
 ## 🙏 Final Thought
 
-> “Come to me, all you who are weary and burdened, and I will give you rest.” — Matthew 11:28
+> “Your word is a lamp to my feet and a light to my path.” — Psalm 119:105
 
 ---
 
-**Built with intention. Designed for peace. Shared with love.**
+**Simple. Peaceful. Intentional.**
