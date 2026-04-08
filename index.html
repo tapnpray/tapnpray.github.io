@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Tap N Pray</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
@@ -21,6 +21,8 @@ html,body{
  font-family:Arial,sans-serif;color:#fff;
  background-size:cover;background-position:center;
 }
+
+/* Background */
 body::before{
  content:"";position:fixed;width:100%;height:100%;
  background:linear-gradient(to bottom,rgba(0,0,0,.4),rgba(0,0,0,.9));
@@ -31,20 +33,22 @@ body::after{
  backdrop-filter:blur(12px);z-index:-1;
 }
 
+/* Logo */
 .logo-container{
  position:fixed;bottom:25px;left:20px;opacity:.7;
 }
 .logo-container img{max-width:55px}
 
+/* Layout */
 .center{
  height:100%;
  display:flex;
  align-items:center;
  justify-content:center;
  padding:100px 15px 180px;
- box-sizing:border-box;
 }
 
+/* Verse Box */
 #votd{
  position:relative;
  background:rgba(0,0,0,.55);
@@ -67,20 +71,30 @@ body::after{
 .word{opacity:.35;transition:.3s}
 .word.active{opacity:1}
 
+/* Icons */
 #favoriteStar{position:absolute;top:12px;left:12px;font-size:22px;cursor:pointer;}
-#ambientToggle{
- position:absolute;top:12px;right:12px;cursor:pointer;font-size:18px;
-}
+#ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
 #ambientToggle.active{
  color:#7CFFB2;
  text-shadow:0 0 8px rgba(124,255,178,0.8);
- transform:scale(1.1);
 }
 
-#title{font-size:14px;opacity:.85;margin-bottom:5px;}
-#date{color:#108cd7;margin-bottom:8px}
+/* Easter Egg */
+#gameTrigger{
+ position:absolute;
+ bottom:12px;
+ right:12px;
+ font-size:18px;
+ opacity:.6;
+ cursor:pointer;
+}
+
+/* Text */
+#title{font-size:14px;opacity:.85}
+#date{color:#108cd7}
 #ref{color:#108cd7;margin-top:8px}
 
+/* Topics */
 #topics{
  display:flex;flex-wrap:wrap;gap:8px;
  justify-content:center;margin:10px 0;
@@ -88,10 +102,11 @@ body::after{
 #topics button{
  padding:6px 12px;border-radius:999px;
  border:none;background:rgba(255,255,255,.15);
- color:#fff;font-size:12px;cursor:pointer;
+ color:#fff;font-size:12px;
 }
 #topics button.active{background:#108cd7}
 
+/* Buttons */
 .actions{
  display:grid;
  grid-template-columns:repeat(2,1fr);
@@ -100,31 +115,33 @@ body::after{
 .btn{
  padding:12px;border-radius:999px;
  border:none;background:rgba(255,255,255,.15);
- color:#fff;cursor:pointer;
+ color:#fff;
 }
 .primary{background:#108cd7}
 
+/* Favorites */
 #favoritesModal{
  position:fixed;top:0;left:0;width:100%;height:100%;
  background:rgba(0,0,0,.95);
  display:none;overflow:auto;padding:20px;
 }
-.favorite-item{
- margin-bottom:15px;
- padding:15px;
- background:rgba(255,255,255,.1);
- border-radius:12px;
-}
 
-#bottomTagline{
- position:fixed;bottom:70px;width:100%;
- text-align:center;font-size:12px;
-}
+/* Streak */
 #streak{
  position:fixed;bottom:25px;left:50%;
  transform:translateX(-50%);
  background:rgba(0,0,0,.6);
  padding:8px 16px;border-radius:999px;
+}
+
+/* GAME */
+#pongGame{
+ position:fixed;
+ top:0;left:0;
+ width:100%;height:100%;
+ display:none;
+ background:#000;
+ z-index:9999;
 }
 </style>
 </head>
@@ -138,6 +155,7 @@ body::after{
 
 <div id="favoriteStar" onclick="toggleFavorite()">☆</div>
 <div id="ambientToggle" onclick="toggleAmbient()">🌿</div>
+<div id="gameTrigger" onclick="startGame()">✝️</div>
 
 <div id="title">Daily Bible Verse</div>
 <div id="date"></div>
@@ -145,7 +163,7 @@ body::after{
 <div id="ref"></div>
 
 <div id="topics">
-<button class="active" onclick="goDaily(this)">Daily</button>
+<button onclick="goDaily(this)">Daily</button>
 <button onclick="pickTopic('peace',this)">Peace</button>
 <button onclick="pickTopic('strength',this)">Strength</button>
 <button onclick="pickTopic('hope',this)">Hope</button>
@@ -163,12 +181,13 @@ body::after{
 </div>
 </div>
 
-<div id="bottomTagline">One Tap Closer to Christ</div>
 <div id="streak"></div>
 
 <div id="favoritesModal" onclick="closeFavorites(event)">
 <div id="favoritesContent"></div>
 </div>
+
+<canvas id="pongGame"></canvas>
 
 <audio id="ambientAudio" loop>
 <source src="sounds/calm.mp3">
@@ -176,20 +195,10 @@ body::after{
 
 <script>
 
-/* Analytics */
-function track(name){ if(typeof gtag==="function"){ gtag('event',name); } }
-
-/* Background */
-const backgrounds=["backgrounds/morning1.png","backgrounds/morning2.png","backgrounds/day1.png"];
-let i=0;
-document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
-setInterval(()=>{i=(i+1)%backgrounds.length;
-document.body.style.backgroundImage=`url('${backgrounds[i]}')`;},60000);
-
-/* Data */
+/* DATA */
 let verses={},key="",dailyKey="",topicKeys={};
 
-/* Load */
+/* LOAD */
 async function load(){
  const res=await fetch("BIBLE/NLT/NLT_bible.json");
  const data=await res.json();
@@ -202,126 +211,39 @@ async function load(){
  generateDaily();
 }
 
-/* Daily */
+/* DAILY */
 function generateDaily(){
  const keys=Object.keys(verses);
- const seed=Math.abs([...new Date().toISOString().slice(0,10)].reduce((a,c)=>a+c.charCodeAt(0),0));
+ const seed=new Date().toDateString().split('').reduce((a,c)=>a+c.charCodeAt(0),0);
  dailyKey=keys[seed%keys.length];
-
- ["peace","strength","hope","guidance","faith"].forEach(t=>{
-  let list=keys.filter(ref=>{
-   let txt=verses[ref].toLowerCase();
-   return topicMap[t].some(w=>txt.includes(w));
-  });
-  if(list.length) topicKeys[t]=list[(seed+t.length)%list.length];
- });
-
  key=dailyKey;
  update();
  streak();
 }
 
-/* Update */
+/* UPDATE */
 function update(){
  const words=verses[key].split(" ");
  document.getElementById("verse").innerHTML=
  words.map(w=>`<span class="word">${w}</span>`).join(" ");
  document.getElementById("ref").innerText=key;
  document.getElementById("date").innerText=new Date().toDateString();
- updateStar();
 }
 
-/* Topics */
-const topicMap={
- peace:["peace","rest"],
- strength:["strength","power"],
- hope:["hope","future"],
- guidance:["wisdom","path"],
- faith:["faith","trust"]
-};
-
-function pickTopic(t,btn){
- key=topicKeys[t]||dailyKey;
- track("topic_"+t);
- update();setActive(btn);
-}
-function goDaily(btn){
- key=dailyKey;
- update();setActive(btn);
-}
-function setActive(btn){
- document.querySelectorAll("#topics button").forEach(b=>b.classList.remove("active"));
- btn.classList.add("active");
-}
-
-/* AUDIO (FINAL FIXED) */
-let ambientOn=localStorage.getItem("ambientOn")==="true";
-let fadeInterval=null;
-let tapLock=false;
-
-const audio=document.getElementById("ambientAudio");
-const btn=document.getElementById("ambientToggle");
-
-if(ambientOn){
- btn.classList.add("active");
- audio.volume=0.3;
- audio.play().catch(()=>{});
-}
-
+/* AUDIO */
+let ambientOn=false;
 function toggleAmbient(){
- if(tapLock)return;
- tapLock=true;
- setTimeout(()=>tapLock=false,300);
-
+ const a=document.getElementById("ambientAudio");
  if(ambientOn){
-  fadeAudio(audio,0,1000,()=>{
-   btn.classList.remove("active");
-   ambientOn=false;
-   localStorage.setItem("ambientOn","false");
-   track("ambient_off");
-  });
+  a.pause();a.currentTime=0;
  }else{
-  audio.volume=0;
-  audio.play().catch(()=>{});
-  fadeAudio(audio,0.3,1000,()=>{
-   btn.classList.add("active");
-   ambientOn=true;
-   localStorage.setItem("ambientOn","true");
-   track("ambient_on");
-  });
+  a.volume=.3;a.play();
  }
+ ambientOn=!ambientOn;
 }
 
-function fadeAudio(audio,target,duration,callback){
- if(fadeInterval) clearInterval(fadeInterval);
-
- const start=audio.volume;
- const diff=target-start;
- const steps=duration/50;
- let step=0;
-
- fadeInterval=setInterval(()=>{
-  step++;
-  audio.volume=start+(diff*(step/steps));
-
-  if(step>=steps){
-   audio.volume=target;
-
-   if(target===0){
-    audio.pause();
-    audio.currentTime=0;
-    audio.volume=0;
-   }
-
-   clearInterval(fadeInterval);
-   if(callback) callback();
-  }
- },50);
-}
-
-/* Read */
+/* READ */
 function readVerse(){
- track("read_verse");
  const words=document.querySelectorAll(".word");
  words.forEach(w=>w.classList.remove("active"));
  let i=0;
@@ -331,61 +253,110 @@ function readVerse(){
    words[i].classList.add("active"); i++;
   }
  };
- utter.onend=()=>speechSynthesis.speak(new SpeechSynthesisUtterance(key));
  speechSynthesis.cancel();
  speechSynthesis.speak(utter);
 }
 
-/* Favorites */
+/* FAVORITES */
 function getFavs(){return JSON.parse(localStorage.getItem("favs")||"[]");}
 function toggleFavorite(){
  let f=getFavs();
- if(f.includes(key)){f=f.filter(x=>x!==key);}else{f.push(key);}
+ if(f.includes(key)) f=f.filter(x=>x!==key);
+ else f.push(key);
  localStorage.setItem("favs",JSON.stringify(f));
- updateStar();
-}
-function updateStar(){
- document.getElementById("favoriteStar").innerText=
- getFavs().includes(key)?"⭐":"☆";
 }
 function openFavorites(){
  let c=document.getElementById("favoritesContent");
- c.innerHTML="<h2>Saved Verses</h2>";
+ c.innerHTML="<h2>Saved</h2>";
  getFavs().forEach(ref=>{
-  c.innerHTML+=`<div class="favorite-item"><b>${ref}</b><br>${verses[ref]}<br><button onclick="deleteFavorite('${ref}')">🗑 Remove</button></div>`;
+  c.innerHTML+=`<div>${ref}<br>${verses[ref]}</div>`;
  });
  document.getElementById("favoritesModal").style.display="block";
-}
-function deleteFavorite(ref){
- let f=getFavs().filter(x=>x!==ref);
- localStorage.setItem("favs",JSON.stringify(f));
- openFavorites();updateStar();
 }
 function closeFavorites(e){
  if(e.target.id==="favoritesModal")
   document.getElementById("favoritesModal").style.display="none";
 }
 
-/* Share */
-function shareVerse(){
- track("share");
- navigator.share?.({text:verses[key]+" — "+key});
-}
-
-/* Copy */
-function copyVerse(){
- navigator.clipboard.writeText(verses[key]+" — "+key);
-}
-
-/* Streak */
+/* STREAK */
 function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
  let t=new Date().toDateString();
  if(l!==t){s++;localStorage.setItem("s",s);localStorage.setItem("l",t);}
- document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
+ document.getElementById("streak").innerText="🔥 "+s;
 }
 
+/* ================= PONG GAME ================= */
+
+let canvas=document.getElementById("pongGame");
+let ctx=canvas.getContext("2d");
+let ball,blocks=[],paddleX,gameRunning=false;
+
+function startGame(){
+ gameRunning=true;
+ canvas.style.display="block";
+ canvas.width=window.innerWidth;
+ canvas.height=window.innerHeight;
+
+ ball={x:200,y:200,dx:3,dy:-3};
+
+ paddleX=canvas.width/2;
+
+ blocks=[];
+ let words=verses[key].split(" ");
+ let x=40,y=80;
+
+ words.forEach(w=>{
+  let width=ctx.measureText(w).width+20;
+  blocks.push({text:w,x:x,y:y,w:width,hit:false});
+  x+=width+10;
+ });
+
+ animate();
+}
+
+function animate(){
+ if(!gameRunning)return;
+
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ ctx.fillText("✝️",ball.x,ball.y);
+
+ blocks.forEach(b=>{
+  if(!b.hit) ctx.fillText(b.text,b.x,b.y);
+ });
+
+ ctx.fillRect(paddleX-50,canvas.height-40,100,10);
+
+ ball.x+=ball.dx;
+ ball.y+=ball.dy;
+
+ if(ball.x<0||ball.x>canvas.width) ball.dx*=-1;
+ if(ball.y<0) ball.dy*=-1;
+
+ if(ball.y>canvas.height-50 && ball.x>paddleX-50 && ball.x<paddleX+50)
+  ball.dy*=-1;
+
+ blocks.forEach(b=>{
+  if(!b.hit && ball.x>b.x && ball.x<b.x+b.w && ball.y>b.y-20 && ball.y<b.y){
+   b.hit=true;
+   ball.dy*=-1;
+  }
+ });
+
+ if(ball.y>canvas.height){
+  gameRunning=false;
+  canvas.style.display="none";
+ }
+
+ requestAnimationFrame(animate);
+}
+
+canvas.addEventListener("mousemove",e=>paddleX=e.clientX);
+canvas.addEventListener("touchmove",e=>paddleX=e.touches[0].clientX);
+
+/* START */
 load();
 
 </script>
