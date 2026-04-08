@@ -6,13 +6,21 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ELQ3E5WGCT');
+</script>
+
 <style>
 html,body{
  height:100%;margin:0;overflow:hidden;
  font-family:Arial,sans-serif;color:#fff;
  background-size:cover;background-position:center;
 }
-
 body::before{
  content:"";position:fixed;width:100%;height:100%;
  background:linear-gradient(to bottom,rgba(0,0,0,.4),rgba(0,0,0,.9));
@@ -23,58 +31,50 @@ body::after{
  backdrop-filter:blur(12px);z-index:-1;
 }
 
-/* LOGO */
 .logo-container{
  position:fixed;bottom:25px;left:20px;opacity:.7;
 }
 .logo-container img{max-width:55px}
 
-/* MAIN */
 .center{
  height:100%;
  display:flex;
  align-items:center;
  justify-content:center;
- padding:120px 20px 180px;
+ padding:100px 15px 180px;
  box-sizing:border-box;
 }
 
-/* CARD */
 #votd{
  position:relative;
  background:rgba(0,0,0,.55);
  border-radius:28px;
- padding:30px;
+ padding:24px;
  max-width:520px;width:100%;
  backdrop-filter:blur(30px);
  text-align:center;
+ max-height:65vh;
+ display:flex;
+ flex-direction:column;
 }
 
-/* ICONS */
-#favoriteStar{
- position:absolute;top:12px;left:12px;
- font-size:22px;cursor:pointer;
-}
-#ambientToggle{
- position:absolute;top:12px;right:12px;
- cursor:pointer;font-size:18px;
+#verse{
+ font-size:clamp(22px,5vw,30px);
+ line-height:1.6;
+ overflow-y:auto;
+ padding-right:5px;
 }
 
-/* HEADER */
-#title{
- font-size:14px;
- opacity:.85;
- margin-bottom:5px;
-}
-
-/* TEXT */
-#date{color:#108cd7;margin-bottom:10px}
-#verse{font-size:28px;line-height:1.6;}
 .word{opacity:.35;transition:.3s}
 .word.active{opacity:1}
-#ref{color:#108cd7;margin-top:10px}
 
-/* TOPICS */
+#favoriteStar{position:absolute;top:12px;left:12px;font-size:22px;cursor:pointer;}
+#ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
+
+#title{font-size:14px;opacity:.85;margin-bottom:5px;}
+#date{color:#108cd7;margin-bottom:8px}
+#ref{color:#108cd7;margin-top:8px}
+
 #topics{
  display:flex;flex-wrap:wrap;gap:8px;
  justify-content:center;margin:10px 0;
@@ -86,11 +86,10 @@ body::after{
 }
 #topics button.active{background:#108cd7}
 
-/* BUTTONS */
 .actions{
  display:grid;
  grid-template-columns:repeat(2,1fr);
- gap:10px;margin-top:15px;
+ gap:10px;margin-top:10px;
 }
 .btn{
  padding:12px;border-radius:999px;
@@ -99,16 +98,10 @@ body::after{
 }
 .primary{background:#108cd7}
 
-/* FAVORITES MODAL */
 #favoritesModal{
  position:fixed;top:0;left:0;width:100%;height:100%;
  background:rgba(0,0,0,.95);
- display:none;
- overflow:auto;
- padding:20px;
-}
-#favoritesContent{
- max-width:600px;margin:auto;
+ display:none;overflow:auto;padding:20px;
 }
 .favorite-item{
  margin-bottom:15px;
@@ -117,7 +110,6 @@ body::after{
  border-radius:12px;
 }
 
-/* FOOTER */
 #bottomTagline{
  position:fixed;bottom:70px;width:100%;
  text-align:center;font-size:12px;
@@ -148,11 +140,11 @@ body::after{
 
 <div id="topics">
 <button class="active" onclick="goDaily(this)">Daily</button>
-<button onclick="pickTopic('peace', this)">Peace</button>
-<button onclick="pickTopic('strength', this)">Strength</button>
-<button onclick="pickTopic('hope', this)">Hope</button>
-<button onclick="pickTopic('guidance', this)">Guidance</button>
-<button onclick="pickTopic('faith', this)">Faith</button>
+<button onclick="pickTopic('peace',this)">Peace</button>
+<button onclick="pickTopic('strength',this)">Strength</button>
+<button onclick="pickTopic('hope',this)">Hope</button>
+<button onclick="pickTopic('guidance',this)">Guidance</button>
+<button onclick="pickTopic('faith',this)">Faith</button>
 </div>
 
 <div class="actions">
@@ -169,7 +161,7 @@ body::after{
 <div id="streak"></div>
 
 <div id="favoritesModal" onclick="closeFavorites(event)">
-  <div id="favoritesContent"></div>
+<div id="favoritesContent"></div>
 </div>
 
 <audio id="ambientAudio" loop>
@@ -178,17 +170,22 @@ body::after{
 
 <script>
 
+/* ================= ANALYTICS ================= */
+function track(name,data={}){
+ if(typeof gtag==="function"){
+  gtag('event',name,data);
+ }
+}
+
 /* BACKGROUND */
 const backgrounds=["backgrounds/morning1.png","backgrounds/morning2.png","backgrounds/day1.png"];
 let i=0;
 document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
-setInterval(()=>{
- i=(i+1)%backgrounds.length;
- document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
-},60000);
+setInterval(()=>{i=(i+1)%backgrounds.length;
+document.body.style.backgroundImage=`url('${backgrounds[i]}')`;},60000);
 
 /* DATA */
-let verses={},key="",dailyKey="";
+let verses={},key="",dailyKey="",topicKeys={};
 
 /* LOAD */
 async function load(){
@@ -202,53 +199,56 @@ async function load(){
     flat[`${b} ${c}:${v}`]=data[b][c][v];
 
  verses=flat;
- setDailyVerse();
+ generateDailyContent();
 }
 
-/* DAILY RANDOM */
-function setDailyVerse(){
+/* DAILY LOCK */
+function generateDailyContent(){
  const keys=Object.keys(verses);
- const today=new Date().toISOString().slice(0,10);
+ const seed=getSeed();
 
- let hash=0;
- for(let i=0;i<today.length;i++){
-  hash=(hash<<5)-hash+today.charCodeAt(i);
-  hash|=0;
- }
+ dailyKey=keys[seed%keys.length];
 
- const index=Math.abs(hash)%keys.length;
+ ["peace","strength","hope","guidance","faith"].forEach(t=>{
+  let list=keys.filter(ref=>{
+   let text=verses[ref].toLowerCase();
+   return topicMap[t].some(w=>text.includes(w));
+  });
+  if(list.length) topicKeys[t]=list[(seed+t.length)%list.length];
+ });
 
- dailyKey=keys[index];
  key=dailyKey;
-
+ track("daily_view");
  updateTitle("Daily");
  update();
  streak();
 }
 
+function getSeed(){
+ const today=new Date().toISOString().slice(0,10);
+ let hash=0;
+ for(let i=0;i<today.length;i++){
+  hash=(hash<<5)-hash+today.charCodeAt(i);
+  hash|=0;
+ }
+ return Math.abs(hash);
+}
+
 /* UPDATE */
 function update(){
- const text=verses[key];
- const words=text.split(" ");
-
+ const words=verses[key].split(" ");
  document.getElementById("verse").innerHTML=
  words.map(w=>`<span class="word">${w}</span>`).join(" ");
 
  document.getElementById("ref").innerText=key;
-
- const now=new Date();
- document.getElementById("date").innerText=
- now.toLocaleDateString(undefined,{
-  weekday:'short',month:'short',day:'numeric',year:'numeric'
- });
-
+ document.getElementById("date").innerText=new Date().toDateString();
  updateStar();
 }
 
 /* TITLE */
 function updateTitle(label){
- document.getElementById("title").innerText =
- label==="Daily" ? "Daily Bible Verse" : `Daily Bible Verse - ${label}`;
+ document.getElementById("title").innerText=
+ label==="Daily"?"Daily Bible Verse":`Daily Bible Verse - ${label}`;
 }
 
 /* TOPICS */
@@ -261,14 +261,8 @@ const topicMap={
 };
 
 function pickTopic(t,btn){
- let list=[];
- for(let ref in verses){
-  let text=verses[ref].toLowerCase();
-  if(topicMap[t].some(w=>text.includes(w))) list.push(ref);
- }
-
- key=list.length ? list[Math.floor(Math.random()*list.length)] : dailyKey;
-
+ key=topicKeys[t]||dailyKey;
+ track("topic_selected",{topic:t});
  updateTitle(btn.innerText);
  update();
  setActive(btn);
@@ -276,6 +270,7 @@ function pickTopic(t,btn){
 
 function goDaily(btn){
  key=dailyKey;
+ track("daily_selected");
  updateTitle("Daily");
  update();
  setActive(btn);
@@ -286,71 +281,18 @@ function setActive(btn){
  btn.classList.add("active");
 }
 
-/* FAVORITES */
-function getFavs(){
- return JSON.parse(localStorage.getItem("favs")||"[]");
-}
-
-function toggleFavorite(){
- let favs=getFavs();
- if(favs.includes(key)){
-  favs=favs.filter(f=>f!==key);
- }else{
-  favs.push(key);
- }
- localStorage.setItem("favs",JSON.stringify(favs));
- updateStar();
-}
-
-function updateStar(){
- document.getElementById("favoriteStar").innerText=
- getFavs().includes(key)?"⭐":"☆";
-}
-
-function openFavorites(){
- let modal=document.getElementById("favoritesModal");
- let content=document.getElementById("favoritesContent");
-
- let favs=getFavs();
- content.innerHTML="<h2>Saved Verses</h2>";
-
- favs.forEach(ref=>{
-  content.innerHTML+=`
-   <div class="favorite-item">
-     <b>${ref}</b><br>${verses[ref]}<br><br>
-     <button onclick="deleteFavorite('${ref}')">🗑 Remove</button>
-   </div>`;
- });
-
- modal.style.display="block";
-}
-
-function deleteFavorite(ref){
- let favs=getFavs().filter(f=>f!==ref);
- localStorage.setItem("favs",JSON.stringify(favs));
- openFavorites();
- updateStar();
-}
-
-function closeFavorites(e){
- if(e.target.id==="favoritesModal"){
-  document.getElementById("favoritesModal").style.display="none";
- }
-}
-
 /* AUDIO */
 let ambientOn=false;
 function toggleAmbient(){
  const a=document.getElementById("ambientAudio");
-
  if(!ambientOn){
-  a.volume=0;
-  a.play();
-  fadeAudio(a,0.3,1500);
+  a.volume=0;a.play();
+  fadeAudio(a,0.3,1000);
+  track("ambient_on");
  }else{
-  fadeAudio(a,0,1500);
+  fadeAudio(a,0,1000);
+  track("ambient_off");
  }
-
  ambientOn=!ambientOn;
 }
 
@@ -368,124 +310,71 @@ function fadeAudio(audio,target,duration){
 
 /* READ */
 function readVerse(){
-
+ track("read_verse");
  const words=document.querySelectorAll(".word");
  words.forEach(w=>w.classList.remove("active"));
 
- const verseText = verses[key];
- const refText = key;
-
- const utter=new SpeechSynthesisUtterance(verseText);
- utter.rate=0.85;
-
  let i=0;
+ const utter=new SpeechSynthesisUtterance(verses[key]);
 
- utter.onboundary=(e)=>{
-  if(e.name==="word" && words[i]){
-   words[i].classList.add("active");
-   i++;
+ utter.onboundary=e=>{
+  if(e.name==="word"&&words[i]){
+   words[i].classList.add("active"); i++;
   }
  };
 
  utter.onend=()=>{
-  const refUtter=new SpeechSynthesisUtterance(refText);
-  refUtter.rate=0.9;
-  speechSynthesis.speak(refUtter);
+  speechSynthesis.speak(new SpeechSynthesisUtterance(key));
  };
 
  speechSynthesis.cancel();
  speechSynthesis.speak(utter);
 }
 
-/* SHARE IMAGE */
-function shareVerse(){
-
- const canvas=document.createElement("canvas");
- canvas.width=1080;
- canvas.height=1080;
- const ctx=canvas.getContext("2d");
-
- const bg=new Image();
- bg.src=document.body.style.backgroundImage.slice(5,-2);
-
- bg.onload=()=>{
-
-  ctx.drawImage(bg,0,0,1080,1080);
-
-  ctx.fillStyle="rgba(0,0,0,0.45)";
-  ctx.fillRect(0,0,1080,1080);
-
-  ctx.fillStyle="rgba(0,0,0,0.55)";
-  roundRect(ctx,140,260,800,420,30,true,false);
-
-  ctx.fillStyle="#fff";
-  ctx.font="42px Arial";
-  ctx.textAlign="center";
-  wrapText(ctx,verses[key],540,340,700,52);
-
-  ctx.fillStyle="#108cd7";
-  ctx.font="28px Arial";
-  ctx.fillText(key,540,640);
-
-  const logo=new Image();
-  logo.src="logo.svg";
-
-  logo.onload=()=>{
-   ctx.drawImage(logo,40,900,120,120);
-
-   ctx.fillStyle="#fff";
-   ctx.font="22px Arial";
-   ctx.textAlign="left";
-   ctx.fillText("tapnpray.github.io",40,1040);
-
-   canvas.toBlob(blob=>{
-    const file=new File([blob],"tapnpray.png",{type:"image/png"});
-
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-     navigator.share({files:[file]});
-    }else{
-     const link=document.createElement("a");
-     link.download="tapnpray.png";
-     link.href=URL.createObjectURL(blob);
-     link.click();
-    }
-   });
-  };
- };
-}
-
-/* HELPERS */
-function wrapText(ctx,text,x,y,maxWidth,lineHeight){
- let words=text.split(' ');
- let line='';
- for(let n=0;n<words.length;n++){
-  let testLine=line+words[n]+' ';
-  let testWidth=ctx.measureText(testLine).width;
-  if(testWidth>maxWidth && n>0){
-   ctx.fillText(line,x,y);
-   line=words[n]+' ';
-   y+=lineHeight;
-  }else line=testLine;
+/* FAVORITES */
+function getFavs(){return JSON.parse(localStorage.getItem("favs")||"[]");}
+function toggleFavorite(){
+ let f=getFavs();
+ if(f.includes(key)){
+  f=f.filter(x=>x!==key);
+  track("favorite_remove");
+ }else{
+  f.push(key);
+  track("favorite_add");
  }
- ctx.fillText(line,x,y);
+ localStorage.setItem("favs",JSON.stringify(f));
+ updateStar();
+}
+function updateStar(){
+ document.getElementById("favoriteStar").innerText=
+ getFavs().includes(key)?"⭐":"☆";
+}
+function openFavorites(){
+ let c=document.getElementById("favoritesContent");
+ c.innerHTML="<h2>Saved Verses</h2>";
+ getFavs().forEach(ref=>{
+  c.innerHTML+=`<div class="favorite-item"><b>${ref}</b><br>${verses[ref]}<br><button onclick="deleteFavorite('${ref}')">🗑 Remove</button></div>`;
+ });
+ document.getElementById("favoritesModal").style.display="block";
+}
+function deleteFavorite(ref){
+ let f=getFavs().filter(x=>x!==ref);
+ localStorage.setItem("favs",JSON.stringify(f));
+ track("favorite_remove");
+ openFavorites();updateStar();
+}
+function closeFavorites(e){
+ if(e.target.id==="favoritesModal")
+  document.getElementById("favoritesModal").style.display="none";
 }
 
-function roundRect(ctx,x,y,w,h,r,fill){
- ctx.beginPath();
- ctx.moveTo(x+r,y);
- ctx.lineTo(x+w-r,y);
- ctx.quadraticCurveTo(x+w,y,x+w,y+r);
- ctx.lineTo(x+w,y+h-r);
- ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
- ctx.lineTo(x+r,y+h);
- ctx.quadraticCurveTo(x,y+h,x,y+h-r);
- ctx.lineTo(x,y+r);
- ctx.quadraticCurveTo(x,y,x+r,y);
- ctx.closePath();
- if(fill)ctx.fill();
+/* SHARE */
+function shareVerse(){
+ track("share_verse");
+ navigator.share?.({text:verses[key]+" — "+key});
 }
 
-/* OTHER */
+/* COPY */
 function copyVerse(){
  navigator.clipboard.writeText(verses[key]+" — "+key);
 }
@@ -495,13 +384,7 @@ function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
  let t=new Date().toDateString();
-
- if(l!==t){
-  s++;
-  localStorage.setItem("s",s);
-  localStorage.setItem("l",t);
- }
-
+ if(l!==t){s++;localStorage.setItem("s",s);localStorage.setItem("l",t);}
  document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
 }
 
