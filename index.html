@@ -186,7 +186,7 @@ body::before {
 
 <body>
 
-<!-- TOP LOGO (never overlaps verse box) -->
+<!-- TOP LOGO -->
 <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
 
 <div class="center">
@@ -281,8 +281,8 @@ async function loadTranslation(t) {
     const data = await res.json();
 
     Object.entries(data).forEach(([book, chapters]) => {
-      Object.entries(chapters).forEach(([chapter, versesObj]) => {
-        Object.entries(versesObj).forEach(([v, text]) => {
+      Object.entries(chapters]).forEach(([chapter, versesObj]) => {
+        Object.entries(versesObj]).forEach(([v, text]) => {
           verses[t][`${book} ${chapter}:${v}`] = text;
         });
       });
@@ -427,16 +427,117 @@ function fadeOut(a) {
   }, 100);
 }
 
-/* PREMIUM SHARE ENGINE (same as before, unchanged) */
-/* ——— (Your existing premium share code goes here unchanged) ——— */
+/* PREMIUM SHARE ENGINE — FULL VERSION INCLUDED */
+function wrapTextAutoFit(ctx, text, x, y, maxWidth, lineHeight, maxHeight, baseFontSize) {
+  let fontSize = baseFontSize;
+  const minFontSize = 26;
+  const lines = [];
 
-(async () => {
-  await loadTranslation("nlt");
-  await loadTranslation("niv");
-  await loadTranslation("kjv");
-  generateDaily();
-})();
-</script>
+  function computeLines(size) {
+    ctx.font = `bold ${size}px Georgia`;
+    const words = text.split(" ");
+    const tempLines = [];
+    let line = "";
 
-</body>
-</html>
+    for (let n = 0; n < words.length; n++) {
+      const testLine = line ? line + " " + words[n] : words[n];
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && n > 0) {
+        tempLines.push(line);
+        line = words[n];
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) tempLines.push(line);
+    return tempLines;
+  }
+
+  while (fontSize >= minFontSize) {
+    const tempLines = computeLines(fontSize);
+    const totalHeight = tempLines.length * lineHeight;
+    if (totalHeight <= maxHeight) {
+      lines.length = 0;
+      lines.push(...tempLines);
+      break;
+    }
+    fontSize -= 2;
+  }
+
+  ctx.font = `bold ${fontSize}px Georgia`;
+  for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], x, y + (i * lineHeight));
+  }
+}
+
+async function shareVerse() {
+  try {
+    const verseText = verses[translation][currentKey];
+    if (!verseText || !currentBackground) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1080;
+    const ctx = canvas.getContext("2d");
+
+    // Background
+    const bg = new Image();
+    bg.crossOrigin = "anonymous";
+    bg.src = currentBackground;
+    await new Promise(res => { bg.onload = res; bg.onerror = res; });
+
+    ctx.filter = `brightness(${currentBrightness})`;
+    ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+    ctx.filter = "none";
+
+    // Verse panel
+    const panelX = 120;
+    const panelY = 180;
+    const panelW = 840;
+    const panelH = 540;
+
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    ctx.fillRect(panelX, panelY, panelW, panelH);
+
+    // Verse text (soft white, auto-fit)
+    ctx.fillStyle = "#F2F2F2";
+    ctx.textAlign = "center";
+    const textX = canvas.width / 2;
+    const textY = panelY + 80;
+    const maxWidth = panelW - 80;
+    const lineHeight = 60;
+    const maxHeight = panelH - 120;
+    const baseFontSize = 48;
+
+    wrapTextAutoFit(ctx, verseText, textX, textY, maxWidth, lineHeight, maxHeight, baseFontSize);
+
+    // Reference
+    ctx.font = "bold 40px Georgia";
+    ctx.fillStyle = "#108cd7";
+    ctx.fillText(currentKey, canvas.width / 2, panelY + panelH - 40);
+
+    // Logo
+    const logo = new Image();
+    logo.crossOrigin = "anonymous";
+    logo.src = "logo.svg";
+    await new Promise(res => { logo.onload = res; logo.onerror = res; });
+
+    const logoSize = 120;
+    const logoX = 60;
+    const logoY = canvas.height - logoSize - 80;
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+
+    // Site URL under logo
+    ctx.font = "bold 32px Georgia";
+    ctx.fillStyle = "#F2F2F2";
+    ctx.textAlign = "left";
+    ctx.fillText("tapnpray.github.io", logoX, logoY + logoSize + 40);
+
+    // Export
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+    if (!blob) return;
+
+    const file = new File([blob], "tapnpray.png", { type: "image/png" });
+
+    // Native share with file
+    if (navigator.share && navigator.canShare && navigator.can
