@@ -47,25 +47,26 @@ body::before {
   }
 }
 
-/* CENTER */
+/* LAYOUT */
 .center {
-  min-height: 100%;
+  min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
-/* BOX */
+/* BIG VERSE BOX */
 #votd {
   position: relative;
-  background: rgba(0,0,0,.6);
+  background: rgba(0,0,0,.65);
   backdrop-filter: blur(20px);
   border-radius: 28px;
-  padding: 24px;
-  max-width: 650px;
+  padding: 20px 20px 16px;
+  max-width: 800px;
   width: 100%;
-  max-height: calc(100vh - 120px);
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -75,14 +76,14 @@ body::before {
 /* ICONS */
 #readIcon, #ambientToggle {
   position: absolute;
-  top: 12px;
+  top: 10px;
   font-size: 26px;
   padding: 8px;
   cursor: pointer;
 }
 
-#readIcon { left: 12px; }
-#ambientToggle { right: 12px; }
+#readIcon { left: 10px; }
+#ambientToggle { right: 10px; }
 
 #readIcon.speaking { animation: pulse 1s infinite; }
 @keyframes pulse { 50% { transform: scale(1.2); } }
@@ -90,24 +91,33 @@ body::before {
 #ambientToggle.active { color: #7CFFB2; }
 
 /* TEXT */
+#title {
+  font-size: 15px;
+  margin-top: 6px;
+}
+
+#date, #ref {
+  color: #108cd7;
+  font-size: 14px;
+}
+
 #verse {
-  font-size: clamp(22px, 5.5vw, 34px);
+  margin-top: 10px;
+  font-size: clamp(22px, 5vw, 32px);
   line-height: 1.7;
   overflow-y: auto;
   cursor: pointer;
   -webkit-overflow-scrolling: touch;
   word-wrap: break-word;
+  flex: 1;
 }
 
 .word { opacity: .35; }
 .word.active { opacity: 1; }
 
-#date, #ref { color: #108cd7; font-size: 14px; }
-#title { font-size: 15px; }
-
 /* CONTROLS */
 .translation-select {
-  margin-top: 6px;
+  margin-top: 8px;
   border-radius: 999px;
   background: rgba(255,255,255,.15);
   color: #fff;
@@ -118,21 +128,24 @@ body::before {
 .mode-buttons {
   display: flex;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .mode-buttons button {
   flex: 1;
-  padding: 12px;
+  padding: 10px;
   border-radius: 999px;
   border: none;
   background: rgba(255,255,255,.15);
   color: #fff;
+  font-size: 14px;
 }
 
 .mode-buttons button.active { background: #108cd7; }
 
-.actions { margin-top: 12px; }
+.actions {
+  margin-top: 10px;
+}
 
 .btn {
   width: 100%;
@@ -141,18 +154,20 @@ body::before {
   border-radius: 999px;
   background: #108cd7;
   color: #fff;
+  font-size: 15px;
 }
 
 /* STREAK */
 #streak {
   position: fixed;
-  bottom: 25px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0,0,0,.6);
   padding: 6px 14px;
   border-radius: 999px;
   cursor: pointer;
+  font-size: 14px;
 }
 
 /* MODAL */
@@ -167,6 +182,7 @@ body::before {
   flex-direction: column;
   overflow-y: auto;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .badges {
@@ -180,6 +196,7 @@ body::before {
 
 .progress {
   width: 80%;
+  max-width: 400px;
   height: 10px;
   background: rgba(255,255,255,.2);
   border-radius: 999px;
@@ -188,6 +205,7 @@ body::before {
 .progress div {
   height: 100%;
   background: #108cd7;
+  border-radius: 999px;
 }
 </style>
 </head>
@@ -195,32 +213,32 @@ body::before {
 <body>
 
 <div class="center">
-<div id="votd">
+  <div id="votd">
 
-<div id="readIcon" onclick="readVerse()">🔊</div>
-<div id="ambientToggle" onclick="toggleAmbient()">🌿</div>
+    <div id="readIcon" onclick="readVerse()">🔊</div>
+    <div id="ambientToggle" onclick="toggleAmbient()">🌿</div>
 
-<div id="title">Daily Bible Verse</div>
-<div id="date"></div>
-<div id="verse" onclick="readVerse()"></div>
-<div id="ref"></div>
+    <div id="title">Daily Bible Verse</div>
+    <div id="date"></div>
+    <div id="verse" onclick="readVerse()"></div>
+    <div id="ref"></div>
 
-<select id="translationSelect" class="translation-select">
-  <option value="nlt">NLT</option>
-  <option value="niv">NIV</option>
-  <option value="kjv">KJV</option>
-</select>
+    <select id="translationSelect" class="translation-select" onchange="changeTranslation(this.value)">
+      <option value="nlt">NLT</option>
+      <option value="niv">NIV</option>
+      <option value="kjv">KJV</option>
+    </select>
 
-<div class="mode-buttons">
-  <button id="dailyBtn" class="active" onclick="showDaily()">Daily</button>
-  <button id="randomBtn" onclick="showRandom()">Random</button>
-</div>
+    <div class="mode-buttons">
+      <button id="dailyBtn" class="active" onclick="showDaily()">Daily</button>
+      <button id="randomBtn" onclick="showRandom()">Random</button>
+    </div>
 
-<div class="actions">
-  <button class="btn" onclick="shareVerse()">Share</button>
-</div>
+    <div class="actions">
+      <button class="btn" onclick="shareVerse()">Share</button>
+    </div>
 
-</div>
+  </div>
 </div>
 
 <div id="streak" onclick="openStreak()"></div>
@@ -249,6 +267,9 @@ const bgSets = {
   night: ["/backgrounds/night1.png","/backgrounds/night2.png"]
 };
 
+let currentBackground = "";
+let currentBrightness = 1.0;
+
 function getTimeBlock() {
   const h = new Date().getHours();
   if (h < 11) return "morning";
@@ -261,11 +282,12 @@ function updateBackground() {
   const block = getTimeBlock();
   const set = bgSets[block];
   const img = set[Math.floor(Math.random() * set.length)];
+  currentBackground = img;
+
+  const brightness = (block === "night" || block === "evening") ? 0.75 : 1.0;
+  currentBrightness = brightness;
 
   document.body.style.setProperty('--bg-image', `url('${img}')`);
-
-  // Auto-darkening brightness
-  const brightness = (block === "night" || block === "evening") ? 0.75 : 1.0;
   document.body.style.setProperty('--brightness', brightness);
 }
 
@@ -288,7 +310,6 @@ async function loadTranslation(t) {
         });
       });
     });
-
   } catch {}
 }
 
@@ -305,9 +326,11 @@ function generateDaily() {
   const today = new Date().toDateString();
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
-  if (stored.date === today) dailyKey = stored.key;
-  else {
+  if (stored.date === today) {
+    dailyKey = stored.key;
+  } else {
     const keys = Object.keys(verses.nlt);
+    if (!keys.length) return;
     dailyKey = keys[getSeed(today) % keys.length];
     localStorage.setItem("dailyVerse", JSON.stringify({ date: today, key: dailyKey }));
   }
@@ -317,9 +340,36 @@ function generateDaily() {
   updateStreak();
 }
 
-function update(t) {
+function showDaily() {
+  currentKey = dailyKey;
+  update("Daily Bible Verse");
+  document.getElementById("dailyBtn").classList.add("active");
+  document.getElementById("randomBtn").classList.remove("active");
+}
+
+function showRandom() {
+  const keys = Object.keys(verses[translation]);
+  if (!keys.length) return;
+  currentKey = keys[Math.floor(Math.random() * keys.length)];
+  update("Random Bible Verse");
+  document.getElementById("dailyBtn").classList.remove("active");
+  document.getElementById("randomBtn").classList.add("active");
+}
+
+function changeTranslation(t) {
+  translation = t;
+  if (!verses[translation][currentKey]) {
+    const keys = Object.keys(verses[translation]);
+    if (!keys.length) return;
+    currentKey = keys[0];
+  }
+  update(document.getElementById("dailyBtn").classList.contains("active") ? "Daily Bible Verse" : "Random Bible Verse");
+}
+
+function update(titleText) {
   const text = verses[translation][currentKey];
-  document.getElementById("title").innerText = t;
+  if (!text) return;
+  document.getElementById("title").innerText = titleText;
   document.getElementById("verse").innerHTML =
     text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
   document.getElementById("ref").innerText = currentKey;
@@ -335,7 +385,6 @@ function updateStreak() {
   if (lastVisit) {
     const last = new Date(lastVisit);
     const now = new Date(today);
-
     const diff = Math.floor((now - last) / (1000 * 60 * 60 * 24));
 
     if (diff === 1) streak++;
@@ -346,12 +395,13 @@ function updateStreak() {
   localStorage.setItem("lastVisit", today);
 
   document.getElementById("streak").innerText = "🔥 " + streak + " Day Streak";
-
   document.getElementById("streakCount").innerText = streak + " Days";
+
   document.getElementById("b7").classList.toggle("active", streak >= 7);
   document.getElementById("b30").classList.toggle("active", streak >= 30);
   document.getElementById("b100").classList.toggle("active", streak >= 100);
-  document.getElementById("progressBar").style.width = (streak / 100 * 100) + "%";
+
+  document.getElementById("progressBar").style.width = Math.min(100, (streak / 100 * 100)) + "%";
 }
 
 function openStreak() {
@@ -369,14 +419,18 @@ function readVerse() {
   words.forEach(w => w.classList.remove("active"));
   let i = 0;
 
-  const u = new SpeechSynthesisUtterance(verses[translation][currentKey] + " " + currentKey);
+  const text = verses[translation][currentKey];
+  if (!text) return;
 
+  const u = new SpeechSynthesisUtterance(text + " " + currentKey);
   u.onboundary = () => {
     if (words[i]) words[i++].classList.add("active");
   };
 
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
+  try {
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch {}
 }
 
 /* AMBIENT */
@@ -385,7 +439,11 @@ let ambientOn = false;
 function toggleAmbient() {
   const a = document.getElementById("ambientAudio");
   if (ambientOn) fadeOut(a);
-  else { a.volume = 0; a.play().catch(()=>{}); fadeIn(a); }
+  else {
+    a.volume = 0;
+    a.play().catch(()=>{});
+    fadeIn(a);
+  }
   ambientOn = !ambientOn;
   document.getElementById("ambientToggle").classList.toggle("active");
 }
@@ -408,34 +466,133 @@ function fadeOut(a) {
   }, 100);
 }
 
-/* UNIVERSAL SHARE SYSTEM */
+/* PREMIUM SHARE: SQUARE IMAGE 1080x1080 */
+function wrapTextAutoFit(ctx, text, x, y, maxWidth, lineHeight, maxHeight, baseFontSize) {
+  let fontSize = baseFontSize;
+  const minFontSize = 26;
+  const lines = [];
+
+  function computeLines(size) {
+    ctx.font = `bold ${size}px Georgia`;
+    const words = text.split(" ");
+    const tempLines = [];
+    let line = "";
+
+    for (let n = 0; n < words.length; n++) {
+      const testLine = line ? line + " " + words[n] : words[n];
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && n > 0) {
+        tempLines.push(line);
+        line = words[n];
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) tempLines.push(line);
+    return tempLines;
+  }
+
+  while (fontSize >= minFontSize) {
+    const tempLines = computeLines(fontSize);
+    const totalHeight = tempLines.length * lineHeight;
+    if (totalHeight <= maxHeight) {
+      lines.length = 0;
+      lines.push(...tempLines);
+      break;
+    }
+    fontSize -= 2;
+  }
+
+  ctx.font = `bold ${fontSize}px Georgia`;
+  for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], x, y + (i * lineHeight));
+  }
+}
+
 async function shareVerse() {
   try {
-    const text = `${verses[translation][currentKey]}\n\n${currentKey}`;
+    const verseText = verses[translation][currentKey];
+    if (!verseText || !currentBackground) return;
 
-    // Native share (mobile + some desktops)
-    if (navigator.share) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1080;
+    const ctx = canvas.getContext("2d");
+
+    // Background
+    const bg = new Image();
+    bg.crossOrigin = "anonymous";
+    bg.src = currentBackground;
+    await new Promise(res => { bg.onload = res; bg.onerror = res; });
+
+    ctx.filter = `brightness(${currentBrightness})`;
+    ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+    ctx.filter = "none";
+
+    // Verse panel
+    const panelX = 120;
+    const panelY = 180;
+    const panelW = 840;
+    const panelH = 540;
+
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    ctx.fillRect(panelX, panelY, panelW, panelH);
+
+    // Verse text (soft white, auto-fit)
+    ctx.fillStyle = "#F2F2F2";
+    ctx.textAlign = "center";
+    const textX = canvas.width / 2;
+    const textY = panelY + 80;
+    const maxWidth = panelW - 80;
+    const lineHeight = 60;
+    const maxHeight = panelH - 120;
+    const baseFontSize = 48;
+
+    wrapTextAutoFit(ctx, verseText, textX, textY, maxWidth, lineHeight, maxHeight, baseFontSize);
+
+    // Reference
+    ctx.font = "bold 40px Georgia";
+    ctx.fillStyle = "#108cd7";
+    ctx.fillText(currentKey, canvas.width / 2, panelY + panelH - 40);
+
+    // Logo
+    const logo = new Image();
+    logo.crossOrigin = "anonymous";
+    logo.src = "logo.svg";
+    await new Promise(res => { logo.onload = res; logo.onerror = res; });
+
+    const logoSize = 120;
+    const logoX = 60;
+    const logoY = canvas.height - logoSize - 80;
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+
+    // Site URL under logo
+    ctx.font = "bold 32px Georgia";
+    ctx.fillStyle = "#F2F2F2";
+    ctx.textAlign = "left";
+    ctx.fillText("tapnpray.github.io", logoX, logoY + logoSize + 40);
+
+    // Export
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+    if (!blob) return;
+
+    const file = new File([blob], "tapnpray.png", { type: "image/png" });
+
+    // Native share with file
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({ text });
+        await navigator.share({ files: [file], title: "Tap N Pray", text: verseText + "\n\n" + currentKey });
         return;
       } catch {}
     }
 
-    // Clipboard fallback
-    if (navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(text);
-        return;
-      } catch {}
-    }
-
-    // Download fallback
-    const blob = new Blob([text], { type: "text/plain" });
+    // Fallback: download image
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "verse.txt";
+    a.download = "tapnpray.png";
     a.click();
+    URL.revokeObjectURL(url);
 
   } catch {}
 }
