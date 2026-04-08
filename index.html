@@ -19,9 +19,10 @@ html,body{
  height:100%;margin:0;overflow:hidden;
  font-family:Arial,sans-serif;color:#fff;
  background-size:cover;background-position:center;
- transition:background-image 1.5s ease-in-out;
+ transition:background-image 2s ease-in-out;
 }
 
+/* CENTER */
 .center{
  height:100%;
  display:flex;
@@ -30,14 +31,16 @@ html,body{
  padding:20px;
 }
 
+/* VERSE BOX (BIGGER) */
 #votd{
  position:relative;
  background:rgba(0,0,0,.6);
  backdrop-filter:blur(25px);
  border-radius:28px;
- padding:20px;
- max-width:520px;width:100%;
- max-height:75vh;
+ padding:28px;
+ max-width:650px;
+ width:100%;
+ max-height:80vh;
  display:flex;
  flex-direction:column;
  text-align:center;
@@ -45,16 +48,16 @@ html,body{
 
 /* TEXT */
 #verse{
- font-size:clamp(22px,5vw,30px);
- line-height:1.6;
+ font-size:clamp(24px,6vw,34px);
+ line-height:1.7;
  overflow-y:auto;
 }
 .word{opacity:.35;transition:.2s;}
 .word.active{opacity:1;}
 
-#title{font-size:14px;opacity:.85;}
-#date{color:#108cd7;font-size:13px;}
-#ref{color:#108cd7;margin-top:6px;font-size:13px;}
+#title{font-size:15px;opacity:.85;}
+#date{color:#108cd7;font-size:14px;}
+#ref{color:#108cd7;margin-top:8px;font-size:14px;}
 
 /* ICONS */
 #favoriteStar{position:absolute;top:12px;left:12px;cursor:pointer;}
@@ -64,39 +67,41 @@ html,body{
 /* TRANSLATION */
 .translation-select{
  margin-top:6px;
- padding:3px 8px;
- font-size:11px;
+ padding:4px 10px;
+ font-size:12px;
  border-radius:999px;
  border:none;
  background:rgba(255,255,255,.15);
  color:#fff;
 }
 
-/* BUTTONS */
+/* MODE BUTTONS */
 .mode-buttons{
  display:flex;
  gap:10px;
- margin-top:12px;
+ margin-top:14px;
 }
 .mode-buttons button{
  flex:1;
- padding:10px;
+ padding:12px;
  border:none;
  border-radius:999px;
  background:rgba(255,255,255,.15);
  color:#fff;
+ cursor:pointer;
 }
 .mode-buttons button.active{background:#108cd7;}
 
+/* ACTIONS */
 .actions{
  display:grid;
  grid-template-columns:repeat(2,1fr);
- gap:10px;margin-top:10px;
+ gap:10px;margin-top:12px;
 }
 .btn{
- padding:10px;border-radius:999px;
+ padding:12px;border-radius:999px;
  border:none;background:rgba(255,255,255,.15);
- color:#fff;
+ color:#fff;cursor:pointer;
 }
 .primary{background:#108cd7}
 
@@ -166,13 +171,16 @@ html,body{
 
 <script>
 
-/* BACKGROUNDS */
+/* BACKGROUNDS (FIXED NO FLICKER) */
 const bgSets={
  morning:["/backgrounds/morning1.png","/backgrounds/morning2.png"],
  day:["/backgrounds/day1.png","/backgrounds/day2.png"],
  evening:["/backgrounds/evening1.png","/backgrounds/evening2.png"],
  night:["/backgrounds/night1.png","/backgrounds/night2.png"]
 };
+
+let currentBackground="";
+let currentTimeBlock="";
 let bgIndex=0;
 
 function getTimeBlock(){
@@ -184,10 +192,19 @@ function getTimeBlock(){
 }
 
 function updateBackground(){
- const set=bgSets[getTimeBlock()];
- document.body.style.backgroundImage=`url('${set[bgIndex%set.length]}')`;
- bgIndex++;
+ const newBlock=getTimeBlock();
+
+ if(newBlock!==currentTimeBlock){
+  currentTimeBlock=newBlock;
+
+  const set=bgSets[newBlock];
+  bgIndex=Math.floor(Math.random()*set.length);
+
+  currentBackground=set[bgIndex];
+  document.body.style.backgroundImage=`url('${currentBackground}')`;
+ }
 }
+
 updateBackground();
 setInterval(updateBackground,60000);
 
@@ -195,7 +212,6 @@ setInterval(updateBackground,60000);
 let verses={nlt:{},niv:{},kjv:{}};
 let translation="nlt";
 let dailyKey="",currentKey="";
-let mode="daily";
 
 /* LOAD */
 async function loadTranslation(t){
@@ -210,7 +226,15 @@ async function loadTranslation(t){
 }
 
 /* DAILY */
-function getSeed(str){let h=0;for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i);h|=0;}return Math.abs(h);}
+function getSeed(str){
+ let h=0;
+ for(let i=0;i<str.length;i++){
+  h=(h<<5)-h+str.charCodeAt(i);
+  h|=0;
+ }
+ return Math.abs(h);
+}
+
 function generateDaily(){
  const today=new Date().toDateString();
  const stored=JSON.parse(localStorage.getItem("dailyVerse")||"{}");
@@ -230,13 +254,11 @@ function generateDaily(){
 
 /* BUTTONS */
 function showDaily(){
- mode="daily";
  currentKey=dailyKey;
  setActive("dailyBtn");
  update("Daily Bible Verse");
 }
 function showRandom(){
- mode="random";
  const keys=Object.keys(verses[translation]);
  currentKey=keys[Math.floor(Math.random()*keys.length)];
  setActive("randomBtn");
@@ -351,22 +373,42 @@ async function shareVerse(){
  canvas.width=1080;canvas.height=1080;
  const ctx=canvas.getContext("2d");
 
- ctx.fillStyle="#000";ctx.fillRect(0,0,1080,1080);
+ const bg=new Image();
+ bg.crossOrigin="anonymous";
+ bg.src=currentBackground;
+ await new Promise(r=>bg.onload=r);
 
- ctx.fillStyle="rgba(255,255,255,.08)";
+ ctx.drawImage(bg,0,0,1080,1080);
+
+ ctx.fillStyle="rgba(0,0,0,.55)";
+ ctx.fillRect(0,0,1080,1080);
+
+ ctx.fillStyle="rgba(0,0,0,.5)";
  ctx.fillRect(140,260,800,520);
 
  ctx.fillStyle="#fff";
- ctx.font="40px Arial";
+ ctx.font="bold 48px Arial";
  ctx.textAlign="center";
 
- wrapText(ctx,verses[translation][currentKey],540,350,640,50);
+ wrapText(ctx,verses[translation][currentKey],540,350,680,60);
 
  ctx.fillStyle="#108cd7";
+ ctx.font="32px Arial";
  ctx.fillText(currentKey,540,700);
 
+ const logo=new Image();
+ logo.src="logo.svg";
+ await new Promise(r=>logo.onload=r);
+
+ ctx.drawImage(logo,860,850,120,120);
+
+ ctx.fillStyle="rgba(255,255,255,.8)";
+ ctx.font="24px Arial";
+ ctx.textAlign="right";
+ ctx.fillText("tapnpray.github.io",1000,1010);
+
  canvas.toBlob(b=>{
-  const file=new File([b],"verse.png",{type:"image/png"});
+  const file=new File([b],"tapnpray.png",{type:"image/png"});
   navigator.share?.({files:[file]});
  });
 }
