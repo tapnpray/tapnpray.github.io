@@ -5,20 +5,18 @@
 <title>Tap N Pray</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-ELQ3E5WGCT');
-</script>
-
 <style>
 html,body{
  height:100%;margin:0;overflow:hidden;
  font-family:Arial,sans-serif;color:#fff;
  background-size:cover;background-position:center;
  transition:background-image 2s ease-in-out;
+ animation:bgZoom 40s ease-in-out infinite alternate;
+}
+
+@keyframes bgZoom{
+ from{background-size:100%;}
+ to{background-size:110%;}
 }
 
 .center{
@@ -37,36 +35,21 @@ html,body{
  padding:28px;
  max-width:650px;
  width:100%;
- max-height:80vh;
+ max-height:75vh;
  display:flex;
  flex-direction:column;
  text-align:center;
 }
 
-/* 🔊 Speaker Icon */
+/* ICONS */
 #readIcon{
- position:absolute;
- top:12px;
- left:12px;
- cursor:pointer;
- font-size:18px;
- opacity:.85;
- transition:.2s;
+ position:absolute;top:12px;left:12px;cursor:pointer;
 }
-#readIcon:hover{
- opacity:1;
- transform:scale(1.1);
-}
+#readIcon.speaking{animation:pulse 1s infinite;}
+@keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}}
 
-/* Pulse animation when speaking */
-#readIcon.speaking{
- animation:pulse 1s infinite;
-}
-@keyframes pulse{
- 0%{transform:scale(1);}
- 50%{transform:scale(1.2);}
- 100%{transform:scale(1);}
-}
+#ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
+#ambientToggle.active{color:#7CFFB2;}
 
 /* TEXT */
 #verse{
@@ -75,59 +58,73 @@ html,body{
  overflow-y:auto;
  cursor:pointer;
 }
-.word{opacity:.35;transition:.2s;}
+.word{opacity:.35;}
 .word.active{opacity:1;}
 
-#title{font-size:15px;opacity:.85;}
+#title{font-size:15px;}
 #date{color:#108cd7;font-size:14px;}
 #ref{color:#108cd7;margin-top:8px;font-size:14px;}
 
-#ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
-#ambientToggle.active{color:#7CFFB2;}
-
-.translation-select{
- margin-top:6px;
- padding:4px 10px;
- font-size:12px;
- border-radius:999px;
- border:none;
- background:rgba(255,255,255,.15);
- color:#fff;
-}
-
-.mode-buttons{
- display:flex;
- gap:10px;
- margin-top:14px;
-}
+/* BUTTONS */
+.mode-buttons{display:flex;gap:10px;margin-top:14px;}
 .mode-buttons button{
- flex:1;
- padding:12px;
- border:none;
- border-radius:999px;
- background:rgba(255,255,255,.15);
- color:#fff;
- cursor:pointer;
+ flex:1;padding:12px;border:none;border-radius:999px;
+ background:rgba(255,255,255,.15);color:#fff;
 }
 .mode-buttons button.active{background:#108cd7;}
 
-.actions{
- display:grid;
- grid-template-columns:1fr;
- gap:10px;margin-top:12px;
-}
+.actions{margin-top:12px;}
 .btn{
- padding:12px;border-radius:999px;
- border:none;background:rgba(255,255,255,.15);
- color:#fff;cursor:pointer;
+ padding:12px;border-radius:999px;border:none;
+ background:#108cd7;color:#fff;width:100%;
 }
-.primary{background:#108cd7}
 
+/* STREAK BAR */
 #streak{
- position:fixed;bottom:25px;left:50%;
+ position:fixed;
+ bottom:max(25px, env(safe-area-inset-bottom));
+ left:50%;
  transform:translateX(-50%);
  background:rgba(0,0,0,.6);
- padding:6px 14px;border-radius:999px;
+ padding:8px 18px;
+ border-radius:999px;
+ cursor:pointer;
+}
+
+/* STREAK MODAL */
+#streakModal{
+ position:fixed;
+ top:0;left:0;width:100%;height:100%;
+ background:rgba(0,0,0,.95);
+ display:none;
+ align-items:center;
+ justify-content:center;
+ flex-direction:column;
+ text-align:center;
+ padding:20px;
+}
+
+.badges{
+ display:flex;
+ gap:15px;
+ margin:20px 0;
+}
+.badge{
+ font-size:28px;
+ opacity:.3;
+}
+.badge.active{opacity:1;}
+
+.progress{
+ width:80%;
+ height:10px;
+ background:rgba(255,255,255,.2);
+ border-radius:999px;
+ overflow:hidden;
+}
+.progress div{
+ height:100%;
+ background:#108cd7;
 }
 </style>
 </head>
@@ -137,7 +134,7 @@ html,body{
 <div class="center">
 <div id="votd">
 
-<div id="readIcon" onclick="readVerse()" title="Listen">🔊</div>
+<div id="readIcon" onclick="readVerse()">🔊</div>
 <div id="ambientToggle" onclick="toggleAmbient()">🌿</div>
 
 <div id="title">Daily Bible Verse</div>
@@ -145,31 +142,39 @@ html,body{
 <div id="verse" onclick="readVerse()"></div>
 <div id="ref"></div>
 
-<select id="translationSelect" class="translation-select">
-<option value="nlt">NLT</option>
-<option value="niv">NIV</option>
-<option value="kjv">KJV</option>
-</select>
-
 <div class="mode-buttons">
 <button id="dailyBtn" class="active" onclick="showDaily()">Daily</button>
 <button id="randomBtn" onclick="showRandom()">Random</button>
 </div>
 
 <div class="actions">
-<button class="btn primary" onclick="shareVerse()">Share</button>
+<button class="btn" onclick="shareVerse()">Share</button>
 </div>
 
 </div>
 </div>
 
-<div id="streak"></div>
+<div id="streak" onclick="openStreak()"></div>
+
+<!-- STREAK UI -->
+<div id="streakModal" onclick="closeStreak(event)">
+<h1 id="streakCount"></h1>
+<div id="streakMsg"></div>
+
+<div class="badges">
+<span class="badge" id="b7">🌿</span>
+<span class="badge" id="b30">🔥</span>
+<span class="badge" id="b100">👑</span>
+</div>
+
+<div class="progress"><div id="progressBar"></div></div>
+</div>
 
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
 
 <script>
 
-/* BACKGROUNDS */
+/* BACKGROUND */
 const bgSets={
  morning:["/backgrounds/morning1.png","/backgrounds/morning2.png"],
  day:["/backgrounds/day1.png","/backgrounds/day2.png"],
@@ -179,7 +184,6 @@ const bgSets={
 
 let currentBackground="";
 let currentTimeBlock="";
-let bgIndex=0;
 
 function getTimeBlock(){
  const h=new Date().getHours();
@@ -194,82 +198,56 @@ function updateBackground(){
  if(newBlock!==currentTimeBlock){
   currentTimeBlock=newBlock;
   const set=bgSets[newBlock];
-  bgIndex=Math.floor(Math.random()*set.length);
-  currentBackground=set[bgIndex];
+  currentBackground=set[Math.floor(Math.random()*set.length)];
   document.body.style.backgroundImage=`url('${currentBackground}')`;
  }
 }
-
 updateBackground();
-setInterval(updateBackground,60000);
 
-/* VERSES */
-let verses={nlt:{},niv:{},kjv:{}};
-let translation="nlt";
-let dailyKey="",currentKey="";
+/* STREAK SYSTEM */
+function streak(){
+ let s=parseInt(localStorage.getItem("s"))||0;
+ let last=localStorage.getItem("l");
+ let today=new Date().toDateString();
 
-async function loadTranslation(t){
- if(Object.keys(verses[t]).length) return;
- const res=await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
- const data=await res.json();
- for(let b in data)
-  for(let c in data[b])
-   for(let v in data[b][c])
-    verses[t][`${b} ${c}:${v}`]=data[b][c][v];
-}
-
-function getSeed(str){
- let h=0;
- for(let i=0;i<str.length;i++){
-  h=(h<<5)-h+str.charCodeAt(i);
-  h|=0;
- }
- return Math.abs(h);
-}
-
-function generateDaily(){
- const today=new Date().toDateString();
- const stored=JSON.parse(localStorage.getItem("dailyVerse")||"{}");
-
- if(stored.date===today){
-  dailyKey=stored.key;
- }else{
-  const keys=Object.keys(verses["nlt"]);
-  dailyKey=keys[getSeed(today)%keys.length];
-  localStorage.setItem("dailyVerse",JSON.stringify({date:today,key:dailyKey}));
+ if(!last){s=1;}
+ else{
+  const diff=(new Date(today)-new Date(last))/(86400000);
+  if(diff===1)s++;
+  else if(diff>2)s=1;
  }
 
- currentKey=dailyKey;
- update("Daily Bible Verse");
- streak();
+ localStorage.setItem("s",s);
+ localStorage.setItem("l",today);
+
+ document.getElementById("streak").innerText="🔥 "+s+" Day Streak";
+ updateStreakUI(s);
 }
 
-function showDaily(){
- currentKey=dailyKey;
- setActive("dailyBtn");
- update("Daily Bible Verse");
-}
-function showRandom(){
- const keys=Object.keys(verses[translation]);
- currentKey=keys[Math.floor(Math.random()*keys.length)];
- setActive("randomBtn");
- update("Random Verse");
-}
-function setActive(id){
- document.getElementById("dailyBtn").classList.remove("active");
- document.getElementById("randomBtn").classList.remove("active");
- document.getElementById(id).classList.add("active");
+function updateStreakUI(s){
+ document.getElementById("streakCount").innerText=s+" Days";
+
+ let msg="Stay consistent 🙏";
+ if(s>=7) msg="1 Week Strong 💪";
+ if(s>=30) msg="30 Days 🙌";
+ if(s>=100) msg="Legend 👑";
+
+ document.getElementById("streakMsg").innerText=msg;
+
+ document.getElementById("b7").classList.toggle("active",s>=7);
+ document.getElementById("b30").classList.toggle("active",s>=30);
+ document.getElementById("b100").classList.toggle("active",s>=100);
+
+ let next= s<7?7:s<30?30:100;
+ document.getElementById("progressBar").style.width=(s/next*100)+"%";
 }
 
-function update(title){
- const text=verses[translation][currentKey];
- if(!text) return;
-
- document.getElementById("title").innerText=title;
- document.getElementById("verse").innerHTML=
-  text.split(" ").map(w=>`<span class="word">${w}</span>`).join(" ");
- document.getElementById("ref").innerText=currentKey;
- document.getElementById("date").innerText=new Date().toDateString();
+function openStreak(){
+ document.getElementById("streakModal").style.display="flex";
+}
+function closeStreak(e){
+ if(e.target.id==="streakModal")
+ document.getElementById("streakModal").style.display="none";
 }
 
 /* READ */
@@ -282,7 +260,7 @@ function readVerse(){
 
  let i=0;
  const utter=new SpeechSynthesisUtterance(
-  verses[translation][currentKey] + " " + currentKey
+  verses[translation][currentKey]+" "+currentKey
  );
 
  utter.onboundary=e=>{
@@ -291,79 +269,90 @@ function readVerse(){
   }
  };
 
- utter.onend=()=>{
-  icon.classList.remove("speaking");
- };
+ utter.onend=()=>icon.classList.remove("speaking");
 
  speechSynthesis.cancel();
  speechSynthesis.speak(utter);
 }
 
-/* AMBIENT */
-let ambientOn=false;
-function toggleAmbient(){
- const a=document.getElementById("ambientAudio");
+/* SHARE */
+async function shareVerse(){
+ const canvas=document.createElement("canvas");
+ canvas.width=1080;canvas.height=1080;
+ const ctx=canvas.getContext("2d");
 
- if(ambientOn){
-  fadeOut(a);
- }else{
-  a.volume=0;
-  a.play();
-  fadeIn(a);
+ const bg=new Image();
+ bg.crossOrigin="anonymous";
+ bg.src=currentBackground;
+ await new Promise(r=>bg.onload=r);
+
+ ctx.drawImage(bg,0,0,1080,1080);
+
+ ctx.fillStyle="rgba(0,0,0,.55)";
+ ctx.fillRect(0,0,1080,1080);
+
+ ctx.fillStyle="rgba(0,0,0,.5)";
+ ctx.fillRect(120,220,840,520);
+
+ ctx.fillStyle="#fff";
+ ctx.font="bold 48px Arial";
+ ctx.textAlign="center";
+
+ wrapText(ctx,verses[translation][currentKey],540,320,720,60);
+
+ ctx.fillStyle="#108cd7";
+ ctx.font="32px Arial";
+ ctx.fillText(currentKey,540,680);
+
+ const logo=new Image();
+ logo.src="logo.svg";
+ await new Promise(r=>logo.onload=r);
+
+ ctx.drawImage(logo,60,880,100,100);
+
+ ctx.fillStyle="rgba(255,255,255,.8)";
+ ctx.font="22px Arial";
+ ctx.textAlign="left";
+ ctx.fillText("tapnpray.github.io",60,1000);
+
+ canvas.toBlob(b=>{
+  const file=new File([b],"tapnpray.png",{type:"image/png"});
+  navigator.share?.({files:[file]});
+ });
+}
+
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){
+ const words=text.split(' ');
+ let line='';
+ for(let n=0;n<words.length;n++){
+  const test=line+words[n]+' ';
+  const w=ctx.measureText(test).width;
+  if(w>maxWidth&&n>0){
+   ctx.fillText(line,x,y);
+   line=words[n]+' ';
+   y+=lineHeight;
+  }else line=test;
  }
-
- ambientOn=!ambientOn;
- document.getElementById("ambientToggle").classList.toggle("active");
-}
-
-function fadeIn(a){
- let v=0;
- const i=setInterval(()=>{
-  v+=0.05;
-  if(v>=0.3){v=0.3;clearInterval(i);}
-  a.volume=v;
- },100);
-}
-
-function fadeOut(a){
- let v=a.volume;
- const i=setInterval(()=>{
-  v-=0.05;
-  if(v<=0){
-   v=0;clearInterval(i);
-   a.pause();a.currentTime=0;
-  }
-  a.volume=v;
- },100);
-}
-
-/* SHARE (unchanged) */
-async function shareVerse(){ /* same as before */ }
-
-/* UTIL */
-function streak(){
- let s=parseInt(localStorage.getItem("s"))||0;
- let l=localStorage.getItem("l");
- let t=new Date().toDateString();
- if(l!==t){s++;localStorage.setItem("s",s);localStorage.setItem("l",t);}
- document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
+ ctx.fillText(line,x,y);
 }
 
 /* INIT */
-async function init(){
- await loadTranslation("nlt");
- await loadTranslation("niv");
- await loadTranslation("kjv");
+let verses={nlt:{}};
+let translation="nlt";
+let currentKey="John 3:16";
 
- document.getElementById("translationSelect").onchange=(e)=>{
-  translation=e.target.value;
-  update(document.getElementById("title").innerText);
- };
+verses.nlt["John 3:16"]="For God so loved the world...";
 
- generateDaily();
+function update(){
+ const text=verses[translation][currentKey];
+ document.getElementById("verse").innerHTML=
+ text.split(" ").map(w=>`<span class="word">${w}</span>`).join(" ");
+ document.getElementById("ref").innerText=currentKey;
+ document.getElementById("date").innerText=new Date().toDateString();
 }
 
-init();
+update();
+streak();
 
 </script>
 </body>
