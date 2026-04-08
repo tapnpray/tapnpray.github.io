@@ -62,14 +62,20 @@ body::after{
  font-size:clamp(22px,5vw,30px);
  line-height:1.6;
  overflow-y:auto;
- padding-right:5px;
 }
 
 .word{opacity:.35;transition:.3s}
 .word.active{opacity:1}
 
 #favoriteStar{position:absolute;top:12px;left:12px;font-size:22px;cursor:pointer;}
-#ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
+#ambientToggle{
+ position:absolute;top:12px;right:12px;cursor:pointer;font-size:18px;
+}
+#ambientToggle.active{
+ color:#7CFFB2;
+ text-shadow:0 0 8px rgba(124,255,178,0.8);
+ transform:scale(1.1);
+}
 
 #title{font-size:14px;opacity:.85;margin-bottom:5px;}
 #date{color:#108cd7;margin-bottom:8px}
@@ -170,88 +176,62 @@ body::after{
 
 <script>
 
-/* ================= ANALYTICS ================= */
-function track(name,data={}){
- if(typeof gtag==="function"){
-  gtag('event',name,data);
- }
-}
+/* Analytics */
+function track(name){ if(typeof gtag==="function"){ gtag('event',name); } }
 
-/* BACKGROUND */
+/* Background */
 const backgrounds=["backgrounds/morning1.png","backgrounds/morning2.png","backgrounds/day1.png"];
 let i=0;
 document.body.style.backgroundImage=`url('${backgrounds[i]}')`;
 setInterval(()=>{i=(i+1)%backgrounds.length;
 document.body.style.backgroundImage=`url('${backgrounds[i]}')`;},60000);
 
-/* DATA */
+/* Data */
 let verses={},key="",dailyKey="",topicKeys={};
 
-/* LOAD */
+/* Load */
 async function load(){
  const res=await fetch("BIBLE/NLT/NLT_bible.json");
  const data=await res.json();
-
  let flat={};
  for(let b in data)
   for(let c in data[b])
    for(let v in data[b][c])
     flat[`${b} ${c}:${v}`]=data[b][c][v];
-
  verses=flat;
- generateDailyContent();
+ generateDaily();
 }
 
-/* DAILY LOCK */
-function generateDailyContent(){
+/* Daily */
+function generateDaily(){
  const keys=Object.keys(verses);
- const seed=getSeed();
-
+ const seed=Math.abs([...new Date().toISOString().slice(0,10)].reduce((a,c)=>a+c.charCodeAt(0),0));
  dailyKey=keys[seed%keys.length];
 
  ["peace","strength","hope","guidance","faith"].forEach(t=>{
   let list=keys.filter(ref=>{
-   let text=verses[ref].toLowerCase();
-   return topicMap[t].some(w=>text.includes(w));
+   let txt=verses[ref].toLowerCase();
+   return topicMap[t].some(w=>txt.includes(w));
   });
   if(list.length) topicKeys[t]=list[(seed+t.length)%list.length];
  });
 
  key=dailyKey;
- track("daily_view");
- updateTitle("Daily");
  update();
  streak();
 }
 
-function getSeed(){
- const today=new Date().toISOString().slice(0,10);
- let hash=0;
- for(let i=0;i<today.length;i++){
-  hash=(hash<<5)-hash+today.charCodeAt(i);
-  hash|=0;
- }
- return Math.abs(hash);
-}
-
-/* UPDATE */
+/* Update */
 function update(){
  const words=verses[key].split(" ");
  document.getElementById("verse").innerHTML=
  words.map(w=>`<span class="word">${w}</span>`).join(" ");
-
  document.getElementById("ref").innerText=key;
  document.getElementById("date").innerText=new Date().toDateString();
  updateStar();
 }
 
-/* TITLE */
-function updateTitle(label){
- document.getElementById("title").innerText=
- label==="Daily"?"Daily Bible Verse":`Daily Bible Verse - ${label}`;
-}
-
-/* TOPICS */
+/* Topics */
 const topicMap={
  peace:["peace","rest"],
  strength:["strength","power"],
@@ -262,86 +242,105 @@ const topicMap={
 
 function pickTopic(t,btn){
  key=topicKeys[t]||dailyKey;
- track("topic_selected",{topic:t});
- updateTitle(btn.innerText);
- update();
- setActive(btn);
+ track("topic_"+t);
+ update();setActive(btn);
 }
-
 function goDaily(btn){
  key=dailyKey;
- track("daily_selected");
- updateTitle("Daily");
- update();
- setActive(btn);
+ update();setActive(btn);
 }
-
 function setActive(btn){
  document.querySelectorAll("#topics button").forEach(b=>b.classList.remove("active"));
  btn.classList.add("active");
 }
 
-/* AUDIO */
-let ambientOn=false;
-function toggleAmbient(){
- const a=document.getElementById("ambientAudio");
- if(!ambientOn){
-  a.volume=0;a.play();
-  fadeAudio(a,0.3,1000);
-  track("ambient_on");
- }else{
-  fadeAudio(a,0,1000);
-  track("ambient_off");
- }
- ambientOn=!ambientOn;
+/* AUDIO (FINAL FIXED) */
+let ambientOn=localStorage.getItem("ambientOn")==="true";
+let fadeInterval=null;
+let tapLock=false;
+
+const audio=document.getElementById("ambientAudio");
+const btn=document.getElementById("ambientToggle");
+
+if(ambientOn){
+ btn.classList.add("active");
+ audio.volume=0.3;
+ audio.play().catch(()=>{});
 }
 
-function fadeAudio(audio,target,duration){
- const step=(target-audio.volume)/(duration/50);
- const fade=setInterval(()=>{
-  audio.volume+=step;
-  if((step>0 && audio.volume>=target)||(step<0 && audio.volume<=target)){
+function toggleAmbient(){
+ if(tapLock)return;
+ tapLock=true;
+ setTimeout(()=>tapLock=false,300);
+
+ if(ambientOn){
+  fadeAudio(audio,0,1000,()=>{
+   btn.classList.remove("active");
+   ambientOn=false;
+   localStorage.setItem("ambientOn","false");
+   track("ambient_off");
+  });
+ }else{
+  audio.volume=0;
+  audio.play().catch(()=>{});
+  fadeAudio(audio,0.3,1000,()=>{
+   btn.classList.add("active");
+   ambientOn=true;
+   localStorage.setItem("ambientOn","true");
+   track("ambient_on");
+  });
+ }
+}
+
+function fadeAudio(audio,target,duration,callback){
+ if(fadeInterval) clearInterval(fadeInterval);
+
+ const start=audio.volume;
+ const diff=target-start;
+ const steps=duration/50;
+ let step=0;
+
+ fadeInterval=setInterval(()=>{
+  step++;
+  audio.volume=start+(diff*(step/steps));
+
+  if(step>=steps){
    audio.volume=target;
-   if(target===0) audio.pause();
-   clearInterval(fade);
+
+   if(target===0){
+    audio.pause();
+    audio.currentTime=0;
+    audio.volume=0;
+   }
+
+   clearInterval(fadeInterval);
+   if(callback) callback();
   }
  },50);
 }
 
-/* READ */
+/* Read */
 function readVerse(){
  track("read_verse");
  const words=document.querySelectorAll(".word");
  words.forEach(w=>w.classList.remove("active"));
-
  let i=0;
  const utter=new SpeechSynthesisUtterance(verses[key]);
-
  utter.onboundary=e=>{
   if(e.name==="word"&&words[i]){
    words[i].classList.add("active"); i++;
   }
  };
-
- utter.onend=()=>{
-  speechSynthesis.speak(new SpeechSynthesisUtterance(key));
- };
-
+ utter.onend=()=>speechSynthesis.speak(new SpeechSynthesisUtterance(key));
  speechSynthesis.cancel();
  speechSynthesis.speak(utter);
 }
 
-/* FAVORITES */
+/* Favorites */
 function getFavs(){return JSON.parse(localStorage.getItem("favs")||"[]");}
 function toggleFavorite(){
  let f=getFavs();
- if(f.includes(key)){
-  f=f.filter(x=>x!==key);
-  track("favorite_remove");
- }else{
-  f.push(key);
-  track("favorite_add");
- }
+ if(f.includes(key)){f=f.filter(x=>x!==key);}else{f.push(key);}
  localStorage.setItem("favs",JSON.stringify(f));
  updateStar();
 }
@@ -360,7 +359,6 @@ function openFavorites(){
 function deleteFavorite(ref){
  let f=getFavs().filter(x=>x!==ref);
  localStorage.setItem("favs",JSON.stringify(f));
- track("favorite_remove");
  openFavorites();updateStar();
 }
 function closeFavorites(e){
@@ -368,18 +366,18 @@ function closeFavorites(e){
   document.getElementById("favoritesModal").style.display="none";
 }
 
-/* SHARE */
+/* Share */
 function shareVerse(){
- track("share_verse");
+ track("share");
  navigator.share?.({text:verses[key]+" — "+key});
 }
 
-/* COPY */
+/* Copy */
 function copyVerse(){
  navigator.clipboard.writeText(verses[key]+" — "+key);
 }
 
-/* STREAK */
+/* Streak */
 function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
