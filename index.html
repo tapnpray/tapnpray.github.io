@@ -183,7 +183,6 @@ body::before {
 }
 </style>
 </head>
-
 <body>
 
 <!-- TOP LOGO -->
@@ -192,35 +191,35 @@ body::before {
 <div class="center">
   <div id="votd">
 
-    <div id="readIcon" onclick="readVerse()">🔊</div>
-    <div id="ambientToggle" onclick="toggleAmbient()">🌿</div>
+    <div id="readIcon">🔊</div>
+    <div id="ambientToggle">🌿</div>
 
     <div id="title">Daily Bible Verse</div>
     <div id="date"></div>
-    <div id="verse" onclick="readVerse()"></div>
+    <div id="verse"></div>
     <div id="ref"></div>
 
-    <select id="translationSelect" class="translation-select" onchange="changeTranslation(this.value)">
+    <select id="translationSelect" class="translation-select">
       <option value="nlt">NLT</option>
       <option value="niv">NIV</option>
       <option value="kjv">KJV</option>
     </select>
 
     <div class="mode-buttons">
-      <button id="dailyBtn" class="active" onclick="showDaily()">Daily</button>
-      <button id="randomBtn" onclick="showRandom()">Random</button>
+      <button id="dailyBtn" class="active">Daily</button>
+      <button id="randomBtn">Random</button>
     </div>
 
     <div class="actions">
-      <button class="btn" onclick="shareVerse()">Share</button>
+      <button class="btn" id="shareBtn">Share</button>
     </div>
 
   </div>
 </div>
 
-<div id="streak" onclick="openStreak()"></div>
+<div id="streak"></div>
 
-<div id="streakModal" onclick="closeStreak(event)">
+<div id="streakModal">
   <h1 id="streakCount"></h1>
   <div id="streakMsg"></div>
 
@@ -234,9 +233,29 @@ body::before {
 </div>
 
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
-
 <script>
-/* BACKGROUND */
+/* DOM SHORTCUTS */
+const titleEl = document.getElementById("title");
+const dateEl = document.getElementById("date");
+const verseEl = document.getElementById("verse");
+const refEl = document.getElementById("ref");
+const translationSelect = document.getElementById("translationSelect");
+const dailyBtn = document.getElementById("dailyBtn");
+const randomBtn = document.getElementById("randomBtn");
+const shareBtn = document.getElementById("shareBtn");
+const readIcon = document.getElementById("readIcon");
+const ambientToggle = document.getElementById("ambientToggle");
+const streakEl = document.getElementById("streak");
+const streakModal = document.getElementById("streakModal");
+const streakCount = document.getElementById("streakCount");
+const streakMsg = document.getElementById("streakMsg");
+const b7 = document.getElementById("b7");
+const b30 = document.getElementById("b30");
+const b100 = document.getElementById("b100");
+const progressBar = document.getElementById("progressBar");
+const ambientAudio = document.getElementById("ambientAudio");
+
+/* BACKGROUND SETS */
 const bgSets = {
   morning: ["/backgrounds/morning1.png","/backgrounds/morning2.png"],
   day: ["/backgrounds/day1.png","/backgrounds/day2.png"],
@@ -281,8 +300,8 @@ async function loadTranslation(t) {
     const data = await res.json();
 
     Object.entries(data).forEach(([book, chapters]) => {
-      Object.entries(chapters]).forEach(([chapter, versesObj]) => {
-        Object.entries(versesObj]).forEach(([v, text]) => {
+      Object.entries(chapters).forEach(([chapter, versesObj]) => {
+        Object.entries(versesObj).forEach(([v, text]) => {
           verses[t][`${book} ${chapter}:${v}`] = text;
         });
       });
@@ -313,13 +332,13 @@ function generateDaily() {
   }
 
   currentKey = dailyKey;
-  update("Daily Bible Verse");
+  updateVerse("Daily Bible Verse");
   updateStreak();
 }
 
 function showDaily() {
   currentKey = dailyKey;
-  update("Daily Bible Verse");
+  updateVerse("Daily Bible Verse");
   dailyBtn.classList.add("active");
   randomBtn.classList.remove("active");
 }
@@ -328,7 +347,7 @@ function showRandom() {
   const keys = Object.keys(verses[translation]);
   if (!keys.length) return;
   currentKey = keys[Math.floor(Math.random() * keys.length)];
-  update("Random Bible Verse");
+  updateVerse("Random Bible Verse");
   dailyBtn.classList.remove("active");
   randomBtn.classList.add("active");
 }
@@ -340,16 +359,16 @@ function changeTranslation(t) {
     if (!keys.length) return;
     currentKey = keys[0];
   }
-  update(dailyBtn.classList.contains("active") ? "Daily Bible Verse" : "Random Bible Verse");
+  updateVerse(dailyBtn.classList.contains("active") ? "Daily Bible Verse" : "Random Bible Verse");
 }
 
-function update(titleText) {
+function updateVerse(titleText) {
   const text = verses[translation][currentKey];
   if (!text) return;
-  title.innerText = titleText;
-  verse.innerHTML = text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
-  ref.innerText = currentKey;
-  date.innerText = new Date().toDateString();
+  titleEl.innerText = titleText;
+  verseEl.innerHTML = text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
+  refEl.innerText = currentKey;
+  dateEl.innerText = new Date().toDateString();
 }
 
 /* STREAK SYSTEM */
@@ -372,6 +391,7 @@ function updateStreak() {
 
   streakEl.innerText = "🔥 " + streak + " Day Streak";
   streakCount.innerText = streak + " Days";
+  streakMsg.innerText = "Keep going — 100 days is your next big milestone.";
 
   b7.classList.toggle("active", streak >= 7);
   b30.classList.toggle("active", streak >= 30);
@@ -427,7 +447,7 @@ function fadeOut(a) {
   }, 100);
 }
 
-/* PREMIUM SHARE ENGINE — FULL VERSION INCLUDED */
+/* PREMIUM SHARE ENGINE — 1080x1080, Georgia, auto-fit, logo + URL */
 function wrapTextAutoFit(ctx, text, x, y, maxWidth, lineHeight, maxHeight, baseFontSize) {
   let fontSize = baseFontSize;
   const minFontSize = 26;
@@ -499,7 +519,7 @@ async function shareVerse() {
     ctx.fillStyle = "rgba(0,0,0,0.55)";
     ctx.fillRect(panelX, panelY, panelW, panelH);
 
-    // Verse text (soft white, auto-fit)
+    // Verse text
     ctx.fillStyle = "#F2F2F2";
     ctx.textAlign = "center";
     const textX = canvas.width / 2;
@@ -539,5 +559,45 @@ async function shareVerse() {
 
     const file = new File([blob], "tapnpray.png", { type: "image/png" });
 
-    // Native share with file
-    if (navigator.share && navigator.canShare && navigator.can
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "Tap N Pray",
+          text: verseText + "\n\n" + currentKey
+        });
+        return;
+      } catch {}
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "tapnpray.png";
+    a.click();
+    URL.revokeObjectURL(url);
+
+  } catch {}
+}
+
+/* EVENT WIRING */
+readIcon.addEventListener("click", readVerse);
+verseEl.addEventListener("click", readVerse);
+ambientToggle.addEventListener("click", toggleAmbient);
+dailyBtn.addEventListener("click", showDaily);
+randomBtn.addEventListener("click", showRandom);
+translationSelect.addEventListener("change", e => changeTranslation(e.target.value));
+shareBtn.addEventListener("click", shareVerse);
+streakEl.addEventListener("click", openStreak);
+streakModal.addEventListener("click", closeStreak);
+
+/* INIT */
+(async () => {
+  await loadTranslation("nlt");
+  await loadTranslation("niv");
+  await loadTranslation("kjv");
+  generateDaily();
+})();
+</script>
+</body>
+</html>
