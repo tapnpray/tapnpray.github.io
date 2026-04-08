@@ -21,7 +21,17 @@ html,body{
  background-size:cover;background-position:center;
 }
 
-/* Background */
+/* Smooth background */
+body{
+ transition: background-image 1.5s ease-in-out;
+ animation: subtleZoom 60s linear infinite;
+}
+@keyframes subtleZoom {
+ 0% { background-size:100%; }
+ 100% { background-size:110%; }
+}
+
+/* Overlay */
 body::before{
  content:"";position:fixed;width:100%;height:100%;
  background:linear-gradient(to bottom,rgba(0,0,0,.4),rgba(0,0,0,.9));
@@ -48,7 +58,7 @@ body::after{
  box-sizing:border-box;
 }
 
-/* Verse Box */
+/* Verse box */
 #votd{
  position:relative;
  background:rgba(0,0,0,.6);
@@ -129,7 +139,7 @@ body::after{
  border-radius:12px;
 }
 
-/* Bottom UI */
+/* Bottom */
 #streak{
  position:fixed;bottom:25px;left:50%;
  transform:translateX(-50%);
@@ -181,18 +191,66 @@ body::after{
 </div>
 
 <audio id="ambientAudio" loop>
-<source src="sounds/calm.mp3">
+<source src="/sounds/calm.mp3">
 </audio>
 
 <script>
 
-/* ===== DATA ===== */
+/* =========================
+   BACKGROUND SYSTEM
+========================= */
+
+const bgSets = {
+ morning:["/backgrounds/morning1.png","/backgrounds/morning2.png"],
+ day:["/backgrounds/day1.png","/backgrounds/day2.png"],
+ evening:["/backgrounds/evening1.png","/backgrounds/evening2.png"],
+ night:["/backgrounds/night1.png","/backgrounds/night2.png"]
+};
+
+let bgIndex=0,currentTimeBlock="";
+
+function getTimeBlock(){
+ const h=new Date().getHours();
+ if(h>=5&&h<11)return"morning";
+ if(h>=11&&h<17)return"day";
+ if(h>=17&&h<21)return"evening";
+ return"night";
+}
+
+function setBackground(){
+ const time=getTimeBlock();
+ const set=bgSets[time];
+ if(!set)return;
+ document.body.style.backgroundImage=`url('${set[bgIndex]}')`;
+}
+
+function rotateBackground(){
+ const time=getTimeBlock();
+ if(time!==currentTimeBlock){
+  bgIndex=0;
+  currentTimeBlock=time;
+ }
+ const set=bgSets[time];
+ if(!set)return;
+ bgIndex=(bgIndex+1)%set.length;
+ setBackground();
+}
+
+function initBackgrounds(){
+ currentTimeBlock=getTimeBlock();
+ setBackground();
+ setInterval(rotateBackground,60000);
+}
+
+/* =========================
+   VERSES
+========================= */
+
 let verses={},key="",dailyKey="";
 let topicCache={};
 
-/* LOAD */
 async function load(){
- const res=await fetch("BIBLE/NLT/NLT_bible.json");
+ const res=await fetch("/BIBLE/NLT/NLT_bible.json");
  const data=await res.json();
 
  let flat={};
@@ -205,25 +263,22 @@ async function load(){
  generateDaily();
 }
 
-/* DAILY SEED */
 function getSeed(str){
  return str.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
 }
 
-/* DAILY */
 function generateDaily(){
  const keys=Object.keys(verses);
  const today=new Date().toDateString();
  const seed=getSeed(today);
 
- dailyKey=keys[seed % keys.length];
+ dailyKey=keys[seed%keys.length];
  key=dailyKey;
 
  update("Daily Bible Verse");
  streak();
 }
 
-/* UPDATE */
 function update(title){
  const words=verses[key].split(" ");
 
@@ -237,7 +292,10 @@ function update(title){
  updateStar();
 }
 
-/* TOPICS */
+/* =========================
+   TOPICS
+========================= */
+
 const topicMap={
  peace:["peace","rest"],
  strength:["strength","power"],
@@ -256,12 +314,11 @@ function pickTopic(topic,btn){
   });
 
   const seed=getSeed(today+topic);
-  topicCache[topic]=filtered[seed % filtered.length];
+  topicCache[topic]=filtered[seed%filtered.length];
  }
 
  key=topicCache[topic];
- update("Daily Bible Verse - "+capitalize(topic));
-
+ update("Daily Bible Verse - "+topic.charAt(0).toUpperCase()+topic.slice(1));
  setActive(btn);
 }
 
@@ -276,28 +333,33 @@ function setActive(btn){
  btn.classList.add("active");
 }
 
-function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+/* =========================
+   AUDIO
+========================= */
 
-/* AUDIO */
 let ambientOn=false;
+let fadeInterval=null;
+
 function toggleAmbient(){
  const a=document.getElementById("ambientAudio");
 
+ if(fadeInterval) clearInterval(fadeInterval);
+
  if(ambientOn){
-  let fade=setInterval(()=>{
-   a.volume-=0.05;
-   if(a.volume<=0){
+  fadeInterval=setInterval(()=>{
+   a.volume=Math.max(0,a.volume-0.05);
+   if(a.volume===0){
     a.pause();
     a.currentTime=0;
-    clearInterval(fade);
+    clearInterval(fadeInterval);
    }
   },100);
  }else{
   a.volume=0;
   a.play();
-  let fade=setInterval(()=>{
-   a.volume+=0.05;
-   if(a.volume>=0.3) clearInterval(fade);
+  fadeInterval=setInterval(()=>{
+   a.volume=Math.min(0.3,a.volume+0.05);
+   if(a.volume===0.3) clearInterval(fadeInterval);
   },100);
  }
 
@@ -305,7 +367,10 @@ function toggleAmbient(){
  document.getElementById("ambientToggle").classList.toggle("active");
 }
 
-/* READ */
+/* =========================
+   READ
+========================= */
+
 function readVerse(){
  const words=document.querySelectorAll(".word");
  words.forEach(w=>w.classList.remove("active"));
@@ -317,7 +382,7 @@ function readVerse(){
  utter.rate=.9;
 
  utter.onboundary=e=>{
-  if(e.name==="word" && words[i]){
+  if(e.name==="word"&&words[i]){
    words[i].classList.add("active");
    i++;
   }
@@ -327,12 +392,15 @@ function readVerse(){
  speechSynthesis.speak(utter);
 }
 
-/* FAVORITES */
+/* =========================
+   FAVORITES
+========================= */
+
 function getFavs(){return JSON.parse(localStorage.getItem("favs")||"[]");}
 
 function toggleFavorite(){
  let f=getFavs();
- if(f.includes(key)) f=f.filter(x=>x!==key);
+ if(f.includes(key))f=f.filter(x=>x!==key);
  else f.push(key);
  localStorage.setItem("favs",JSON.stringify(f));
  updateStar();
@@ -349,10 +417,10 @@ function openFavorites(){
 
  getFavs().forEach(ref=>{
   c.innerHTML+=`
-   <div class="favorite-item">
-    <b>${ref}</b><br>${verses[ref]}
-    <br><button onclick="removeFav('${ref}')">Delete</button>
-   </div>`;
+  <div class="favorite-item">
+   <b>${ref}</b><br>${verses[ref]}
+   <br><button onclick="removeFav('${ref}')">Delete</button>
+  </div>`;
  });
 
  document.getElementById("favoritesModal").style.display="block";
@@ -369,7 +437,10 @@ function closeFavorites(e){
   document.getElementById("favoritesModal").style.display="none";
 }
 
-/* COPY / SHARE */
+/* =========================
+   UTIL
+========================= */
+
 function copyVerse(){
  navigator.clipboard.writeText(verses[key]+" — "+key);
 }
@@ -378,7 +449,6 @@ function shareVerse(){
  navigator.share?.({text:verses[key]+" — "+key});
 }
 
-/* STREAK */
 function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
@@ -394,6 +464,7 @@ function streak(){
 }
 
 /* INIT */
+initBackgrounds();
 load();
 
 </script>
