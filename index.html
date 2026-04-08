@@ -15,183 +15,179 @@ gtag('config', 'G-ELQ3E5WGCT');
 </script>
 
 <style>
-html,body{
- height:100%;
- margin:0;
- overflow:hidden;
- font-family:Arial,sans-serif;
- color:#fff;
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
 }
 
-/* BACKGROUND (STATIC + BLUR) */
-body::before{
- content:"";
- position:fixed;
- top:0;left:0;
- width:100%;
- height:100%;
- min-width:100vw;
- min-height:100vh;
+/* BACKGROUND */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-image: var(--bg-image);
+  transform: scale(1.05);
+  filter: blur(2px);
+  z-index: -1;
+}
 
- background-size:cover;
- background-position:center;
- background-image:var(--bg-image);
-
- transform:scale(1.15);
- filter:blur(3px);
-
- z-index:-1;
+/* MOBILE OPTIMIZATION */
+@media (max-width: 600px) {
+  body::before {
+    transform: scale(1.03);
+    filter: blur(1.5px);
+  }
 }
 
 /* CENTER */
-.center{
- height:100%;
- display:flex;
- align-items:center;
- justify-content:center;
- padding:
- 20px
- env(safe-area-inset-right)
- calc(20px + env(safe-area-inset-bottom))
- env(safe-area-inset-left);
+.center {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
-/* VERSE BOX */
-#votd{
- position:relative;
- background:rgba(0,0,0,.6);
- backdrop-filter:blur(25px);
- border-radius:28px;
- padding:24px;
- max-width:650px;
- width:100%;
- max-height:calc(100vh - 120px);
- overflow:hidden;
- display:flex;
- flex-direction:column;
- text-align:center;
+/* BOX */
+#votd {
+  position: relative;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(20px);
+  border-radius: 28px;
+  padding: 24px;
+  max-width: 650px;
+  width: 100%;
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  overflow: hidden;
 }
 
 /* ICONS */
-#readIcon{
- position:absolute;
- top:12px;
- left:12px;
- cursor:pointer;
- font-size:18px;
-}
-#readIcon.speaking{
- animation:pulse 1s infinite;
-}
-@keyframes pulse{
- 0%{transform:scale(1);}
- 50%{transform:scale(1.2);}
- 100%{transform:scale(1);}
+#readIcon, #ambientToggle {
+  position: absolute;
+  top: 12px;
+  font-size: 26px;
+  padding: 8px;
+  cursor: pointer;
 }
 
-#ambientToggle{
- position:absolute;
- top:12px;
- right:12px;
- cursor:pointer;
-}
-#ambientToggle.active{color:#7CFFB2;}
+#readIcon { left: 12px; }
+#ambientToggle { right: 12px; }
+
+#readIcon.speaking { animation: pulse 1s infinite; }
+@keyframes pulse { 50% { transform: scale(1.2); } }
+
+#ambientToggle.active { color: #7CFFB2; }
 
 /* TEXT */
-#verse{
- font-size:clamp(22px,5.5vw,34px);
- line-height:1.7;
- overflow-y:auto;
- -webkit-overflow-scrolling:touch;
- cursor:pointer;
+#verse {
+  font-size: clamp(22px, 5.5vw, 34px);
+  line-height: 1.7;
+  overflow-y: auto;
+  cursor: pointer;
+  -webkit-overflow-scrolling: touch;
+  word-wrap: break-word;
 }
-.word{opacity:.35;}
-.word.active{opacity:1;}
 
-#title{font-size:15px;}
-#date{color:#108cd7;font-size:14px;}
-#ref{color:#108cd7;margin-top:8px;font-size:14px;}
+.word { opacity: .35; }
+.word.active { opacity: 1; }
+
+#date, #ref { color: #108cd7; font-size: 14px; }
+#title { font-size: 15px; }
 
 /* CONTROLS */
-.translation-select{
- margin-top:6px;
- padding:4px 10px;
- border-radius:999px;
- background:rgba(255,255,255,.15);
- color:#fff;
- border:none;
+.translation-select {
+  margin-top: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border: none;
+  padding: 4px 10px;
 }
 
-.mode-buttons{
- display:flex;
- gap:10px;
- margin-top:14px;
+.mode-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
 }
-.mode-buttons button{
- flex:1;
- padding:12px;
- border:none;
- border-radius:999px;
- background:rgba(255,255,255,.15);
- color:#fff;
-}
-.mode-buttons button.active{background:#108cd7;}
 
-.actions{margin-top:12px;}
-.btn{
- padding:12px;
- border-radius:999px;
- border:none;
- background:#108cd7;
- color:#fff;
- width:100%;
+.mode-buttons button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+}
+
+.mode-buttons button.active { background: #108cd7; }
+
+.actions { margin-top: 12px; }
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 999px;
+  background: #108cd7;
+  color: #fff;
 }
 
 /* STREAK */
-#streak{
- position:fixed;
- bottom:max(25px, env(safe-area-inset-bottom));
- left:50%;
- transform:translateX(-50%);
- background:rgba(0,0,0,.6);
- padding:6px 14px;
- border-radius:999px;
- cursor:pointer;
+#streak {
+  position: fixed;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.6);
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
 }
 
-/* STREAK MODAL */
-#streakModal{
- position:fixed;
- top:0;left:0;width:100%;height:100%;
- background:rgba(0,0,0,.95);
- display:none;
- align-items:center;
- justify-content:center;
- flex-direction:column;
- text-align:center;
+/* MODAL */
+#streakModal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,.95);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 20px;
 }
 
-.badges{
- display:flex;
- gap:15px;
- margin:20px 0;
+.badges {
+  display: flex;
+  gap: 15px;
+  margin: 20px;
 }
-.badge{
- font-size:28px;
- opacity:.3;
-}
-.badge.active{opacity:1;}
 
-.progress{
- width:80%;
- height:10px;
- background:rgba(255,255,255,.2);
- border-radius:999px;
- overflow:hidden;
+.badge { opacity: .3; font-size: 28px; }
+.badge.active { opacity: 1; }
+
+.progress {
+  width: 80%;
+  height: 10px;
+  background: rgba(255,255,255,.2);
+  border-radius: 999px;
 }
-.progress div{
- height:100%;
- background:#108cd7;
+
+.progress div {
+  height: 100%;
+  background: #108cd7;
 }
 </style>
 </head>
@@ -210,18 +206,18 @@ body::before{
 <div id="ref"></div>
 
 <select id="translationSelect" class="translation-select">
-<option value="nlt">NLT</option>
-<option value="niv">NIV</option>
-<option value="kjv">KJV</option>
+  <option value="nlt">NLT</option>
+  <option value="niv">NIV</option>
+  <option value="kjv">KJV</option>
 </select>
 
 <div class="mode-buttons">
-<button id="dailyBtn" class="active" onclick="showDaily()">Daily</button>
-<button id="randomBtn" onclick="showRandom()">Random</button>
+  <button id="dailyBtn" class="active" onclick="showDaily()">Daily</button>
+  <button id="randomBtn" onclick="showRandom()">Random</button>
 </div>
 
 <div class="actions">
-<button class="btn" onclick="shareVerse()">Share</button>
+  <button class="btn" onclick="shareVerse()">Share</button>
 </div>
 
 </div>
@@ -230,323 +226,232 @@ body::before{
 <div id="streak" onclick="openStreak()"></div>
 
 <div id="streakModal" onclick="closeStreak(event)">
-<h1 id="streakCount"></h1>
-<div id="streakMsg"></div>
+  <h1 id="streakCount"></h1>
+  <div id="streakMsg"></div>
 
-<div class="badges">
-<span class="badge" id="b7">🌿</span>
-<span class="badge" id="b30">🔥</span>
-<span class="badge" id="b100">👑</span>
-</div>
+  <div class="badges">
+    <span class="badge" id="b7">🌿</span>
+    <span class="badge" id="b30">🔥</span>
+    <span class="badge" id="b100">👑</span>
+  </div>
 
-<div class="progress"><div id="progressBar"></div></div>
+  <div class="progress"><div id="progressBar"></div></div>
 </div>
 
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
 
 <script>
-
-/* BACKGROUNDS */
-const bgSets={
- morning:["/backgrounds/morning1.png","/backgrounds/morning2.png"],
- day:["/backgrounds/day1.png","/backgrounds/day2.png"],
- evening:["/backgrounds/evening1.png","/backgrounds/evening2.png"],
- night:["/backgrounds/night1.png","/backgrounds/night2.png"]
+/* BACKGROUND */
+const bgSets = {
+  morning: ["/backgrounds/morning1.png","/backgrounds/morning2.png"],
+  day: ["/backgrounds/day1.png","/backgrounds/day2.png"],
+  evening: ["/backgrounds/evening1.png","/backgrounds/evening2.png"],
+  night: ["/backgrounds/night1.png","/backgrounds/night2.png"]
 };
 
-function preloadImages(){
- Object.values(bgSets).flat().forEach(src=>{
-  const img=new Image();
-  img.src=src;
- });
+let currentBackground = "", currentTimeBlock = "";
+
+function getTimeBlock() {
+  const h = new Date().getHours();
+  if (h < 11) return "morning";
+  if (h < 17) return "day";
+  if (h < 21) return "evening";
+  return "night";
 }
 
-let currentBackground="";
-let currentTimeBlock="";
-
-function getTimeBlock(){
- const h=new Date().getHours();
- if(h>=5&&h<11) return "morning";
- if(h>=11&&h<17) return "day";
- if(h>=17&&h<21) return "evening";
- return "night";
+function updateBackground() {
+  const b = getTimeBlock();
+  if (b !== currentTimeBlock) {
+    currentTimeBlock = b;
+    const set = bgSets[b];
+    currentBackground = set[Math.floor(Math.random() * set.length)];
+    document.body.style.setProperty('--bg-image', `url('${currentBackground}')`);
+  }
 }
-
-function updateBackground(){
- const newBlock=getTimeBlock();
- if(newBlock!==currentTimeBlock){
-  currentTimeBlock=newBlock;
-  const set=bgSets[newBlock];
-  currentBackground=set[Math.floor(Math.random()*set.length)];
-  document.body.style.setProperty('--bg-image', `url('${currentBackground}')`);
- }
-}
-
-preloadImages();
 updateBackground();
-setInterval(updateBackground,60000);
 
 /* VERSES */
-let verses={nlt:{},niv:{},kjv:{}};
-let translation="nlt";
-let dailyKey="",currentKey="";
+let verses = { nlt:{}, niv:{}, kjv:{} };
+let translation = "nlt", dailyKey = "", currentKey = "";
 
-async function loadTranslation(t){
- if(Object.keys(verses[t]).length) return;
- const res=await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
- const data=await res.json();
- for(let b in data)
-  for(let c in data[b])
-   for(let v in data[b][c])
-    verses[t][`${b} ${c}:${v}`]=data[b][c][v];
+async function loadTranslation(t) {
+  try {
+    const res = await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
+    if (!res.ok) throw new Error("Missing translation");
+    const data = await res.json();
+
+    Object.entries(data).forEach(([book, chapters]) => {
+      Object.entries(chapters).forEach(([chapter, versesObj]) => {
+        Object.entries(versesObj).forEach(([v, text]) => {
+          verses[t][`${book} ${chapter}:${v}`] = text;
+        });
+      });
+    });
+
+  } catch (err) {
+    alert("Error loading Bible data.");
+  }
 }
 
-function getSeed(str){
- let h=0;
- for(let i=0;i<str.length;i++){
-  h=(h<<5)-h+str.charCodeAt(i);
-  h|=0;
- }
- return Math.abs(h);
+function getSeed(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h << 5) - h + s.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
 }
 
-function generateDaily(){
- const today=new Date().toDateString();
- const stored=JSON.parse(localStorage.getItem("dailyVerse")||"{}");
+function generateDaily() {
+  const today = new Date().toDateString();
+  const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
- if(stored.date===today){
-  dailyKey=stored.key;
- }else{
-  const keys=Object.keys(verses["nlt"]);
-  dailyKey=keys[getSeed(today)%keys.length];
-  localStorage.setItem("dailyVerse",JSON.stringify({date:today,key:dailyKey}));
- }
+  if (stored.date === today) dailyKey = stored.key;
+  else {
+    const keys = Object.keys(verses.nlt);
+    dailyKey = keys[getSeed(today) % keys.length];
+    localStorage.setItem("dailyVerse", JSON.stringify({ date: today, key: dailyKey }));
+  }
 
- currentKey=dailyKey;
- update("Daily Bible Verse");
- streak();
+  currentKey = dailyKey;
+  update("Daily Bible Verse");
+  streak();
 }
 
-/* BUTTONS */
-function showDaily(){
- currentKey=dailyKey;
- setActive("dailyBtn");
- update("Daily Bible Verse");
-}
-function showRandom(){
- const keys=Object.keys(verses[translation]);
- currentKey=keys[Math.floor(Math.random()*keys.length)];
- setActive("randomBtn");
- update("Random Verse");
-}
-function setActive(id){
- document.getElementById("dailyBtn").classList.remove("active");
- document.getElementById("randomBtn").classList.remove("active");
- document.getElementById(id).classList.add("active");
-}
-
-/* UPDATE */
-function update(title){
- const text=verses[translation][currentKey];
- if(!text) return;
-
- document.getElementById("title").innerText=title;
- document.getElementById("verse").innerHTML=
-  text.split(" ").map(w=>`<span class="word">${w}</span>`).join(" ");
- document.getElementById("ref").innerText=currentKey;
- document.getElementById("date").innerText=new Date().toDateString();
+function update(t) {
+  const text = verses[translation][currentKey];
+  document.getElementById("title").innerText = t;
+  document.getElementById("verse").innerHTML =
+    text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
+  document.getElementById("ref").innerText = currentKey;
+  document.getElementById("date").innerText = new Date().toDateString();
 }
 
 /* READ */
-function readVerse(){
- const icon=document.getElementById("readIcon");
- icon.classList.add("speaking");
+function readVerse() {
+  const words = document.querySelectorAll(".word");
+  words.forEach(w => w.classList.remove("active"));
+  let i = 0;
 
- const words=document.querySelectorAll(".word");
- words.forEach(w=>w.classList.remove("active"));
+  const u = new SpeechSynthesisUtterance(verses[translation][currentKey] + " " + currentKey);
 
- let i=0;
- const utter=new SpeechSynthesisUtterance(
-  verses[translation][currentKey]+" "+currentKey
- );
+  u.onboundary = e => {
+    if (words[i]) words[i++].classList.add("active");
+  };
 
- utter.onboundary=e=>{
-  if(e.name==="word"&&words[i]){
-   words[i].classList.add("active");i++;
-  }
- };
-
- utter.onend=()=>icon.classList.remove("speaking");
-
- speechSynthesis.cancel();
- speechSynthesis.speak(utter);
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
 }
 
 /* AMBIENT */
-let ambientOn=false;
+let ambientOn = false;
 
-function toggleAmbient(){
- const a=document.getElementById("ambientAudio");
-
- if(ambientOn){
-  fadeOut(a);
- }else{
-  a.volume=0;
-  a.play().catch(()=>{});
-  fadeIn(a);
- }
-
- ambientOn=!ambientOn;
- document.getElementById("ambientToggle").classList.toggle("active");
+function toggleAmbient() {
+  const a = document.getElementById("ambientAudio");
+  if (ambientOn) fadeOut(a);
+  else { a.volume = 0; a.play().catch(()=>{}); fadeIn(a); }
+  ambientOn = !ambientOn;
+  document.getElementById("ambientToggle").classList.toggle("active");
 }
 
-function fadeIn(a){
- let v=0;
- const i=setInterval(()=>{
-  v+=0.05;
-  if(v>=0.3){v=0.3;clearInterval(i);}
-  a.volume=v;
- },100);
+function fadeIn(a) {
+  let v = 0;
+  const i = setInterval(() => {
+    v += .05;
+    if (v >= .3) { v = .3; clearInterval(i); }
+    a.volume = v;
+  }, 100);
 }
 
-function fadeOut(a){
- let v=a.volume;
- const i=setInterval(()=>{
-  v-=0.05;
-  if(v<=0){
-   v=0;
-   clearInterval(i);
-   a.pause();
-   a.currentTime=0;
+function fadeOut(a) {
+  let v = a.volume;
+  const i = setInterval(() => {
+    v -= .05;
+    if (v <= 0) { clearInterval(i); a.pause(); a.currentTime = 0; }
+    a.volume = v;
+  }, 100);
+}
+
+/* SHARE */
+async function shareVerse() {
+  try {
+    const c = document.createElement("canvas");
+    c.width = 1080; c.height = 1080;
+    const x = c.getContext("2d");
+
+    const bg = new Image();
+    bg.src = currentBackground;
+    await new Promise(r => bg.onload = r);
+    x.drawImage(bg, 0, 0, 1080, 1080);
+
+    x.fillStyle = "rgba(0,0,0,.5)";
+    x.fillRect(120, 220, 840, 520);
+
+    x.fillStyle = "#fff";
+    x.font = "bold 48px Arial";
+    x.textAlign = "center";
+
+    wrapText(x, verses[translation][currentKey], 540, 320, 720, 60);
+
+    x.fillStyle = "#108cd7";
+    x.fillText(currentKey, 540, 680);
+
+    const logo = new Image();
+    logo.src = "logo.svg";
+    await new Promise(r => logo.onload = r);
+    x.drawImage(logo, 60, 880, 100, 100);
+
+    let blob = await new Promise(r => c.toBlob(r, "image/png"));
+    if (!blob) return;
+
+    const file = new File([blob], "tapnpray.png", { type: "image/png" });
+
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file] }); } catch {}
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "tapnpray.png"; a.click();
+
+  } catch {
+    alert("Unable to share image.");
   }
-  a.volume=v;
- },100);
-}
-
-/* SHARE (FINAL FIX) */
-async function shareVerse(){
- try{
-  const canvas=document.createElement("canvas");
-  canvas.width=1080;
-  canvas.height=1080;
-  const ctx=canvas.getContext("2d");
-
-  const bg=new Image();
-  bg.crossOrigin="anonymous";
-  bg.src=currentBackground;
-  await new Promise((res,rej)=>{
-   bg.onload=res;
-   bg.onerror=rej;
-  });
-
-  ctx.drawImage(bg,0,0,1080,1080);
-
-  ctx.fillStyle="rgba(0,0,0,.55)";
-  ctx.fillRect(0,0,1080,1080);
-
-  ctx.fillStyle="rgba(0,0,0,.5)";
-  ctx.fillRect(120,220,840,520);
-
-  ctx.fillStyle="#fff";
-  ctx.font="bold 48px Arial";
-  ctx.textAlign="center";
-
-  wrapText(ctx,verses[translation][currentKey],540,320,720,60);
-
-  ctx.fillStyle="#108cd7";
-  ctx.font="32px Arial";
-  ctx.fillText(currentKey,540,680);
-
-  const logo=new Image();
-  logo.src="logo.svg";
-  await new Promise(res=>logo.onload=res);
-
-  ctx.drawImage(logo,60,880,100,100);
-
-  ctx.fillStyle="rgba(255,255,255,.8)";
-  ctx.font="22px Arial";
-  ctx.textAlign="left";
-  ctx.fillText("tapnpray.github.io",60,1000);
-
-  let blob = await new Promise(resolve=>{
-   canvas.toBlob(resolve,"image/png");
-  });
-
-  if(!blob){
-   const dataUrl = canvas.toDataURL("image/png");
-   blob = await (await fetch(dataUrl)).blob();
-  }
-
-  const file = new File([blob], "tapnpray.png", {type:"image/png"});
-
-  if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-   await navigator.share({
-    files:[file],
-    title:"Tap N Pray",
-    text:"Daily Bible Verse"
-   });
-   return;
-  }
-
-  const url = URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.download="tapnpray.png";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-
-  setTimeout(()=>window.open(url,"_blank"),300);
-
- }catch(err){
-  console.error(err);
-  alert("Sharing is not supported on this device.");
- }
-}
-
-function wrapText(ctx,text,x,y,maxWidth,lineHeight){
- const words=text.split(' ');
- let line='';
- for(let n=0;n<words.length;n++){
-  const test=line+words[n]+' ';
-  const w=ctx.measureText(test).width;
-  if(w>maxWidth&&n>0){
-   ctx.fillText(line,x,y);
-   line=words[n]+' ';
-   y+=lineHeight;
-  }else line=test;
- }
- ctx.fillText(line,x,y);
 }
 
 /* STREAK */
-function streak(){
- let s=parseInt(localStorage.getItem("s"))||0;
- let last=localStorage.getItem("l");
- let today=new Date().toDateString();
+function streak() {
+  let s = parseInt(localStorage.getItem("s")) || 1;
+  localStorage.setItem("s", s);
+  document.getElementById("streak").innerText = "🔥 " + s + " Day Streak";
+  updateStreakUI(s);
+}
 
- if(!last){s=1;}
- else{
-  const diff=(new Date(today)-new Date(last))/(86400000);
-  if(diff===1)s++;
-  else if(diff>2)s=1;
- }
+function updateStreakUI(s) {
+  document.getElementById("streakCount").innerText = s + " Days";
+  document.getElementById("b7").classList.toggle("active", s >= 7);
+  document.getElementById("b30").classList.toggle("active", s >= 30);
+  document.getElementById("b100").classList.toggle("active", s >= 100);
+  document.getElementById("progressBar").style.width = (s / 100 * 100) + "%";
+}
 
- localStorage.setItem("s",s);
- localStorage.setItem("l",today);
+function openStreak() {
+  document.getElementById("streakModal").style.display = "flex";
+}
 
- document.getElementById("streak").innerText="🔥 "+s+" Day Streak";
+function closeStreak(e) {
+  if (e.target === e.currentTarget)
+    document.getElementById("streakModal").style.display = "none";
 }
 
 /* INIT */
-async function init(){
- await loadTranslation("nlt");
- await loadTranslation("niv");
- await loadTranslation("kjv");
- generateDaily();
-}
-init();
-
+(async () => {
+  await loadTranslation("nlt");
+  await loadTranslation("niv");
+  await loadTranslation("kjv");
+  generateDaily();
+})();
 </script>
 </body>
 </html>
