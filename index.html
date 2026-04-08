@@ -327,6 +327,24 @@ function generateDaily(){
  streak();
 }
 
+/* BUTTONS */
+function showDaily(){
+ currentKey=dailyKey;
+ setActive("dailyBtn");
+ update("Daily Bible Verse");
+}
+function showRandom(){
+ const keys=Object.keys(verses[translation]);
+ currentKey=keys[Math.floor(Math.random()*keys.length)];
+ setActive("randomBtn");
+ update("Random Verse");
+}
+function setActive(id){
+ document.getElementById("dailyBtn").classList.remove("active");
+ document.getElementById("randomBtn").classList.remove("active");
+ document.getElementById(id).classList.add("active");
+}
+
 /* UPDATE */
 function update(title){
  const text=verses[translation][currentKey];
@@ -405,7 +423,7 @@ function fadeOut(a){
  },100);
 }
 
-/* SHARE */
+/* SHARE (FINAL FIX) */
 async function shareVerse(){
  try{
   const canvas=document.createElement("canvas");
@@ -414,8 +432,12 @@ async function shareVerse(){
   const ctx=canvas.getContext("2d");
 
   const bg=new Image();
+  bg.crossOrigin="anonymous";
   bg.src=currentBackground;
-  await new Promise(r=>bg.onload=r);
+  await new Promise((res,rej)=>{
+   bg.onload=res;
+   bg.onerror=rej;
+  });
 
   ctx.drawImage(bg,0,0,1080,1080);
 
@@ -437,7 +459,7 @@ async function shareVerse(){
 
   const logo=new Image();
   logo.src="logo.svg";
-  await new Promise(r=>logo.onload=r);
+  await new Promise(res=>logo.onload=res);
 
   ctx.drawImage(logo,60,880,100,100);
 
@@ -446,23 +468,39 @@ async function shareVerse(){
   ctx.textAlign="left";
   ctx.fillText("tapnpray.github.io",60,1000);
 
-  const dataUrl=canvas.toDataURL("image/png");
+  let blob = await new Promise(resolve=>{
+   canvas.toBlob(resolve,"image/png");
+  });
 
-  if(navigator.share){
-   await navigator.share({
-    title:"Tap N Pray",
-    text:"Daily Bible Verse",
-    url:dataUrl
-   });
-  }else{
-   const a=document.createElement("a");
-   a.href=dataUrl;
-   a.download="tapnpray.png";
-   a.click();
+  if(!blob){
+   const dataUrl = canvas.toDataURL("image/png");
+   blob = await (await fetch(dataUrl)).blob();
   }
 
- }catch(e){
-  alert("Share failed");
+  const file = new File([blob], "tapnpray.png", {type:"image/png"});
+
+  if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+   await navigator.share({
+    files:[file],
+    title:"Tap N Pray",
+    text:"Daily Bible Verse"
+   });
+   return;
+  }
+
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="tapnpray.png";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  setTimeout(()=>window.open(url,"_blank"),300);
+
+ }catch(err){
+  console.error(err);
+  alert("Sharing is not supported on this device.");
  }
 }
 
@@ -505,10 +543,8 @@ async function init(){
  await loadTranslation("nlt");
  await loadTranslation("niv");
  await loadTranslation("kjv");
-
  generateDaily();
 }
-
 init();
 
 </script>
