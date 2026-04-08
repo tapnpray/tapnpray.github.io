@@ -45,44 +45,51 @@ body::after{
  align-items:center;
  justify-content:center;
  padding:100px 15px 180px;
+ box-sizing:border-box;
 }
 
 /* Verse Box */
 #votd{
  position:relative;
- background:rgba(0,0,0,.55);
+ background:rgba(0,0,0,.6);
  border-radius:28px;
  padding:24px;
  max-width:520px;width:100%;
  backdrop-filter:blur(30px);
  text-align:center;
+ max-height:70vh;
+ display:flex;
+ flex-direction:column;
 }
 
 #verse{
  font-size:clamp(22px,5vw,30px);
  line-height:1.6;
+ overflow-y:auto;
 }
 
-.word{opacity:.9;transition:.3s}
-.word.hit{opacity:0}
-
-/* Overlay Canvas */
-#breakoutOverlay{
- position:absolute;
- top:0;left:0;
- width:100%;height:100%;
- pointer-events:none;
-}
+/* Word highlight */
+.word{opacity:.35;transition:.25s;}
+.word.active{opacity:1;}
 
 /* Icons */
-#favoriteStar{position:absolute;top:12px;left:12px;font-size:22px;cursor:pointer;}
-#ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
-#ambientToggle.active{color:#7CFFB2;}
+#favoriteStar{
+ position:absolute;top:12px;left:12px;
+ font-size:22px;cursor:pointer;
+}
+#ambientToggle{
+ position:absolute;top:12px;right:12px;
+ cursor:pointer;
+}
+#ambientToggle.active{
+ color:#7CFFB2;
+ text-shadow:0 0 8px rgba(124,255,178,.8);
+}
 
 /* Text */
-#title{font-size:14px;opacity:.85}
-#date{color:#108cd7}
-#ref{color:#108cd7;margin-top:8px}
+#title{font-size:14px;opacity:.85;margin-bottom:4px;}
+#date{color:#108cd7;font-size:14px;}
+#ref{color:#108cd7;margin-top:8px;font-size:14px;}
 
 /* Topics */
 #topics{
@@ -92,7 +99,7 @@ body::after{
 #topics button{
  padding:6px 12px;border-radius:999px;
  border:none;background:rgba(255,255,255,.15);
- color:#fff;font-size:12px;
+ color:#fff;font-size:12px;cursor:pointer;
 }
 #topics button.active{background:#108cd7}
 
@@ -105,7 +112,7 @@ body::after{
 .btn{
  padding:12px;border-radius:999px;
  border:none;background:rgba(255,255,255,.15);
- color:#fff;
+ color:#fff;cursor:pointer;
 }
 .primary{background:#108cd7}
 
@@ -128,16 +135,6 @@ body::after{
  transform:translateX(-50%);
  background:rgba(0,0,0,.6);
  padding:8px 16px;border-radius:999px;
-}
-
-#gameTrigger{
- position:fixed;
- bottom:25px;
- left:20px;
- background:rgba(0,0,0,.6);
- padding:8px 14px;
- border-radius:999px;
- cursor:pointer;
  font-size:14px;
 }
 </style>
@@ -158,15 +155,13 @@ body::after{
 <div id="verse"></div>
 <div id="ref"></div>
 
-<canvas id="breakoutOverlay"></canvas>
-
 <div id="topics">
-<button onclick="goDaily()">Daily</button>
-<button onclick="pickTopic('peace')">Peace</button>
-<button onclick="pickTopic('strength')">Strength</button>
-<button onclick="pickTopic('hope')">Hope</button>
-<button onclick="pickTopic('guidance')">Guidance</button>
-<button onclick="pickTopic('faith')">Faith</button>
+<button onclick="goDaily(this)">Daily</button>
+<button onclick="pickTopic('peace',this)">Peace</button>
+<button onclick="pickTopic('strength',this)">Strength</button>
+<button onclick="pickTopic('hope',this)">Hope</button>
+<button onclick="pickTopic('guidance',this)">Guidance</button>
+<button onclick="pickTopic('faith',this)">Faith</button>
 </div>
 
 <div class="actions">
@@ -179,7 +174,6 @@ body::after{
 </div>
 </div>
 
-<div id="gameTrigger" onclick="startGame()">✝️ Play</div>
 <div id="streak"></div>
 
 <div id="favoritesModal" onclick="closeFavorites(event)">
@@ -194,39 +188,95 @@ body::after{
 
 /* ===== DATA ===== */
 let verses={},key="",dailyKey="";
-let topicKeys={};
+let topicCache={};
 
 /* LOAD */
 async function load(){
  const res=await fetch("BIBLE/NLT/NLT_bible.json");
  const data=await res.json();
+
  let flat={};
  for(let b in data)
   for(let c in data[b])
    for(let v in data[b][c])
     flat[`${b} ${c}:${v}`]=data[b][c][v];
+
  verses=flat;
  generateDaily();
+}
+
+/* DAILY SEED */
+function getSeed(str){
+ return str.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
 }
 
 /* DAILY */
 function generateDaily(){
  const keys=Object.keys(verses);
- const seed=new Date().toDateString().split('').reduce((a,c)=>a+c.charCodeAt(0),0);
- dailyKey=keys[seed%keys.length];
+ const today=new Date().toDateString();
+ const seed=getSeed(today);
+
+ dailyKey=keys[seed % keys.length];
  key=dailyKey;
- update();
+
+ update("Daily Bible Verse");
  streak();
 }
 
 /* UPDATE */
-function update(){
+function update(title){
  const words=verses[key].split(" ");
+
+ document.getElementById("title").innerText=title;
  document.getElementById("verse").innerHTML=
- words.map(w=>`<span class="word">${w}</span>`).join(" ");
+  words.map(w=>`<span class="word">${w}</span>`).join(" ");
+
  document.getElementById("ref").innerText=key;
  document.getElementById("date").innerText=new Date().toDateString();
+
+ updateStar();
 }
+
+/* TOPICS */
+const topicMap={
+ peace:["peace","rest"],
+ strength:["strength","power"],
+ hope:["hope","future"],
+ guidance:["wisdom","path"],
+ faith:["faith","trust"]
+};
+
+function pickTopic(topic,btn){
+ const today=new Date().toDateString();
+
+ if(!topicCache[topic]){
+  const filtered=Object.keys(verses).filter(ref=>{
+   let text=verses[ref].toLowerCase();
+   return topicMap[topic].some(w=>text.includes(w));
+  });
+
+  const seed=getSeed(today+topic);
+  topicCache[topic]=filtered[seed % filtered.length];
+ }
+
+ key=topicCache[topic];
+ update("Daily Bible Verse - "+capitalize(topic));
+
+ setActive(btn);
+}
+
+function goDaily(btn){
+ key=dailyKey;
+ update("Daily Bible Verse");
+ setActive(btn);
+}
+
+function setActive(btn){
+ document.querySelectorAll("#topics button").forEach(b=>b.classList.remove("active"));
+ btn.classList.add("active");
+}
+
+function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1);}
 
 /* AUDIO */
 let ambientOn=false;
@@ -234,9 +284,14 @@ function toggleAmbient(){
  const a=document.getElementById("ambientAudio");
 
  if(ambientOn){
-  a.pause();
-  a.currentTime=0;
-  a.volume=0;
+  let fade=setInterval(()=>{
+   a.volume-=0.05;
+   if(a.volume<=0){
+    a.pause();
+    a.currentTime=0;
+    clearInterval(fade);
+   }
+  },100);
  }else{
   a.volume=0;
   a.play();
@@ -247,15 +302,18 @@ function toggleAmbient(){
  }
 
  ambientOn=!ambientOn;
+ document.getElementById("ambientToggle").classList.toggle("active");
 }
 
 /* READ */
 function readVerse(){
  const words=document.querySelectorAll(".word");
  words.forEach(w=>w.classList.remove("active"));
- let i=0;
 
- const utter=new SpeechSynthesisUtterance(verses[key]);
+ let i=0;
+ const text=verses[key]+" "+key;
+
+ const utter=new SpeechSynthesisUtterance(text);
  utter.rate=.9;
 
  utter.onboundary=e=>{
@@ -277,6 +335,12 @@ function toggleFavorite(){
  if(f.includes(key)) f=f.filter(x=>x!==key);
  else f.push(key);
  localStorage.setItem("favs",JSON.stringify(f));
+ updateStar();
+}
+
+function updateStar(){
+ document.getElementById("favoriteStar").innerText=
+ getFavs().includes(key)?"⭐":"☆";
 }
 
 function openFavorites(){
@@ -319,97 +383,17 @@ function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let l=localStorage.getItem("l");
  let t=new Date().toDateString();
- if(l!==t){s++;localStorage.setItem("s",s);localStorage.setItem("l",t);}
- document.getElementById("streak").innerText="🔥 "+s;
-}
 
-/* ===== BREAKOUT GAME ===== */
-
-let canvas=document.getElementById("breakoutOverlay");
-let ctx=canvas.getContext("2d");
-let ball,blocks=[],paddleX,gameOn=false;
-
-function startGame(){
- if(gameOn) return;
- gameOn=true;
-
- canvas.width=canvas.offsetWidth;
- canvas.height=canvas.offsetHeight;
-
- mapWords();
- initBall();
- animate();
-}
-
-function mapWords(){
- blocks=[];
- document.querySelectorAll("#verse .word").forEach(el=>{
-  const r=el.getBoundingClientRect();
-  const c=canvas.getBoundingClientRect();
-
-  blocks.push({
-   el,
-   x:r.left-c.left,
-   y:r.top-c.top,
-   w:r.width,
-   h:r.height,
-   hit:false
-  });
- });
-}
-
-function initBall(){
- ball={x:200,y:200,dx:3,dy:-3};
- paddleX=canvas.width/2;
-}
-
-function animate(){
- if(!gameOn) return;
-
- ctx.clearRect(0,0,canvas.width,canvas.height);
-
- ctx.font="20px Arial";
- ctx.fillText("✝️",ball.x,ball.y);
-
- ctx.fillRect(paddleX-50,canvas.height-20,100,10);
-
- ball.x+=ball.dx;
- ball.y+=ball.dy;
-
- if(ball.x<0||ball.x>canvas.width) ball.dx*=-1;
- if(ball.y<0) ball.dy*=-1;
-
- if(ball.y>canvas.height-30 && ball.x>paddleX-50 && ball.x<paddleX+50)
-  ball.dy*=-1;
-
- blocks.forEach(b=>{
-  if(!b.hit && ball.x>b.x && ball.x<b.x+b.w && ball.y>b.y && ball.y<b.y+b.h){
-   b.hit=true;
-   b.el.classList.add("hit");
-   ball.dy*=-1;
-  }
- });
-
- if(ball.y>canvas.height || blocks.every(b=>b.hit)){
-  stopGame();
+ if(l!==t){
+  s++;
+  localStorage.setItem("s",s);
+  localStorage.setItem("l",t);
  }
 
- requestAnimationFrame(animate);
+ document.getElementById("streak").innerText="🔥 Tap Streak: "+s;
 }
 
-window.addEventListener("mousemove",e=>{
- paddleX=e.clientX-canvas.getBoundingClientRect().left;
-});
-window.addEventListener("touchmove",e=>{
- paddleX=e.touches[0].clientX-canvas.getBoundingClientRect().left;
-});
-
-function stopGame(){
- gameOn=false;
- document.querySelectorAll(".word").forEach(w=>w.classList.remove("hit"));
-}
-
-/* START */
+/* INIT */
 load();
 
 </script>
