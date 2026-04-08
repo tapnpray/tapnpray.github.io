@@ -8,147 +8,184 @@ Tap N Pray is a beautifully designed, mobile-first web app that delivers a **dai
 
 ---
 
-## 🙏 Features
+## ✨ Features
 
-### 📖 Daily Verse
+### 📖 Daily Bible Verse
 
-* Automatically selects a verse each day
-* Clean, centered reading experience
-* Smooth fade-in animation
+* A **consistent verse per day** (resets daily)
+* Carefully randomized using a deterministic seed
+* Designed to feel meaningful and intentional
 
-### 🌍 Multiple Translations
+### 🎯 Topic-Based Verses
 
-* KJV, NIV, NLT support
-* Instantly switch between translations
+Explore scripture based on your current need:
 
-### 🎧 Verse Reading
+* Peace
+* Strength
+* Hope
+* Guidance
+* Faith
 
-* Tap **"Read Verse"** to hear the verse aloud
-* Word-by-word highlighting synced with speech
+Each topic also delivers a **daily rotating verse**, unique per day.
 
-### 🌿 Ambient Sound
+---
 
-* Optional calming background audio
-* Smooth fade in/out controls
+### 🔊 Immersive Reading Experience
 
-### 🖼 Dynamic Backgrounds
+* "Read Verse" button uses built-in speech synthesis
+* Words are **highlighted in sync** as they are spoken
+* Includes verse reference at the end
 
-* Rotates through curated images every minute
-* Soft blur + gradient overlay for readability
+---
 
-### 🧊 Frosted Glass UI
+### 🌿 Ambient Sound Mode
 
-* Modern translucent card design
-* Optimized for readability and aesthetics
+* Toggle calming background audio
+* Smooth fade in/out transitions
+* Designed for prayer, meditation, and reflection
 
-### 📸 Share to Social Media
+---
 
-* Generates a **branded square image**
-* Includes:
+### ⭐ Favorites System
 
-  * Background image
-  * Frosted glass verse box
-  * Logo (properly scaled)
-  * Verse + reference
-  * Website watermark
+* Save verses you love
+* View all saved verses in a dedicated modal
+* Remove saved verses anytime
+
+---
+
+### 📤 Share & Copy
+
+* Copy verses instantly
+* Native share support for mobile devices
+* Designed for social sharing (Instagram-ready enhancements coming)
+
+---
 
 ### 🔥 Tap Streak
 
-* Tracks daily visits using local storage
-* Encourages consistency and habit-building
-
-### 💙 Support Button
-
-* Direct link to support the project via Venmo
+* Tracks daily visits
+* Encourages consistency in scripture engagement
 
 ---
 
-## 📱 Mobile Optimized
+### 🌄 Dynamic Backgrounds
 
-* Designed for **iPhone and Android**
-* Locked viewport for app-like experience
-* Works great when added to home screen (PWA-ready)
+* Changes based on **time of day**:
+
+  * Morning ☀️
+  * Day 🌤️
+  * Evening 🌇
+  * Night 🌙
+* Smooth transitions + subtle zoom animation
+* Creates a peaceful, immersive environment
 
 ---
 
-## 🛠 Tech Stack
+## 📱 Mobile-First Design
+
+Tap N Pray is optimized for:
+
+* iPhone (Safari & Chrome)
+* Android devices
+* Progressive Web App (PWA) ready
+
+You can **Add to Home Screen** for an app-like experience.
+
+---
+
+## 🛠️ Tech Stack
 
 * HTML5
-* CSS3 (Glassmorphism + Responsive Design)
+* CSS3 (Glassmorphism + animations)
 * Vanilla JavaScript
-* Web Speech API (Text-to-Speech)
-* Canvas API (Share Image Generation)
-* GitHub Pages (Hosting)
+* Web Speech API (text-to-speech)
+* LocalStorage (favorites, streaks)
+* GitHub Pages (hosting)
 
 ---
 
-## 📁 Project Structure
+## 📂 Project Structure
 
 ```
 /
 ├── index.html
-├── logo.svg
-├── backgrounds/
+├── /backgrounds
 │   ├── morning1.png
 │   ├── morning2.png
-│   └── day1.png
-├── sounds/
+│   ├── day1.png
+│   ├── day2.png
+│   ├── evening1.png
+│   ├── evening2.png
+│   ├── night1.png
+│   ├── night2.png
+├── /sounds
 │   └── calm.mp3
-├── BIBLE/
-│   ├── KJV/
-│   ├── NIV/
-│   └── NLT/
+├── /BIBLE
+│   └── NLT_bible.json
+└── logo.svg
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Live Site
 
-1. Clone the repository:
+👉 https://tapnpray.github.io/
+
+---
+
+## 🔧 Setup (Local Development)
+
+1. Clone the repo:
 
 ```bash
 git clone https://github.com/tapnpray/tapnpray.github.io.git
 ```
 
 2. Open `index.html` in your browser
-   *(or deploy via GitHub Pages)*
+   (No build tools required)
 
 ---
 
-## 📌 Notes
+## 📈 Analytics
 
-* No backend required — fully client-side
-* Verses are loaded from local JSON files hosted in the repo
-* Streak data is stored in browser `localStorage`
-
----
-
-## 🔮 Future Enhancements
-
-* Additional background themes (sunset, night)
-* Improved voice options
-* Favorites / saved verses system
-* Push notifications (PWA)
-* Verse categories (hope, faith, strength)
+Google Analytics is integrated to help understand usage and improve the experience.
 
 ---
 
 ## 💙 Support
 
-If this app has blessed you, consider supporting:
+If this app blesses you and you want to support the mission:
 
 👉 https://venmo.com/u/tapnpray
 
 ---
 
-## ✨ Vision
+## 🌱 Vision
 
-Tap N Pray is built to create a **simple daily habit of connecting with Scripture** — removing friction and making it easy to pause, reflect, and grow.
+Tap N Pray is more than an app — it's a **daily spiritual touchpoint**.
 
-> “One Tap Closer to Christ”
+Future plans include:
+
+* Smarter verse selection (AI-assisted)
+* Deeper topic filtering
+* Social sharing visuals
+* Devotional integrations
+* Community features
 
 ---
 
-## 📄 License
+## 📜 License
 
-This project is open source and available under the MIT License.
+This project is open for personal and inspirational use.
+All scripture content belongs to its respective publishers.
+
+---
+
+## 🙏 Final Thought
+
+> “Your word is a lamp to my feet and a light to my path.” — Psalm 119:105
+
+---
+
+**Built with purpose. Shared with love.**
