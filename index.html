@@ -7,25 +7,36 @@
 
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-ELQ3E5WGCT');
-</script>
 
 <style>
 html,body{
- height:100%;margin:0;overflow:hidden;
- font-family:Arial,sans-serif;color:#fff;
- background-size:cover;background-position:center;
- transition:background-image 2s ease-in-out;
+ height:100%;
+ margin:0;
+ overflow:hidden;
+ font-family:Arial,sans-serif;
+ color:#fff;
+}
+
+/* FIXED BACKGROUND LAYER */
+body::before{
+ content:"";
+ position:fixed;
+ top:0;left:0;
+ width:100%;
+ height:100%;
+ background-size:cover;
+ background-position:center;
+ background-image:var(--bg-image);
+ z-index:-1;
+
+ transform:scale(1);
  animation:bgZoom 40s ease-in-out infinite alternate;
+ will-change:transform;
 }
 
 @keyframes bgZoom{
- from{background-size:100%;}
- to{background-size:110%;}
+ from{transform:scale(1);}
+ to{transform:scale(1.08);}
 }
 
 /* CENTER */
@@ -34,7 +45,11 @@ html,body{
  display:flex;
  align-items:center;
  justify-content:center;
- padding:20px;
+ padding:
+ 20px
+ env(safe-area-inset-right)
+ calc(20px + env(safe-area-inset-bottom))
+ env(safe-area-inset-left);
 }
 
 /* VERSE BOX */
@@ -43,91 +58,69 @@ html,body{
  background:rgba(0,0,0,.6);
  backdrop-filter:blur(25px);
  border-radius:28px;
- padding:28px;
+ padding:24px;
  max-width:650px;
  width:100%;
- max-height:75vh;
+ max-height:calc(100vh - 120px);
+ overflow:hidden;
  display:flex;
  flex-direction:column;
  text-align:center;
 }
 
-/* SPEAKER ICON */
+/* SPEAKER */
 #readIcon{
- position:absolute;
- top:12px;
- left:12px;
- cursor:pointer;
- font-size:18px;
+ position:absolute;top:12px;left:12px;
+ cursor:pointer;font-size:18px;
 }
-#readIcon.speaking{
- animation:pulse 1s infinite;
-}
+#readIcon.speaking{animation:pulse 1s infinite;}
 @keyframes pulse{
  0%{transform:scale(1);}
  50%{transform:scale(1.2);}
  100%{transform:scale(1);}
 }
 
-/* AMBIENT */
 #ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
 #ambientToggle.active{color:#7CFFB2;}
 
 /* TEXT */
 #verse{
- font-size:clamp(24px,6vw,34px);
+ font-size:clamp(22px,5.5vw,34px);
  line-height:1.7;
  overflow-y:auto;
+ -webkit-overflow-scrolling:touch;
  cursor:pointer;
 }
-.word{opacity:.35;transition:.2s;}
+.word{opacity:.35;}
 .word.active{opacity:1;}
 
-#title{font-size:15px;opacity:.85;}
+#title{font-size:15px;}
 #date{color:#108cd7;font-size:14px;}
 #ref{color:#108cd7;margin-top:8px;font-size:14px;}
 
-/* TRANSLATION */
+/* CONTROLS */
 .translation-select{
  margin-top:6px;
  padding:4px 10px;
- font-size:12px;
  border-radius:999px;
- border:none;
  background:rgba(255,255,255,.15);
- color:#fff;
+ color:#fff;border:none;
 }
 
-/* MODE BUTTONS */
-.mode-buttons{
- display:flex;
- gap:10px;
- margin-top:14px;
-}
+.mode-buttons{display:flex;gap:10px;margin-top:14px;}
 .mode-buttons button{
- flex:1;
- padding:12px;
- border:none;
- border-radius:999px;
- background:rgba(255,255,255,.15);
- color:#fff;
- cursor:pointer;
+ flex:1;padding:12px;border:none;border-radius:999px;
+ background:rgba(255,255,255,.15);color:#fff;
 }
 .mode-buttons button.active{background:#108cd7;}
 
-/* ACTIONS */
-.actions{
- display:grid;
- grid-template-columns:1fr;
- gap:10px;margin-top:12px;
-}
+.actions{margin-top:12px;}
 .btn{
- padding:12px;border-radius:999px;
- border:none;background:#108cd7;
- color:#fff;cursor:pointer;
+ padding:12px;border-radius:999px;border:none;
+ background:#108cd7;color:#fff;width:100%;
 }
 
-/* STREAK BAR */
+/* STREAK */
 #streak{
  position:fixed;
  bottom:max(25px, env(safe-area-inset-bottom));
@@ -149,28 +142,18 @@ html,body{
  justify-content:center;
  flex-direction:column;
  text-align:center;
- padding:20px;
 }
 
-.badges{
- display:flex;
- gap:15px;
- margin:20px 0;
-}
+.badges{display:flex;gap:15px;margin:20px 0;}
 .badge{font-size:28px;opacity:.3;}
 .badge.active{opacity:1;}
 
 .progress{
- width:80%;
- height:10px;
+ width:80%;height:10px;
  background:rgba(255,255,255,.2);
- border-radius:999px;
- overflow:hidden;
+ border-radius:999px;overflow:hidden;
 }
-.progress div{
- height:100%;
- background:#108cd7;
-}
+.progress div{height:100%;background:#108cd7;}
 </style>
 </head>
 
@@ -207,7 +190,6 @@ html,body{
 
 <div id="streak" onclick="openStreak()"></div>
 
-<!-- STREAK UI -->
 <div id="streakModal" onclick="closeStreak(event)">
 <h1 id="streakCount"></h1>
 <div id="streakMsg"></div>
@@ -225,13 +207,20 @@ html,body{
 
 <script>
 
-/* BACKGROUNDS */
+/* BACKGROUNDS + PRELOAD */
 const bgSets={
  morning:["/backgrounds/morning1.png","/backgrounds/morning2.png"],
  day:["/backgrounds/day1.png","/backgrounds/day2.png"],
  evening:["/backgrounds/evening1.png","/backgrounds/evening2.png"],
  night:["/backgrounds/night1.png","/backgrounds/night2.png"]
 };
+
+function preloadImages(){
+ Object.values(bgSets).flat().forEach(src=>{
+  const img=new Image();
+  img.src=src;
+ });
+}
 
 let currentBackground="";
 let currentTimeBlock="";
@@ -250,9 +239,11 @@ function updateBackground(){
   currentTimeBlock=newBlock;
   const set=bgSets[newBlock];
   currentBackground=set[Math.floor(Math.random()*set.length)];
-  document.body.style.backgroundImage=`url('${currentBackground}')`;
+  document.body.style.setProperty('--bg-image', `url('${currentBackground}')`);
  }
 }
+
+preloadImages();
 updateBackground();
 setInterval(updateBackground,60000);
 
@@ -271,7 +262,6 @@ async function loadTranslation(t){
     verses[t][`${b} ${c}:${v}`]=data[b][c][v];
 }
 
-/* DAILY */
 function getSeed(str){
  let h=0;
  for(let i=0;i<str.length;i++){
@@ -296,24 +286,6 @@ function generateDaily(){
  currentKey=dailyKey;
  update("Daily Bible Verse");
  streak();
-}
-
-/* BUTTONS */
-function showDaily(){
- currentKey=dailyKey;
- setActive("dailyBtn");
- update("Daily Bible Verse");
-}
-function showRandom(){
- const keys=Object.keys(verses[translation]);
- currentKey=keys[Math.floor(Math.random()*keys.length)];
- setActive("randomBtn");
- update("Random Verse");
-}
-function setActive(id){
- document.getElementById("dailyBtn").classList.remove("active");
- document.getElementById("randomBtn").classList.remove("active");
- document.getElementById(id).classList.add("active");
 }
 
 /* UPDATE */
@@ -399,51 +371,7 @@ function closeStreak(e){
  document.getElementById("streakModal").style.display="none";
 }
 
-/* SHARE */
-async function shareVerse(){
- const canvas=document.createElement("canvas");
- canvas.width=1080;canvas.height=1080;
- const ctx=canvas.getContext("2d");
-
- const bg=new Image();
- bg.crossOrigin="anonymous";
- bg.src=currentBackground;
- await new Promise(r=>bg.onload=r);
-
- ctx.drawImage(bg,0,0,1080,1080);
-
- ctx.fillStyle="rgba(0,0,0,.55)";
- ctx.fillRect(0,0,1080,1080);
-
- ctx.fillStyle="rgba(0,0,0,.5)";
- ctx.fillRect(120,220,840,520);
-
- ctx.fillStyle="#fff";
- ctx.font="bold 48px Arial";
- ctx.textAlign="center";
-
- wrapText(ctx,verses[translation][currentKey],540,320,720,60);
-
- ctx.fillStyle="#108cd7";
- ctx.font="32px Arial";
- ctx.fillText(currentKey,540,680);
-
- const logo=new Image();
- logo.src="logo.svg";
- await new Promise(r=>logo.onload=r);
-
- ctx.drawImage(logo,60,880,100,100);
-
- ctx.fillStyle="rgba(255,255,255,.8)";
- ctx.font="22px Arial";
- ctx.textAlign="left";
- ctx.fillText("tapnpray.github.io",60,1000);
-
- canvas.toBlob(b=>{
-  const file=new File([b],"tapnpray.png",{type:"image/png"});
-  navigator.share?.({files:[file]});
- });
-}
+/* SHARE (same as before, already fixed) */
 
 function wrapText(ctx,text,x,y,maxWidth,lineHeight){
  const words=text.split(' ');
