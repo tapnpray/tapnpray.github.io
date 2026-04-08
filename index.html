@@ -7,6 +7,12 @@
 
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ELQ3E5WGCT');
+</script>
 
 <style>
 html,body{
@@ -17,26 +23,24 @@ html,body{
  color:#fff;
 }
 
-/* FIXED BACKGROUND LAYER */
+/* STATIC BACKGROUND (NO ANIMATION) */
 body::before{
  content:"";
  position:fixed;
  top:0;left:0;
  width:100%;
  height:100%;
+ min-width:100vw;
+ min-height:100vh;
+
  background-size:cover;
  background-position:center;
  background-image:var(--bg-image);
+
+ transform:scale(1.15); /* prevents white edges */
+ filter:blur(3px); /* subtle premium blur */
+
  z-index:-1;
-
- transform:scale(1);
- animation:bgZoom 40s ease-in-out infinite alternate;
- will-change:transform;
-}
-
-@keyframes bgZoom{
- from{transform:scale(1);}
- to{transform:scale(1.08);}
 }
 
 /* CENTER */
@@ -70,17 +74,27 @@ body::before{
 
 /* SPEAKER */
 #readIcon{
- position:absolute;top:12px;left:12px;
- cursor:pointer;font-size:18px;
+ position:absolute;
+ top:12px;
+ left:12px;
+ cursor:pointer;
+ font-size:18px;
 }
-#readIcon.speaking{animation:pulse 1s infinite;}
+#readIcon.speaking{
+ animation:pulse 1s infinite;
+}
 @keyframes pulse{
  0%{transform:scale(1);}
  50%{transform:scale(1.2);}
  100%{transform:scale(1);}
 }
 
-#ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
+#ambientToggle{
+ position:absolute;
+ top:12px;
+ right:12px;
+ cursor:pointer;
+}
 #ambientToggle.active{color:#7CFFB2;}
 
 /* TEXT */
@@ -104,20 +118,33 @@ body::before{
  padding:4px 10px;
  border-radius:999px;
  background:rgba(255,255,255,.15);
- color:#fff;border:none;
+ color:#fff;
+ border:none;
 }
 
-.mode-buttons{display:flex;gap:10px;margin-top:14px;}
+.mode-buttons{
+ display:flex;
+ gap:10px;
+ margin-top:14px;
+}
 .mode-buttons button{
- flex:1;padding:12px;border:none;border-radius:999px;
- background:rgba(255,255,255,.15);color:#fff;
+ flex:1;
+ padding:12px;
+ border:none;
+ border-radius:999px;
+ background:rgba(255,255,255,.15);
+ color:#fff;
 }
 .mode-buttons button.active{background:#108cd7;}
 
 .actions{margin-top:12px;}
 .btn{
- padding:12px;border-radius:999px;border:none;
- background:#108cd7;color:#fff;width:100%;
+ padding:12px;
+ border-radius:999px;
+ border:none;
+ background:#108cd7;
+ color:#fff;
+ width:100%;
 }
 
 /* STREAK */
@@ -144,16 +171,28 @@ body::before{
  text-align:center;
 }
 
-.badges{display:flex;gap:15px;margin:20px 0;}
-.badge{font-size:28px;opacity:.3;}
+.badges{
+ display:flex;
+ gap:15px;
+ margin:20px 0;
+}
+.badge{
+ font-size:28px;
+ opacity:.3;
+}
 .badge.active{opacity:1;}
 
 .progress{
- width:80%;height:10px;
+ width:80%;
+ height:10px;
  background:rgba(255,255,255,.2);
- border-radius:999px;overflow:hidden;
+ border-radius:999px;
+ overflow:hidden;
 }
-.progress div{height:100%;background:#108cd7;}
+.progress div{
+ height:100%;
+ background:#108cd7;
+}
 </style>
 </head>
 
@@ -288,6 +327,24 @@ function generateDaily(){
  streak();
 }
 
+/* BUTTONS */
+function showDaily(){
+ currentKey=dailyKey;
+ setActive("dailyBtn");
+ update("Daily Bible Verse");
+}
+function showRandom(){
+ const keys=Object.keys(verses[translation]);
+ currentKey=keys[Math.floor(Math.random()*keys.length)];
+ setActive("randomBtn");
+ update("Random Verse");
+}
+function setActive(id){
+ document.getElementById("dailyBtn").classList.remove("active");
+ document.getElementById("randomBtn").classList.remove("active");
+ document.getElementById(id).classList.add("active");
+}
+
 /* UPDATE */
 function update(title){
  const text=verses[translation][currentKey];
@@ -371,21 +428,65 @@ function closeStreak(e){
  document.getElementById("streakModal").style.display="none";
 }
 
-/* SHARE (same as before, already fixed) */
+/* SHARE (FIXED MOBILE) */
+async function shareVerse(){
+ const canvas=document.createElement("canvas");
+ canvas.width=1080;
+ canvas.height=1080;
+ const ctx=canvas.getContext("2d");
 
-function wrapText(ctx,text,x,y,maxWidth,lineHeight){
- const words=text.split(' ');
- let line='';
- for(let n=0;n<words.length;n++){
-  const test=line+words[n]+' ';
-  const w=ctx.measureText(test).width;
-  if(w>maxWidth&&n>0){
-   ctx.fillText(line,x,y);
-   line=words[n]+' ';
-   y+=lineHeight;
-  }else line=test;
- }
- ctx.fillText(line,x,y);
+ const bg=new Image();
+ bg.crossOrigin="anonymous";
+ bg.src=currentBackground;
+ await new Promise(r=>bg.onload=r);
+
+ ctx.drawImage(bg,0,0,1080,1080);
+
+ ctx.fillStyle="rgba(0,0,0,.55)";
+ ctx.fillRect(0,0,1080,1080);
+
+ ctx.fillStyle="rgba(0,0,0,.5)";
+ ctx.fillRect(120,220,840,520);
+
+ ctx.fillStyle="#fff";
+ ctx.font="bold 48px Arial";
+ ctx.textAlign="center";
+
+ wrapText(ctx,verses[translation][currentKey],540,320,720,60);
+
+ ctx.fillStyle="#108cd7";
+ ctx.font="32px Arial";
+ ctx.fillText(currentKey,540,680);
+
+ const logo=new Image();
+ logo.src="logo.svg";
+ await new Promise(r=>logo.onload=r);
+
+ ctx.drawImage(logo,60,880,100,100);
+
+ ctx.fillStyle="rgba(255,255,255,.8)";
+ ctx.font="22px Arial";
+ ctx.textAlign="left";
+ ctx.fillText("tapnpray.github.io",60,1000);
+
+ canvas.toBlob(async (blob)=>{
+  const file=new File([blob],"tapnpray.png",{type:"image/png"});
+
+  try{
+   if(navigator.canShare && navigator.canShare({files:[file]})){
+    await navigator.share({files:[file], title:"Tap N Pray"});
+   } else {
+    throw new Error();
+   }
+  }catch{
+   const url=URL.createObjectURL(blob);
+   const a=document.createElement("a");
+   a.href=url;
+   a.download="tapnpray.png";
+   a.click();
+   setTimeout(()=>window.open(url,"_blank"),500);
+  }
+ });
 }
 
 /* INIT */
