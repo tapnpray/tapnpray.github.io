@@ -19,59 +19,31 @@ html,body{
  height:100%;margin:0;overflow:hidden;
  font-family:Arial,sans-serif;color:#fff;
  background-size:cover;background-position:center;
-}
-
-/* Background */
-body{
  transition:background-image 1.5s ease-in-out;
- animation:zoom 60s linear infinite;
-}
-@keyframes zoom{
- 0%{background-size:100%;}
- 100%{background-size:110%;}
 }
 
-body::before{
- content:"";position:fixed;width:100%;height:100%;
- background:linear-gradient(to bottom,rgba(0,0,0,.4),rgba(0,0,0,.9));
- z-index:-2;
-}
-body::after{
- content:"";position:fixed;width:100%;height:100%;
- backdrop-filter:blur(12px);z-index:-1;
-}
-
-/* CENTER FIX */
 .center{
  height:100%;
  display:flex;
  align-items:center;
  justify-content:center;
  padding:20px;
- box-sizing:border-box;
 }
 
-/* Verse Box */
 #votd{
  position:relative;
  background:rgba(0,0,0,.6);
+ backdrop-filter:blur(25px);
  border-radius:28px;
- padding:24px;
+ padding:20px;
  max-width:520px;width:100%;
- backdrop-filter:blur(30px);
- text-align:center;
- max-height:72vh;
+ max-height:75vh;
  display:flex;
  flex-direction:column;
+ text-align:center;
 }
 
-/* Logo */
-.logo-container{
- position:fixed;bottom:25px;left:20px;opacity:.7;
-}
-.logo-container img{max-width:55px}
-
-/* Text */
+/* TEXT */
 #verse{
  font-size:clamp(22px,5vw,30px);
  line-height:1.6;
@@ -81,75 +53,76 @@ body::after{
 .word.active{opacity:1;}
 
 #title{font-size:14px;opacity:.85;}
-#date{color:#108cd7;font-size:14px;}
-#ref{color:#108cd7;margin-top:8px;font-size:14px;}
+#date{color:#108cd7;font-size:13px;}
+#ref{color:#108cd7;margin-top:6px;font-size:13px;}
 
-/* Controls */
+/* ICONS */
 #favoriteStar{position:absolute;top:12px;left:12px;cursor:pointer;}
 #ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
 #ambientToggle.active{color:#7CFFB2;}
 
-/* Translation */
+/* TRANSLATION */
 .translation-select{
- padding:4px 10px;
- font-size:12px;
+ margin-top:6px;
+ padding:3px 8px;
+ font-size:11px;
  border-radius:999px;
  border:none;
- background:rgba(255,255,255,0.15);
+ background:rgba(255,255,255,.15);
  color:#fff;
 }
 
-/* Topics */
-#topics{
- display:flex;flex-wrap:wrap;gap:8px;
- justify-content:center;margin:10px 0;
+/* BUTTONS */
+.mode-buttons{
+ display:flex;
+ gap:10px;
+ margin-top:12px;
 }
-#topics button{
- padding:6px 12px;border-radius:999px;
- border:none;background:rgba(255,255,255,.15);
- color:#fff;cursor:pointer;font-size:12px;
+.mode-buttons button{
+ flex:1;
+ padding:10px;
+ border:none;
+ border-radius:999px;
+ background:rgba(255,255,255,.15);
+ color:#fff;
 }
-#topics button.active{background:#108cd7}
+.mode-buttons button.active{background:#108cd7;}
 
-/* Actions */
 .actions{
  display:grid;
  grid-template-columns:repeat(2,1fr);
  gap:10px;margin-top:10px;
 }
 .btn{
- padding:12px;border-radius:999px;
+ padding:10px;border-radius:999px;
  border:none;background:rgba(255,255,255,.15);
- color:#fff;cursor:pointer;
+ color:#fff;
 }
 .primary{background:#108cd7}
 
-/* Favorites */
+/* FAVORITES */
 #favoritesModal{
  position:fixed;top:0;left:0;width:100%;height:100%;
  background:rgba(0,0,0,.95);
  display:none;overflow:auto;padding:20px;
 }
 .favorite-item{
- margin-bottom:15px;
- padding:15px;
  background:rgba(255,255,255,.1);
- border-radius:12px;
+ padding:12px;margin-bottom:10px;
+ border-radius:10px;
 }
 
-/* Streak */
+/* STREAK */
 #streak{
  position:fixed;bottom:25px;left:50%;
  transform:translateX(-50%);
  background:rgba(0,0,0,.6);
- padding:8px 16px;border-radius:999px;
+ padding:6px 14px;border-radius:999px;
 }
 </style>
 </head>
 
 <body>
-
-<div class="logo-container"><img src="logo.svg"></div>
 
 <div class="center">
 <div id="votd">
@@ -162,25 +135,19 @@ body::after{
 <div id="verse"></div>
 <div id="ref"></div>
 
-<div style="display:flex;justify-content:center;margin-top:8px;">
 <select id="translationSelect" class="translation-select">
 <option value="nlt">NLT</option>
 <option value="niv">NIV</option>
 <option value="kjv">KJV</option>
 </select>
-</div>
 
-<div id="topics">
-<button onclick="setMode('daily', this)">Daily</button>
-<button onclick="setMode('peace', this)">Peace</button>
-<button onclick="setMode('strength', this)">Strength</button>
-<button onclick="setMode('hope', this)">Hope</button>
-<button onclick="setMode('guidance', this)">Guidance</button>
-<button onclick="setMode('faith', this)">Faith</button>
+<div class="mode-buttons">
+<button id="dailyBtn" class="active" onclick="showDaily()">Daily</button>
+<button id="randomBtn" onclick="showRandom()">Random</button>
 </div>
 
 <div class="actions">
-<button class="btn primary" onclick="readVerse()">Read Verse</button>
+<button class="btn primary" onclick="readVerse()">Read</button>
 <button class="btn" onclick="openFavorites()">Favorites</button>
 <button class="btn" onclick="copyVerse()">Copy</button>
 <button class="btn" onclick="shareVerse()">Share</button>
@@ -195,165 +162,102 @@ body::after{
 <div id="favoritesContent"></div>
 </div>
 
-<audio id="ambientAudio" loop>
-<source src="/sounds/calm.mp3">
-</audio>
+<audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
 
 <script>
+
+/* BACKGROUNDS */
+const bgSets={
+ morning:["/backgrounds/morning1.png","/backgrounds/morning2.png"],
+ day:["/backgrounds/day1.png","/backgrounds/day2.png"],
+ evening:["/backgrounds/evening1.png","/backgrounds/evening2.png"],
+ night:["/backgrounds/night1.png","/backgrounds/night2.png"]
+};
+let bgIndex=0;
+
+function getTimeBlock(){
+ const h=new Date().getHours();
+ if(h>=5&&h<11) return "morning";
+ if(h>=11&&h<17) return "day";
+ if(h>=17&&h<21) return "evening";
+ return "night";
+}
+
+function updateBackground(){
+ const set=bgSets[getTimeBlock()];
+ document.body.style.backgroundImage=`url('${set[bgIndex%set.length]}')`;
+ bgIndex++;
+}
+updateBackground();
+setInterval(updateBackground,60000);
 
 /* VERSES */
 let verses={nlt:{},niv:{},kjv:{}};
 let translation="nlt";
-let key="";
+let dailyKey="",currentKey="";
+let mode="daily";
 
 /* LOAD */
 async function loadTranslation(t){
  if(Object.keys(verses[t]).length) return;
-
  const res=await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
  const data=await res.json();
 
- let flat={};
  for(let b in data)
   for(let c in data[b])
    for(let v in data[b][c])
-    flat[`${b} ${c}:${v}`]=data[b][c][v];
-
- verses[t]=flat;
+    verses[t][`${b} ${c}:${v}`]=data[b][c][v];
 }
 
 /* DAILY */
-function getSeed(str){
- let h=0;
- for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i);h|=0;}
- return Math.abs(h);
-}
-
+function getSeed(str){let h=0;for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i);h|=0;}return Math.abs(h);}
 function generateDaily(){
  const today=new Date().toDateString();
  const stored=JSON.parse(localStorage.getItem("dailyVerse")||"{}");
 
  if(stored.date===today){
-  key=stored.key;
+  dailyKey=stored.key;
  }else{
   const keys=Object.keys(verses["nlt"]);
-  key=keys[getSeed(today)%keys.length];
-  localStorage.setItem("dailyVerse",JSON.stringify({date:today,key}));
+  dailyKey=keys[getSeed(today)%keys.length];
+  localStorage.setItem("dailyVerse",JSON.stringify({date:today,key:dailyKey}));
  }
 
+ currentKey=dailyKey;
  update("Daily Bible Verse");
  streak();
 }
 
-function goDaily(){
- const stored=JSON.parse(localStorage.getItem("dailyVerse")||"{}");
- if(stored.key){
-  key=stored.key;
-  update("Daily Bible Verse");
- }
+/* BUTTONS */
+function showDaily(){
+ mode="daily";
+ currentKey=dailyKey;
+ setActive("dailyBtn");
+ update("Daily Bible Verse");
 }
-
-/* TOPICS */
-function pickTopic(topic){
- const today=new Date().toDateString();
- let store=JSON.parse(localStorage.getItem("topicDaily")||"{}");
-
- if(store[topic]?.date===today){
-  key=store[topic].key;
- }else{
-  const refs=Object.keys(verses[translation]);
-  const filtered=refs.filter(r=>verses[translation][r]?.toLowerCase().includes(topic));
-  key=filtered[getSeed(today+topic)%filtered.length];
-  store[topic]={date:today,key};
-  localStorage.setItem("topicDaily",JSON.stringify(store));
- }
-
- update("Daily Bible Verse - "+topic);
+function showRandom(){
+ mode="random";
+ const keys=Object.keys(verses[translation]);
+ currentKey=keys[Math.floor(Math.random()*keys.length)];
+ setActive("randomBtn");
+ update("Random Verse");
 }
-
-/* MODE SWITCH */
-function setMode(mode, btn){
- document.querySelectorAll("#topics button")
-  .forEach(b=>b.classList.remove("active"));
- btn.classList.add("active");
-
- if(mode==="daily") goDaily();
- else pickTopic(mode);
+function setActive(id){
+ document.getElementById("dailyBtn").classList.remove("active");
+ document.getElementById("randomBtn").classList.remove("active");
+ document.getElementById(id).classList.add("active");
 }
 
 /* UPDATE */
 function update(title){
- const text=verses[translation][key];
+ const text=verses[translation][currentKey];
  if(!text) return;
 
- const words=text.split(" ");
  document.getElementById("title").innerText=title;
  document.getElementById("verse").innerHTML=
-  words.map(w=>`<span class="word">${w}</span>`).join(" ");
- document.getElementById("ref").innerText=key;
+  text.split(" ").map(w=>`<span class="word">${w}</span>`).join(" ");
+ document.getElementById("ref").innerText=currentKey;
  document.getElementById("date").innerText=new Date().toDateString();
-}
-
-/* SHARE FIXED */
-async function shareVerse(){
-
- const canvas=document.createElement("canvas");
- canvas.width=1080;canvas.height=1080;
- const ctx=canvas.getContext("2d");
-
- ctx.fillStyle="#000";ctx.fillRect(0,0,1080,1080);
-
- const boxW=800,boxH=520;
- const boxX=(1080-boxW)/2;
- const boxY=(1080-boxH)/2;
-
- roundRect(ctx,boxX,boxY,boxW,boxH,40);
- ctx.fillStyle="rgba(255,255,255,0.08)";
- ctx.fill();
-
- ctx.fillStyle="#fff";
- ctx.font="bold 44px Arial";
- ctx.textAlign="center";
-
- wrapText(ctx,verses[translation][key],540,boxY+120,640,56);
-
- ctx.fillStyle="#108cd7";
- ctx.font="30px Arial";
- ctx.fillText(key,540,boxY+boxH-80);
-
- const logo=new Image();
- logo.src="logo.svg";
- await new Promise(r=>logo.onload=r);
-
- ctx.drawImage(logo,60,860,100,100);
-
- ctx.fillStyle="rgba(255,255,255,.7)";
- ctx.fillText("tapnpray.github.io",60,1000);
-
- canvas.toBlob(blob=>{
-  const file=new File([blob],"tapnpray.png",{type:"image/png"});
-  navigator.share?.({files:[file]});
- });
-}
-
-/* DRAW ROUNDED */
-function roundRect(ctx,x,y,w,h,r){
- ctx.beginPath();
- ctx.moveTo(x+r,y);
- ctx.arcTo(x+w,y,x+w,y+h,r);
- ctx.arcTo(x+w,y+h,x,y+h,r);
- ctx.arcTo(x,y+h,x,y,r);
- ctx.arcTo(x,y,x+w,y,r);
- ctx.closePath();
-}
-
-/* AUDIO */
-let ambientOn=false;
-function toggleAmbient(){
- const a=document.getElementById("ambientAudio");
- if(ambientOn){a.pause();a.currentTime=0;}
- else{a.volume=0.3;a.play();}
- ambientOn=!ambientOn;
 }
 
 /* READ */
@@ -362,7 +266,9 @@ function readVerse(){
  words.forEach(w=>w.classList.remove("active"));
 
  let i=0;
- const utter=new SpeechSynthesisUtterance(verses[translation][key]+" "+key);
+ const utter=new SpeechSynthesisUtterance(
+  verses[translation][currentKey] + " " + currentKey
+ );
 
  utter.onboundary=e=>{
   if(e.name==="word"&&words[i]){
@@ -374,12 +280,51 @@ function readVerse(){
  speechSynthesis.speak(utter);
 }
 
+/* AMBIENT */
+let ambientOn=false;
+function toggleAmbient(){
+ const a=document.getElementById("ambientAudio");
+
+ if(ambientOn){
+  fadeOut(a);
+ }else{
+  a.volume=0;
+  a.play();
+  fadeIn(a);
+ }
+
+ ambientOn=!ambientOn;
+ document.getElementById("ambientToggle").classList.toggle("active");
+}
+
+function fadeIn(a){
+ let v=0;
+ const i=setInterval(()=>{
+  v+=0.05;
+  if(v>=0.3){v=0.3;clearInterval(i);}
+  a.volume=v;
+ },100);
+}
+
+function fadeOut(a){
+ let v=a.volume;
+ const i=setInterval(()=>{
+  v-=0.05;
+  if(v<=0){
+   v=0;clearInterval(i);
+   a.pause();a.currentTime=0;
+  }
+  a.volume=v;
+ },100);
+}
+
 /* FAVORITES */
 function getFavs(){return JSON.parse(localStorage.getItem("favs")||"[]");}
 function toggleFavorite(){
  let f=getFavs();
- f.includes(key)?f=f.filter(x=>x!==key):f.push(key);
+ f.includes(currentKey)?f=f.filter(x=>x!==currentKey):f.push(currentKey);
  localStorage.setItem("favs",JSON.stringify(f));
+ document.getElementById("favoriteStar").innerText=f.includes(currentKey)?"⭐":"☆";
 }
 function openFavorites(){
  let c=document.getElementById("favoritesContent");
@@ -400,9 +345,50 @@ function closeFavorites(e){
  document.getElementById("favoritesModal").style.display="none";
 }
 
+/* SHARE */
+async function shareVerse(){
+ const canvas=document.createElement("canvas");
+ canvas.width=1080;canvas.height=1080;
+ const ctx=canvas.getContext("2d");
+
+ ctx.fillStyle="#000";ctx.fillRect(0,0,1080,1080);
+
+ ctx.fillStyle="rgba(255,255,255,.08)";
+ ctx.fillRect(140,260,800,520);
+
+ ctx.fillStyle="#fff";
+ ctx.font="40px Arial";
+ ctx.textAlign="center";
+
+ wrapText(ctx,verses[translation][currentKey],540,350,640,50);
+
+ ctx.fillStyle="#108cd7";
+ ctx.fillText(currentKey,540,700);
+
+ canvas.toBlob(b=>{
+  const file=new File([b],"verse.png",{type:"image/png"});
+  navigator.share?.({files:[file]});
+ });
+}
+
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){
+ const words=text.split(' ');
+ let line='';
+ for(let n=0;n<words.length;n++){
+  const test=line+words[n]+' ';
+  const w=ctx.measureText(test).width;
+  if(w>maxWidth&&n>0){
+   ctx.fillText(line,x,y);
+   line=words[n]+' ';
+   y+=lineHeight;
+  }else line=test;
+ }
+ ctx.fillText(line,x,y);
+}
+
 /* UTIL */
 function copyVerse(){
- navigator.clipboard.writeText(verses[translation][key]+" — "+key);
+ navigator.clipboard.writeText(verses[translation][currentKey]+" — "+currentKey);
 }
 function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
@@ -429,6 +415,5 @@ async function init(){
 init();
 
 </script>
-
 </body>
 </html>
