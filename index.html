@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Tap N Pray</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- Google Analytics -->
@@ -57,37 +56,28 @@ body::after{
  max-width:520px;width:100%;
  backdrop-filter:blur(30px);
  text-align:center;
- max-height:65vh;
- display:flex;
- flex-direction:column;
 }
 
 #verse{
  font-size:clamp(22px,5vw,30px);
  line-height:1.6;
- overflow-y:auto;
 }
 
-.word{opacity:.35;transition:.3s}
-.word.active{opacity:1}
+.word{opacity:.9;transition:.3s}
+.word.hit{opacity:0}
+
+/* Overlay Canvas */
+#breakoutOverlay{
+ position:absolute;
+ top:0;left:0;
+ width:100%;height:100%;
+ pointer-events:none;
+}
 
 /* Icons */
 #favoriteStar{position:absolute;top:12px;left:12px;font-size:22px;cursor:pointer;}
 #ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
-#ambientToggle.active{
- color:#7CFFB2;
- text-shadow:0 0 8px rgba(124,255,178,0.8);
-}
-
-/* Easter Egg */
-#gameTrigger{
- position:absolute;
- bottom:12px;
- right:12px;
- font-size:18px;
- opacity:.6;
- cursor:pointer;
-}
+#ambientToggle.active{color:#7CFFB2;}
 
 /* Text */
 #title{font-size:14px;opacity:.85}
@@ -125,8 +115,14 @@ body::after{
  background:rgba(0,0,0,.95);
  display:none;overflow:auto;padding:20px;
 }
+.favorite-item{
+ margin-bottom:15px;
+ padding:15px;
+ background:rgba(255,255,255,.1);
+ border-radius:12px;
+}
 
-/* Streak */
+/* Bottom UI */
 #streak{
  position:fixed;bottom:25px;left:50%;
  transform:translateX(-50%);
@@ -134,14 +130,15 @@ body::after{
  padding:8px 16px;border-radius:999px;
 }
 
-/* GAME */
-#pongGame{
+#gameTrigger{
  position:fixed;
- top:0;left:0;
- width:100%;height:100%;
- display:none;
- background:#000;
- z-index:9999;
+ bottom:25px;
+ left:20px;
+ background:rgba(0,0,0,.6);
+ padding:8px 14px;
+ border-radius:999px;
+ cursor:pointer;
+ font-size:14px;
 }
 </style>
 </head>
@@ -155,20 +152,21 @@ body::after{
 
 <div id="favoriteStar" onclick="toggleFavorite()">☆</div>
 <div id="ambientToggle" onclick="toggleAmbient()">🌿</div>
-<div id="gameTrigger" onclick="startGame()">✝️</div>
 
 <div id="title">Daily Bible Verse</div>
 <div id="date"></div>
 <div id="verse"></div>
 <div id="ref"></div>
 
+<canvas id="breakoutOverlay"></canvas>
+
 <div id="topics">
-<button onclick="goDaily(this)">Daily</button>
-<button onclick="pickTopic('peace',this)">Peace</button>
-<button onclick="pickTopic('strength',this)">Strength</button>
-<button onclick="pickTopic('hope',this)">Hope</button>
-<button onclick="pickTopic('guidance',this)">Guidance</button>
-<button onclick="pickTopic('faith',this)">Faith</button>
+<button onclick="goDaily()">Daily</button>
+<button onclick="pickTopic('peace')">Peace</button>
+<button onclick="pickTopic('strength')">Strength</button>
+<button onclick="pickTopic('hope')">Hope</button>
+<button onclick="pickTopic('guidance')">Guidance</button>
+<button onclick="pickTopic('faith')">Faith</button>
 </div>
 
 <div class="actions">
@@ -181,13 +179,12 @@ body::after{
 </div>
 </div>
 
+<div id="gameTrigger" onclick="startGame()">✝️ Play</div>
 <div id="streak"></div>
 
 <div id="favoritesModal" onclick="closeFavorites(event)">
 <div id="favoritesContent"></div>
 </div>
-
-<canvas id="pongGame"></canvas>
 
 <audio id="ambientAudio" loop>
 <source src="sounds/calm.mp3">
@@ -195,8 +192,9 @@ body::after{
 
 <script>
 
-/* DATA */
-let verses={},key="",dailyKey="",topicKeys={};
+/* ===== DATA ===== */
+let verses={},key="",dailyKey="";
+let topicKeys={};
 
 /* LOAD */
 async function load(){
@@ -234,11 +232,20 @@ function update(){
 let ambientOn=false;
 function toggleAmbient(){
  const a=document.getElementById("ambientAudio");
+
  if(ambientOn){
-  a.pause();a.currentTime=0;
+  a.pause();
+  a.currentTime=0;
+  a.volume=0;
  }else{
-  a.volume=.3;a.play();
+  a.volume=0;
+  a.play();
+  let fade=setInterval(()=>{
+   a.volume+=0.05;
+   if(a.volume>=0.3) clearInterval(fade);
+  },100);
  }
+
  ambientOn=!ambientOn;
 }
 
@@ -247,35 +254,64 @@ function readVerse(){
  const words=document.querySelectorAll(".word");
  words.forEach(w=>w.classList.remove("active"));
  let i=0;
+
  const utter=new SpeechSynthesisUtterance(verses[key]);
+ utter.rate=.9;
+
  utter.onboundary=e=>{
-  if(e.name==="word"&&words[i]){
-   words[i].classList.add("active"); i++;
+  if(e.name==="word" && words[i]){
+   words[i].classList.add("active");
+   i++;
   }
  };
+
  speechSynthesis.cancel();
  speechSynthesis.speak(utter);
 }
 
 /* FAVORITES */
 function getFavs(){return JSON.parse(localStorage.getItem("favs")||"[]");}
+
 function toggleFavorite(){
  let f=getFavs();
  if(f.includes(key)) f=f.filter(x=>x!==key);
  else f.push(key);
  localStorage.setItem("favs",JSON.stringify(f));
 }
+
 function openFavorites(){
  let c=document.getElementById("favoritesContent");
- c.innerHTML="<h2>Saved</h2>";
+ c.innerHTML="<h2>Saved Verses</h2>";
+
  getFavs().forEach(ref=>{
-  c.innerHTML+=`<div>${ref}<br>${verses[ref]}</div>`;
+  c.innerHTML+=`
+   <div class="favorite-item">
+    <b>${ref}</b><br>${verses[ref]}
+    <br><button onclick="removeFav('${ref}')">Delete</button>
+   </div>`;
  });
+
  document.getElementById("favoritesModal").style.display="block";
 }
+
+function removeFav(ref){
+ let f=getFavs().filter(x=>x!==ref);
+ localStorage.setItem("favs",JSON.stringify(f));
+ openFavorites();
+}
+
 function closeFavorites(e){
  if(e.target.id==="favoritesModal")
   document.getElementById("favoritesModal").style.display="none";
+}
+
+/* COPY / SHARE */
+function copyVerse(){
+ navigator.clipboard.writeText(verses[key]+" — "+key);
+}
+
+function shareVerse(){
+ navigator.share?.({text:verses[key]+" — "+key});
 }
 
 /* STREAK */
@@ -287,47 +323,55 @@ function streak(){
  document.getElementById("streak").innerText="🔥 "+s;
 }
 
-/* ================= PONG GAME ================= */
+/* ===== BREAKOUT GAME ===== */
 
-let canvas=document.getElementById("pongGame");
+let canvas=document.getElementById("breakoutOverlay");
 let ctx=canvas.getContext("2d");
-let ball,blocks=[],paddleX,gameRunning=false;
+let ball,blocks=[],paddleX,gameOn=false;
 
 function startGame(){
- gameRunning=true;
- canvas.style.display="block";
- canvas.width=window.innerWidth;
- canvas.height=window.innerHeight;
+ if(gameOn) return;
+ gameOn=true;
 
- ball={x:200,y:200,dx:3,dy:-3};
+ canvas.width=canvas.offsetWidth;
+ canvas.height=canvas.offsetHeight;
 
- paddleX=canvas.width/2;
-
- blocks=[];
- let words=verses[key].split(" ");
- let x=40,y=80;
-
- words.forEach(w=>{
-  let width=ctx.measureText(w).width+20;
-  blocks.push({text:w,x:x,y:y,w:width,hit:false});
-  x+=width+10;
- });
-
+ mapWords();
+ initBall();
  animate();
 }
 
+function mapWords(){
+ blocks=[];
+ document.querySelectorAll("#verse .word").forEach(el=>{
+  const r=el.getBoundingClientRect();
+  const c=canvas.getBoundingClientRect();
+
+  blocks.push({
+   el,
+   x:r.left-c.left,
+   y:r.top-c.top,
+   w:r.width,
+   h:r.height,
+   hit:false
+  });
+ });
+}
+
+function initBall(){
+ ball={x:200,y:200,dx:3,dy:-3};
+ paddleX=canvas.width/2;
+}
+
 function animate(){
- if(!gameRunning)return;
+ if(!gameOn) return;
 
  ctx.clearRect(0,0,canvas.width,canvas.height);
 
+ ctx.font="20px Arial";
  ctx.fillText("✝️",ball.x,ball.y);
 
- blocks.forEach(b=>{
-  if(!b.hit) ctx.fillText(b.text,b.x,b.y);
- });
-
- ctx.fillRect(paddleX-50,canvas.height-40,100,10);
+ ctx.fillRect(paddleX-50,canvas.height-20,100,10);
 
  ball.x+=ball.dx;
  ball.y+=ball.dy;
@@ -335,26 +379,35 @@ function animate(){
  if(ball.x<0||ball.x>canvas.width) ball.dx*=-1;
  if(ball.y<0) ball.dy*=-1;
 
- if(ball.y>canvas.height-50 && ball.x>paddleX-50 && ball.x<paddleX+50)
+ if(ball.y>canvas.height-30 && ball.x>paddleX-50 && ball.x<paddleX+50)
   ball.dy*=-1;
 
  blocks.forEach(b=>{
-  if(!b.hit && ball.x>b.x && ball.x<b.x+b.w && ball.y>b.y-20 && ball.y<b.y){
+  if(!b.hit && ball.x>b.x && ball.x<b.x+b.w && ball.y>b.y && ball.y<b.y+b.h){
    b.hit=true;
+   b.el.classList.add("hit");
    ball.dy*=-1;
   }
  });
 
- if(ball.y>canvas.height){
-  gameRunning=false;
-  canvas.style.display="none";
+ if(ball.y>canvas.height || blocks.every(b=>b.hit)){
+  stopGame();
  }
 
  requestAnimationFrame(animate);
 }
 
-canvas.addEventListener("mousemove",e=>paddleX=e.clientX);
-canvas.addEventListener("touchmove",e=>paddleX=e.touches[0].clientX);
+window.addEventListener("mousemove",e=>{
+ paddleX=e.clientX-canvas.getBoundingClientRect().left;
+});
+window.addEventListener("touchmove",e=>{
+ paddleX=e.touches[0].clientX-canvas.getBoundingClientRect().left;
+});
+
+function stopGame(){
+ gameOn=false;
+ document.querySelectorAll(".word").forEach(w=>w.classList.remove("hit"));
+}
 
 /* START */
 load();
