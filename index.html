@@ -23,7 +23,7 @@ html,body{
  color:#fff;
 }
 
-/* STATIC BACKGROUND (NO ANIMATION) */
+/* BACKGROUND (STATIC + BLUR) */
 body::before{
  content:"";
  position:fixed;
@@ -37,8 +37,8 @@ body::before{
  background-position:center;
  background-image:var(--bg-image);
 
- transform:scale(1.15); /* prevents white edges */
- filter:blur(3px); /* subtle premium blur */
+ transform:scale(1.15);
+ filter:blur(3px);
 
  z-index:-1;
 }
@@ -72,7 +72,7 @@ body::before{
  text-align:center;
 }
 
-/* SPEAKER */
+/* ICONS */
 #readIcon{
  position:absolute;
  top:12px;
@@ -246,7 +246,7 @@ body::before{
 
 <script>
 
-/* BACKGROUNDS + PRELOAD */
+/* BACKGROUNDS */
 const bgSets={
  morning:["/backgrounds/morning1.png","/backgrounds/morning2.png"],
  day:["/backgrounds/day1.png","/backgrounds/day2.png"],
@@ -327,24 +327,6 @@ function generateDaily(){
  streak();
 }
 
-/* BUTTONS */
-function showDaily(){
- currentKey=dailyKey;
- setActive("dailyBtn");
- update("Daily Bible Verse");
-}
-function showRandom(){
- const keys=Object.keys(verses[translation]);
- currentKey=keys[Math.floor(Math.random()*keys.length)];
- setActive("randomBtn");
- update("Random Verse");
-}
-function setActive(id){
- document.getElementById("dailyBtn").classList.remove("active");
- document.getElementById("randomBtn").classList.remove("active");
- document.getElementById(id).classList.add("active");
-}
-
 /* UPDATE */
 function update(title){
  const text=verses[translation][currentKey];
@@ -382,6 +364,123 @@ function readVerse(){
  speechSynthesis.speak(utter);
 }
 
+/* AMBIENT */
+let ambientOn=false;
+
+function toggleAmbient(){
+ const a=document.getElementById("ambientAudio");
+
+ if(ambientOn){
+  fadeOut(a);
+ }else{
+  a.volume=0;
+  a.play().catch(()=>{});
+  fadeIn(a);
+ }
+
+ ambientOn=!ambientOn;
+ document.getElementById("ambientToggle").classList.toggle("active");
+}
+
+function fadeIn(a){
+ let v=0;
+ const i=setInterval(()=>{
+  v+=0.05;
+  if(v>=0.3){v=0.3;clearInterval(i);}
+  a.volume=v;
+ },100);
+}
+
+function fadeOut(a){
+ let v=a.volume;
+ const i=setInterval(()=>{
+  v-=0.05;
+  if(v<=0){
+   v=0;
+   clearInterval(i);
+   a.pause();
+   a.currentTime=0;
+  }
+  a.volume=v;
+ },100);
+}
+
+/* SHARE */
+async function shareVerse(){
+ try{
+  const canvas=document.createElement("canvas");
+  canvas.width=1080;
+  canvas.height=1080;
+  const ctx=canvas.getContext("2d");
+
+  const bg=new Image();
+  bg.src=currentBackground;
+  await new Promise(r=>bg.onload=r);
+
+  ctx.drawImage(bg,0,0,1080,1080);
+
+  ctx.fillStyle="rgba(0,0,0,.55)";
+  ctx.fillRect(0,0,1080,1080);
+
+  ctx.fillStyle="rgba(0,0,0,.5)";
+  ctx.fillRect(120,220,840,520);
+
+  ctx.fillStyle="#fff";
+  ctx.font="bold 48px Arial";
+  ctx.textAlign="center";
+
+  wrapText(ctx,verses[translation][currentKey],540,320,720,60);
+
+  ctx.fillStyle="#108cd7";
+  ctx.font="32px Arial";
+  ctx.fillText(currentKey,540,680);
+
+  const logo=new Image();
+  logo.src="logo.svg";
+  await new Promise(r=>logo.onload=r);
+
+  ctx.drawImage(logo,60,880,100,100);
+
+  ctx.fillStyle="rgba(255,255,255,.8)";
+  ctx.font="22px Arial";
+  ctx.textAlign="left";
+  ctx.fillText("tapnpray.github.io",60,1000);
+
+  const dataUrl=canvas.toDataURL("image/png");
+
+  if(navigator.share){
+   await navigator.share({
+    title:"Tap N Pray",
+    text:"Daily Bible Verse",
+    url:dataUrl
+   });
+  }else{
+   const a=document.createElement("a");
+   a.href=dataUrl;
+   a.download="tapnpray.png";
+   a.click();
+  }
+
+ }catch(e){
+  alert("Share failed");
+ }
+}
+
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){
+ const words=text.split(' ');
+ let line='';
+ for(let n=0;n<words.length;n++){
+  const test=line+words[n]+' ';
+  const w=ctx.measureText(test).width;
+  if(w>maxWidth&&n>0){
+   ctx.fillText(line,x,y);
+   line=words[n]+' ';
+   y+=lineHeight;
+  }else line=test;
+ }
+ ctx.fillText(line,x,y);
+}
+
 /* STREAK */
 function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
@@ -399,94 +498,6 @@ function streak(){
  localStorage.setItem("l",today);
 
  document.getElementById("streak").innerText="🔥 "+s+" Day Streak";
- updateStreakUI(s);
-}
-
-function updateStreakUI(s){
- document.getElementById("streakCount").innerText=s+" Days";
-
- let msg="Stay consistent 🙏";
- if(s>=7) msg="1 Week Strong 💪";
- if(s>=30) msg="30 Days 🙌";
- if(s>=100) msg="Legend 👑";
-
- document.getElementById("streakMsg").innerText=msg;
-
- document.getElementById("b7").classList.toggle("active",s>=7);
- document.getElementById("b30").classList.toggle("active",s>=30);
- document.getElementById("b100").classList.toggle("active",s>=100);
-
- let next= s<7?7:s<30?30:100;
- document.getElementById("progressBar").style.width=(s/next*100)+"%";
-}
-
-function openStreak(){
- document.getElementById("streakModal").style.display="flex";
-}
-function closeStreak(e){
- if(e.target.id==="streakModal")
- document.getElementById("streakModal").style.display="none";
-}
-
-/* SHARE (FIXED MOBILE) */
-async function shareVerse(){
- const canvas=document.createElement("canvas");
- canvas.width=1080;
- canvas.height=1080;
- const ctx=canvas.getContext("2d");
-
- const bg=new Image();
- bg.crossOrigin="anonymous";
- bg.src=currentBackground;
- await new Promise(r=>bg.onload=r);
-
- ctx.drawImage(bg,0,0,1080,1080);
-
- ctx.fillStyle="rgba(0,0,0,.55)";
- ctx.fillRect(0,0,1080,1080);
-
- ctx.fillStyle="rgba(0,0,0,.5)";
- ctx.fillRect(120,220,840,520);
-
- ctx.fillStyle="#fff";
- ctx.font="bold 48px Arial";
- ctx.textAlign="center";
-
- wrapText(ctx,verses[translation][currentKey],540,320,720,60);
-
- ctx.fillStyle="#108cd7";
- ctx.font="32px Arial";
- ctx.fillText(currentKey,540,680);
-
- const logo=new Image();
- logo.src="logo.svg";
- await new Promise(r=>logo.onload=r);
-
- ctx.drawImage(logo,60,880,100,100);
-
- ctx.fillStyle="rgba(255,255,255,.8)";
- ctx.font="22px Arial";
- ctx.textAlign="left";
- ctx.fillText("tapnpray.github.io",60,1000);
-
- canvas.toBlob(async (blob)=>{
-  const file=new File([blob],"tapnpray.png",{type:"image/png"});
-
-  try{
-   if(navigator.canShare && navigator.canShare({files:[file]})){
-    await navigator.share({files:[file], title:"Tap N Pray"});
-   } else {
-    throw new Error();
-   }
-  }catch{
-   const url=URL.createObjectURL(blob);
-   const a=document.createElement("a");
-   a.href=url;
-   a.download="tapnpray.png";
-   a.click();
-   setTimeout(()=>window.open(url,"_blank"),500);
-  }
- });
 }
 
 /* INIT */
@@ -494,15 +505,6 @@ async function init(){
  await loadTranslation("nlt");
  await loadTranslation("niv");
  await loadTranslation("kjv");
-
- translation = localStorage.getItem("preferredTranslation") || "nlt";
- document.getElementById("translationSelect").value = translation;
-
- document.getElementById("translationSelect").onchange=(e)=>{
-  translation=e.target.value;
-  localStorage.setItem("preferredTranslation",translation);
-  update(document.getElementById("title").innerText);
- };
 
  generateDaily();
 }
