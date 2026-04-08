@@ -5,6 +5,15 @@
 <title>Tap N Pray</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ELQ3E5WGCT');
+</script>
+
 <style>
 html,body{
  height:100%;margin:0;overflow:hidden;
@@ -19,6 +28,7 @@ html,body{
  to{background-size:110%;}
 }
 
+/* CENTER */
 .center{
  height:100%;
  display:flex;
@@ -27,6 +37,7 @@ html,body{
  padding:20px;
 }
 
+/* VERSE BOX */
 #votd{
  position:relative;
  background:rgba(0,0,0,.6);
@@ -41,13 +52,24 @@ html,body{
  text-align:center;
 }
 
-/* ICONS */
+/* SPEAKER ICON */
 #readIcon{
- position:absolute;top:12px;left:12px;cursor:pointer;
+ position:absolute;
+ top:12px;
+ left:12px;
+ cursor:pointer;
+ font-size:18px;
 }
-#readIcon.speaking{animation:pulse 1s infinite;}
-@keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}}
+#readIcon.speaking{
+ animation:pulse 1s infinite;
+}
+@keyframes pulse{
+ 0%{transform:scale(1);}
+ 50%{transform:scale(1.2);}
+ 100%{transform:scale(1);}
+}
 
+/* AMBIENT */
 #ambientToggle{position:absolute;top:12px;right:12px;cursor:pointer;}
 #ambientToggle.active{color:#7CFFB2;}
 
@@ -58,25 +80,51 @@ html,body{
  overflow-y:auto;
  cursor:pointer;
 }
-.word{opacity:.35;}
+.word{opacity:.35;transition:.2s;}
 .word.active{opacity:1;}
 
-#title{font-size:15px;}
+#title{font-size:15px;opacity:.85;}
 #date{color:#108cd7;font-size:14px;}
 #ref{color:#108cd7;margin-top:8px;font-size:14px;}
 
-/* BUTTONS */
-.mode-buttons{display:flex;gap:10px;margin-top:14px;}
+/* TRANSLATION */
+.translation-select{
+ margin-top:6px;
+ padding:4px 10px;
+ font-size:12px;
+ border-radius:999px;
+ border:none;
+ background:rgba(255,255,255,.15);
+ color:#fff;
+}
+
+/* MODE BUTTONS */
+.mode-buttons{
+ display:flex;
+ gap:10px;
+ margin-top:14px;
+}
 .mode-buttons button{
- flex:1;padding:12px;border:none;border-radius:999px;
- background:rgba(255,255,255,.15);color:#fff;
+ flex:1;
+ padding:12px;
+ border:none;
+ border-radius:999px;
+ background:rgba(255,255,255,.15);
+ color:#fff;
+ cursor:pointer;
 }
 .mode-buttons button.active{background:#108cd7;}
 
-.actions{margin-top:12px;}
+/* ACTIONS */
+.actions{
+ display:grid;
+ grid-template-columns:1fr;
+ gap:10px;margin-top:12px;
+}
 .btn{
- padding:12px;border-radius:999px;border:none;
- background:#108cd7;color:#fff;width:100%;
+ padding:12px;border-radius:999px;
+ border:none;background:#108cd7;
+ color:#fff;cursor:pointer;
 }
 
 /* STREAK BAR */
@@ -86,7 +134,7 @@ html,body{
  left:50%;
  transform:translateX(-50%);
  background:rgba(0,0,0,.6);
- padding:8px 18px;
+ padding:6px 14px;
  border-radius:999px;
  cursor:pointer;
 }
@@ -109,10 +157,7 @@ html,body{
  gap:15px;
  margin:20px 0;
 }
-.badge{
- font-size:28px;
- opacity:.3;
-}
+.badge{font-size:28px;opacity:.3;}
 .badge.active{opacity:1;}
 
 .progress{
@@ -141,6 +186,12 @@ html,body{
 <div id="date"></div>
 <div id="verse" onclick="readVerse()"></div>
 <div id="ref"></div>
+
+<select id="translationSelect" class="translation-select">
+<option value="nlt">NLT</option>
+<option value="niv">NIV</option>
+<option value="kjv">KJV</option>
+</select>
 
 <div class="mode-buttons">
 <button id="dailyBtn" class="active" onclick="showDaily()">Daily</button>
@@ -174,7 +225,7 @@ html,body{
 
 <script>
 
-/* BACKGROUND */
+/* BACKGROUNDS */
 const bgSets={
  morning:["/backgrounds/morning1.png","/backgrounds/morning2.png"],
  day:["/backgrounds/day1.png","/backgrounds/day2.png"],
@@ -203,8 +254,106 @@ function updateBackground(){
  }
 }
 updateBackground();
+setInterval(updateBackground,60000);
 
-/* STREAK SYSTEM */
+/* VERSES */
+let verses={nlt:{},niv:{},kjv:{}};
+let translation="nlt";
+let dailyKey="",currentKey="";
+
+async function loadTranslation(t){
+ if(Object.keys(verses[t]).length) return;
+ const res=await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
+ const data=await res.json();
+ for(let b in data)
+  for(let c in data[b])
+   for(let v in data[b][c])
+    verses[t][`${b} ${c}:${v}`]=data[b][c][v];
+}
+
+/* DAILY */
+function getSeed(str){
+ let h=0;
+ for(let i=0;i<str.length;i++){
+  h=(h<<5)-h+str.charCodeAt(i);
+  h|=0;
+ }
+ return Math.abs(h);
+}
+
+function generateDaily(){
+ const today=new Date().toDateString();
+ const stored=JSON.parse(localStorage.getItem("dailyVerse")||"{}");
+
+ if(stored.date===today){
+  dailyKey=stored.key;
+ }else{
+  const keys=Object.keys(verses["nlt"]);
+  dailyKey=keys[getSeed(today)%keys.length];
+  localStorage.setItem("dailyVerse",JSON.stringify({date:today,key:dailyKey}));
+ }
+
+ currentKey=dailyKey;
+ update("Daily Bible Verse");
+ streak();
+}
+
+/* BUTTONS */
+function showDaily(){
+ currentKey=dailyKey;
+ setActive("dailyBtn");
+ update("Daily Bible Verse");
+}
+function showRandom(){
+ const keys=Object.keys(verses[translation]);
+ currentKey=keys[Math.floor(Math.random()*keys.length)];
+ setActive("randomBtn");
+ update("Random Verse");
+}
+function setActive(id){
+ document.getElementById("dailyBtn").classList.remove("active");
+ document.getElementById("randomBtn").classList.remove("active");
+ document.getElementById(id).classList.add("active");
+}
+
+/* UPDATE */
+function update(title){
+ const text=verses[translation][currentKey];
+ if(!text) return;
+
+ document.getElementById("title").innerText=title;
+ document.getElementById("verse").innerHTML=
+  text.split(" ").map(w=>`<span class="word">${w}</span>`).join(" ");
+ document.getElementById("ref").innerText=currentKey;
+ document.getElementById("date").innerText=new Date().toDateString();
+}
+
+/* READ */
+function readVerse(){
+ const icon=document.getElementById("readIcon");
+ icon.classList.add("speaking");
+
+ const words=document.querySelectorAll(".word");
+ words.forEach(w=>w.classList.remove("active"));
+
+ let i=0;
+ const utter=new SpeechSynthesisUtterance(
+  verses[translation][currentKey]+" "+currentKey
+ );
+
+ utter.onboundary=e=>{
+  if(e.name==="word"&&words[i]){
+   words[i].classList.add("active");i++;
+  }
+ };
+
+ utter.onend=()=>icon.classList.remove("speaking");
+
+ speechSynthesis.cancel();
+ speechSynthesis.speak(utter);
+}
+
+/* STREAK */
 function streak(){
  let s=parseInt(localStorage.getItem("s"))||0;
  let last=localStorage.getItem("l");
@@ -248,31 +397,6 @@ function openStreak(){
 function closeStreak(e){
  if(e.target.id==="streakModal")
  document.getElementById("streakModal").style.display="none";
-}
-
-/* READ */
-function readVerse(){
- const icon=document.getElementById("readIcon");
- icon.classList.add("speaking");
-
- const words=document.querySelectorAll(".word");
- words.forEach(w=>w.classList.remove("active"));
-
- let i=0;
- const utter=new SpeechSynthesisUtterance(
-  verses[translation][currentKey]+" "+currentKey
- );
-
- utter.onboundary=e=>{
-  if(e.name==="word"&&words[i]){
-   words[i].classList.add("active");i++;
-  }
- };
-
- utter.onend=()=>icon.classList.remove("speaking");
-
- speechSynthesis.cancel();
- speechSynthesis.speak(utter);
 }
 
 /* SHARE */
@@ -337,22 +461,24 @@ function wrapText(ctx,text,x,y,maxWidth,lineHeight){
 }
 
 /* INIT */
-let verses={nlt:{}};
-let translation="nlt";
-let currentKey="John 3:16";
+async function init(){
+ await loadTranslation("nlt");
+ await loadTranslation("niv");
+ await loadTranslation("kjv");
 
-verses.nlt["John 3:16"]="For God so loved the world...";
+ translation = localStorage.getItem("preferredTranslation") || "nlt";
+ document.getElementById("translationSelect").value = translation;
 
-function update(){
- const text=verses[translation][currentKey];
- document.getElementById("verse").innerHTML=
- text.split(" ").map(w=>`<span class="word">${w}</span>`).join(" ");
- document.getElementById("ref").innerText=currentKey;
- document.getElementById("date").innerText=new Date().toDateString();
+ document.getElementById("translationSelect").onchange=(e)=>{
+  translation=e.target.value;
+  localStorage.setItem("preferredTranslation",translation);
+  update(document.getElementById("title").innerText);
+ };
+
+ generateDaily();
 }
 
-update();
-streak();
+init();
 
 </script>
 </body>
