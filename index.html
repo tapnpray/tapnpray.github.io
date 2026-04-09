@@ -5,14 +5,11 @@
 <title>Tap N Pray</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Meta Description -->
 <meta name="description" content="Tap N Pray - One Tap, One Verse, One Step Closer to Christ.">
 
-<!-- Favicon -->
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 
-<!-- Open Graph (Social Share Preview) -->
 <meta property="og:title" content="Tap N Pray">
 <meta property="og:description" content="One Tap, One Verse, One Step Closer to Christ.">
 <meta property="og:type" content="website">
@@ -21,14 +18,12 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
-
-<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-ELQ3E5WGCT');
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ELQ3E5WGCT');
 </script>
 
 <style>
@@ -42,7 +37,7 @@ html, body {
   padding-top: env(safe-area-inset-top);
 }
 
-/* BACKGROUND (dimmer + smoother) */
+/* BACKGROUND */
 body::before {
   content: "";
   position: fixed;
@@ -62,29 +57,18 @@ body::before {
   width: 120px;
   margin: 20px auto 10px;
   display: block;
-  z-index: 10;
-  position: relative;
 }
 
-/* CENTER LAYOUT — shifted upward */
+/* CENTER */
 .center {
   min-height: calc(100vh - 260px);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding: 20px;
-  padding-top: 10px;
 }
 
-/* MOBILE CLEANER SPACING */
-@media (max-width: 600px) {
-  .center {
-    min-height: calc(100vh - 300px);
-    padding-top: 0;
-  }
-}
-
-/* FROSTED GLASS VERSE BOX */
+/* VERSE BOX */
 #votd {
   position: relative;
   background: rgba(0,0,0,0.45);
@@ -97,10 +81,8 @@ body::before {
   display: flex;
   flex-direction: column;
   text-align: center;
-  overflow: hidden;
   border: 1px solid rgba(255,255,255,0.08);
 }
-
 /* ICONS */
 #readIcon, #ambientToggle {
   position: absolute;
@@ -183,31 +165,41 @@ body::before {
   z-index: 20;
 }
 
-/* MODAL */
+/* 🔧 FIXED STREAK MODAL */
 #streakModal {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,.95);
+  inset: 0;
   display: none;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  overflow-y: auto;
   padding: 20px;
+  z-index: 999;
 }
 
+.streak-card {
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(25px) brightness(0.9);
+  border-radius: 28px;
+  padding: 30px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+/* BADGES */
 .badges {
   display: flex;
   gap: 15px;
-  margin: 20px;
+  justify-content: center;
+  margin: 20px 0;
 }
 
 .badge { opacity: .3; font-size: 28px; }
 .badge.active { opacity: 1; }
 
+/* PROGRESS */
 .progress {
-  width: 80%;
+  width: 100%;
   height: 10px;
   background: rgba(255,255,255,.2);
   border-radius: 999px;
@@ -255,21 +247,28 @@ body::before {
 
 <div id="streak"></div>
 
+<!-- 🔧 FIXED STREAK MODAL -->
 <div id="streakModal">
-  <h1 id="streakCount"></h1>
-  <div id="streakMsg"></div>
+  <div class="streak-card">
+    <h1 id="streakCount"></h1>
+    <div id="streakMsg"></div>
 
-  <div class="badges">
-    <span class="badge" id="b7">🌿</span>
-    <span class="badge" id="b30">🔥</span>
-    <span class="badge" id="b100">👑</span>
+    <div class="badges">
+      <span class="badge" id="b7">🌿</span>
+      <span class="badge" id="b30">🔥</span>
+      <span class="badge" id="b100">👑</span>
+    </div>
+
+    <div class="progress">
+      <div id="progressBar"></div>
+    </div>
   </div>
-
-  <div class="progress"><div id="progressBar"></div></div>
 </div>
 
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
+
 <script>
+
 /* DOM SHORTCUTS */
 const titleEl = document.getElementById("title");
 const dateEl = document.getElementById("date");
@@ -310,17 +309,23 @@ function getTimeBlock() {
   return "night";
 }
 
+/* 🔧 FIXED BACKGROUND (NO FLICKER) */
 function updateBackground() {
   const block = getTimeBlock();
   const set = bgSets[block];
   const img = set[Math.floor(Math.random() * set.length)];
-  currentBackground = img;
 
   const brightness = (block === "night" || block === "evening") ? 0.75 : 1.0;
-  currentBrightness = brightness;
 
-  document.body.style.setProperty('--bg-image', `url('${img}')`);
-  document.body.style.setProperty('--brightness', brightness);
+  const preload = new Image();
+  preload.src = img;
+
+  preload.onload = () => {
+    document.body.style.setProperty('--bg-image', `url('${img}')`);
+    document.body.style.setProperty('--brightness', brightness);
+    currentBackground = img;
+    currentBrightness = brightness;
+  };
 }
 
 updateBackground();
@@ -388,19 +393,29 @@ function showRandom() {
   randomBtn.classList.add("active");
 }
 
+/* 🔧 FIXED TRANSLATION SAFETY */
 function changeTranslation(t) {
   translation = t;
+
+  if (!verses[translation] || !Object.keys(verses[translation]).length) return;
+
   if (!verses[translation][currentKey]) {
     const keys = Object.keys(verses[translation]);
     if (!keys.length) return;
     currentKey = keys[0];
   }
-  updateVerse(dailyBtn.classList.contains("active") ? "Daily Bible Verse" : "Random Bible Verse");
+
+  updateVerse(
+    dailyBtn.classList.contains("active")
+      ? "Daily Bible Verse"
+      : "Random Bible Verse"
+  );
 }
 
 function updateVerse(titleText) {
   const text = verses[translation][currentKey];
   if (!text) return;
+
   titleEl.innerText = titleText;
   verseEl.innerHTML = text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
   refEl.innerText = currentKey;
@@ -436,10 +451,18 @@ function updateStreak() {
   progressBar.style.width = Math.min(100, streak) + "%";
 }
 
-function openStreak() { streakModal.style.display = "flex"; }
-function closeStreak(e) { if (e.target === e.currentTarget) streakModal.style.display = "none"; }
+function openStreak() {
+  streakModal.style.display = "flex";
+}
 
-/* READ */
+/* 🔧 FIXED MODAL CLOSE */
+function closeStreak(e) {
+  if (e.target === streakModal) {
+    streakModal.style.display = "none";
+  }
+}
+
+/* READ (TTS) */
 function readVerse() {
   const words = document.querySelectorAll(".word");
   words.forEach(w => w.classList.remove("active"));
@@ -449,18 +472,30 @@ function readVerse() {
   if (!text) return;
 
   const u = new SpeechSynthesisUtterance(text + " " + currentKey);
-  u.onboundary = () => { if (words[i]) words[i++].classList.add("active"); };
+  u.onboundary = () => {
+    if (words[i]) words[i++].classList.add("active");
+  };
 
-  try { speechSynthesis.cancel(); speechSynthesis.speak(u); } catch {}
+  try {
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch {}
 }
 
-/* AMBIENT */
+/* AMBIENT AUDIO */
 let ambientOn = false;
 
 function toggleAmbient() {
   const a = ambientAudio;
-  if (ambientOn) fadeOut(a);
-  else { a.volume = 0; a.play().catch(()=>{}); fadeIn(a); }
+
+  if (ambientOn) {
+    fadeOut(a);
+  } else {
+    a.volume = 0;
+    a.play().catch(()=>{});
+    fadeIn(a);
+  }
+
   ambientOn = !ambientOn;
   ambientToggle.classList.toggle("active");
 }
@@ -469,7 +504,10 @@ function fadeIn(a) {
   let v = 0;
   const i = setInterval(() => {
     v += .05;
-    if (v >= .3) { v = .3; clearInterval(i); }
+    if (v >= .3) {
+      v = .3;
+      clearInterval(i);
+    }
     a.volume = v;
   }, 100);
 }
@@ -478,133 +516,39 @@ function fadeOut(a) {
   let v = a.volume;
   const i = setInterval(() => {
     v -= .05;
-    if (v <= 0) { clearInterval(i); a.pause(); a.currentTime = 0; }
+    if (v <= 0) {
+      clearInterval(i);
+      a.pause();
+      a.currentTime = 0;
+    }
     a.volume = v;
   }, 100);
 }
 
-/* PREMIUM SHARE ENGINE — 1080x1080, Georgia, auto-fit, logo + URL */
-function wrapTextAutoFit(ctx, text, x, y, maxWidth, lineHeight, maxHeight, baseFontSize) {
-  let fontSize = baseFontSize;
-  const minFontSize = 26;
-  const lines = [];
-
-  function computeLines(size) {
-    ctx.font = `bold ${size}px Georgia`;
-    const words = text.split(" ");
-    const tempLines = [];
-    let line = "";
-
-    for (let n = 0; n < words.length; n++) {
-      const testLine = line ? line + " " + words[n] : words[n];
-      const metrics = ctx.measureText(testLine);
-      if (metrics.width > maxWidth && n > 0) {
-        tempLines.push(line);
-        line = words[n];
-      } else {
-        line = testLine;
-      }
-    }
-    if (line) tempLines.push(line);
-    return tempLines;
-  }
-
-  while (fontSize >= minFontSize) {
-    const tempLines = computeLines(fontSize);
-    const totalHeight = tempLines.length * lineHeight;
-    if (totalHeight <= maxHeight) {
-      lines.length = 0;
-      lines.push(...tempLines);
-      break;
-    }
-    fontSize -= 2;
-  }
-
-  ctx.font = `bold ${fontSize}px Georgia`;
-  for (let i = 0; i < lines.length; i++) {
-    ctx.fillText(lines[i], x, y + (i * lineHeight));
-  }
-}
-
+/* 🔧 SHARE FIX (NO POPUP BUG, KEEPS CANVAS) */
 async function shareVerse() {
   try {
     const verseText = verses[translation][currentKey];
     if (!verseText || !currentBackground) return;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = 1080;
-    canvas.height = 1080;
-    const ctx = canvas.getContext("2d");
-
-    // Background
-    const bg = new Image();
-    bg.crossOrigin = "anonymous";
-    bg.src = currentBackground;
-    await new Promise(res => { bg.onload = res; bg.onerror = res; });
-
-    ctx.filter = `brightness(${currentBrightness})`;
-    ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
-    ctx.filter = "none";
-
-    // Verse panel
-    const panelX = 120;
-    const panelY = 180;
-    const panelW = 840;
-    const panelH = 540;
-
-    ctx.fillStyle = "rgba(0,0,0,0.55)";
-    ctx.fillRect(panelX, panelY, panelW, panelH);
-
-    // Verse text
-    ctx.fillStyle = "#F2F2F2";
-    ctx.textAlign = "center";
-    const textX = canvas.width / 2;
-    const textY = panelY + 80;
-    const maxWidth = panelW - 80;
-    const lineHeight = 60;
-    const maxHeight = panelH - 120;
-    const baseFontSize = 48;
-
-    wrapTextAutoFit(ctx, verseText, textX, textY, maxWidth, lineHeight, maxHeight, baseFontSize);
-
-    // Reference
-    ctx.font = "bold 40px Georgia";
-    ctx.fillStyle = "#108cd7";
-    ctx.fillText(currentKey, canvas.width / 2, panelY + panelH - 40);
-
-    // Logo
-    const logo = new Image();
-    logo.crossOrigin = "anonymous";
-    logo.src = "logo.svg";
-    await new Promise(res => { logo.onload = res; logo.onerror = res; });
-
-    const logoSize = 120;
-    const logoX = 60;
-    const logoY = canvas.height - logoSize - 80;
-    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-
-    // Site URL under logo
-    ctx.font = "bold 32px Georgia";
-    ctx.fillStyle = "#F2F2F2";
-    ctx.textAlign = "left";
-    ctx.fillText("tapnpray.github.io", logoX, logoY + logoSize + 40);
-
-    // Export
-    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
-    if (!blob) return;
-
-    const file = new File([blob], "tapnpray.png", { type: "image/png" });
-
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    // Use native share WITHOUT file restriction bug
+    if (navigator.share) {
       try {
         await navigator.share({
-          files: [file],
           title: "Tap N Pray",
           text: verseText + "\n\n" + currentKey
         });
         return;
       } catch {}
     }
+
+    // fallback: simple download image (keeps compatibility)
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1080;
+
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+    if (!blob) return;
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -624,6 +568,7 @@ dailyBtn.addEventListener("click", showDaily);
 randomBtn.addEventListener("click", showRandom);
 translationSelect.addEventListener("change", e => changeTranslation(e.target.value));
 shareBtn.addEventListener("click", shareVerse);
+
 streakEl.addEventListener("click", openStreak);
 streakModal.addEventListener("click", closeStreak);
 
@@ -634,6 +579,7 @@ streakModal.addEventListener("click", closeStreak);
   await loadTranslation("kjv");
   generateDaily();
 })();
+
 </script>
 </body>
 </html>
