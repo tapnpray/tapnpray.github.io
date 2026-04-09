@@ -174,6 +174,17 @@ body::before {
   max-height: 80vh;
   overflow-y: auto;
 }
+/* 👇 ADD THIS RIGHT HERE */
+#streak {
+  margin: 14px auto 0;
+  display: block;
+  width: fit-content;
+  background: rgba(0,0,0,.6);
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+  
 </style>
 </head>
 <body>
@@ -215,10 +226,14 @@ body::before {
     <div class="bottom-right" id="donateIcon">❤️</div>
 
   </div>
+  
+  <!-- 👇 ADD STREAK HERE -->
+  <div id="streak"></div>
+  
 </div>
 
 <!-- STREAK BADGE -->
-<div id="streak"></div>
+
 
 <!-- STREAK MODAL -->
 <div id="streakModal">
