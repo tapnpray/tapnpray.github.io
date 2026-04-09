@@ -531,16 +531,147 @@ async function shareVerse() {
     const verseText = verses[translation][currentKey];
     if (!verseText || !currentBackground) return;
 
-    // Use native share WITHOUT file restriction bug
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1080;
+    const ctx = canvas.getContext("2d");
+
+    /* === LOAD BACKGROUND === */
+    const bg = new Image();
+    bg.crossOrigin = "anonymous";
+    bg.src = currentBackground;
+
+    await new Promise(res => {
+      bg.onload = res;
+      bg.onerror = res;
+    });
+
+    /* === DRAW DIMMED + BLURRED BG === */
+    ctx.filter = `brightness(${currentBrightness * 0.6}) blur(8px)`;
+    ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+    ctx.filter = "none";
+
+    /* === GLASS CARD === */
+    const cardX = 120;
+    const cardY = 200;
+    const cardW = 840;
+    const cardH = 520;
+
+    // Rounded rectangle
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.lineTo(x+w-r, y);
+      ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+      ctx.lineTo(x+w, y+h-r);
+      ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+      ctx.lineTo(x+r, y+h);
+      ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+      ctx.lineTo(x, y+r);
+      ctx.quadraticCurveTo(x, y, x+r, y);
+      ctx.closePath();
+    }
+
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    roundRect(ctx, cardX, cardY, cardW, cardH, 40);
+    ctx.fill();
+
+    /* === TEXT WRAPPING === */
+    function drawWrappedText(text, x, y, maxWidth, lineHeight) {
+      const words = text.split(" ");
+      let line = "";
+      const lines = [];
+
+      ctx.font = "bold 48px Georgia";
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + " ";
+        const width = ctx.measureText(testLine).width;
+        if (width > maxWidth && n > 0) {
+          lines.push(line);
+          line = words[n] + " ";
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line);
+
+      lines.forEach((l, i) => {
+        ctx.fillText(l.trim(), x, y + i * lineHeight);
+      });
+    }
+
+    /* === DRAW VERSE === */
+    ctx.fillStyle = "#F2F2F2";
+    ctx.textAlign = "center";
+
+    drawWrappedText(
+      verseText,
+      canvas.width / 2,
+      cardY + 120,
+      cardW - 120,
+      60
+    );
+
+    /* === REFERENCE === */
+    ctx.font = "bold 40px Georgia";
+    ctx.fillStyle = "#108cd7";
+    ctx.fillText(currentKey, canvas.width / 2, cardY + cardH - 50);
+
+    /* === LOAD LOGO === */
+    const logo = new Image();
+    logo.crossOrigin = "anonymous";
+    logo.src = "logo.svg";
+
+    await new Promise(res => {
+      logo.onload = res;
+      logo.onerror = res;
+    });
+
+    const logoSize = 110;
+    const logoX = 60;
+    const logoY = canvas.height - logoSize - 90;
+
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+
+    /* === SITE URL === */
+    ctx.font = "bold 30px Georgia";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText(
+      "tapnpray.github.io",
+      logoX,
+      logoY + logoSize + 40
+    );
+
+    /* === EXPORT === */
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+    if (!blob) return;
+
+    const file = new File([blob], "tapnpray.png", { type: "image/png" });
+
+    /* === SHARE OR DOWNLOAD === */
     if (navigator.share) {
       try {
         await navigator.share({
+          files: [file],
           title: "Tap N Pray",
           text: verseText + "\n\n" + currentKey
         });
         return;
       } catch {}
     }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "tapnpray.png";
+    a.click();
+    URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error("Share failed", err);
+  }
+}
 
     // fallback: simple download image (keeps compatibility)
     const canvas = document.createElement("canvas");
