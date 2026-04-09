@@ -528,34 +528,141 @@ function fadeOut(a) {
 /* 🔧 SHARE FIX (NO POPUP BUG, KEEPS CANVAS) */
 async function shareVerse() {
   try {
-    const verseText = verses[translation][currentKey];
-    if (!verseText || !currentBackground) return;
+    if (!verses || !translation || !currentKey) return;
+
+    const verseText = verses?.[translation]?.[currentKey];
+    if (!verseText) return;
 
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
     canvas.height = 1080;
     const ctx = canvas.getContext("2d");
 
-    /* === LOAD BACKGROUND === */
-    const bg = new Image();
-    bg.crossOrigin = "anonymous";
-    bg.src = currentBackground;
+    /* SAFE BACKGROUND */
+    let bgImg = null;
 
-    await new Promise(res => {
-      bg.onload = res;
-      bg.onerror = res;
+    if (currentBackground) {
+      bgImg = new Image();
+      bgImg.crossOrigin = "anonymous";
+      bgImg.src = currentBackground;
+
+      await new Promise(res => {
+        bgImg.onload = res;
+        bgImg.onerror = res;
+      });
+    }
+
+    /* DRAW BG OR FALLBACK */
+    if (bgImg) {
+      ctx.filter = `brightness(${(currentBrightness || 1) * 0.6}) blur(6px)`;
+      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+      ctx.filter = "none";
+    } else {
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    /* CARD */
+    const x = 120;
+    const y = 200;
+    const w = 840;
+    const h = 520;
+    const r = 40;
+
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    ctx.fill();
+
+    /* TEXT */
+    ctx.fillStyle = "#F2F2F2";
+    ctx.textAlign = "center";
+    ctx.font = "bold 46px Georgia";
+
+    const words = verseText.split(" ");
+    let line = "";
+    let lines = [];
+    const maxWidth = w - 120;
+
+    words.forEach(word => {
+      const test = line + word + " ";
+      if (ctx.measureText(test).width > maxWidth) {
+        lines.push(line);
+        line = word + " ";
+      } else {
+        line = test;
+      }
+    });
+    lines.push(line);
+
+    const startY = y + 120;
+
+    lines.forEach((l, i) => {
+      ctx.fillText(l.trim(), canvas.width / 2, startY + i * 60);
     });
 
-    /* === DRAW DIMMED + BLURRED BG === */
-    ctx.filter = `brightness(${currentBrightness * 0.6}) blur(8px)`;
-    ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
-    ctx.filter = "none";
+    /* REF */
+    ctx.font = "bold 36px Georgia";
+    ctx.fillStyle = "#108cd7";
+    ctx.fillText(currentKey, canvas.width / 2, y + h - 40);
 
-    /* === GLASS CARD === */
-    const cardX = 120;
-    const cardY = 200;
-    const cardW = 840;
-    const cardH = 520;
+    /* LOGO SAFE LOAD */
+    try {
+      const logo = new Image();
+      logo.src = "logo.svg";
+
+      await new Promise(res => {
+        logo.onload = res;
+        logo.onerror = res;
+      });
+
+      ctx.drawImage(logo, 60, canvas.height - 160, 100, 100);
+    } catch {}
+
+    /* URL */
+    ctx.font = "bold 26px Georgia";
+    ctx.fillStyle = "#fff";
+    ctx.textAlign = "left";
+    ctx.fillText("tapnpray.github.io", 60, canvas.height - 30);
+
+    /* EXPORT */
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+    if (!blob) return;
+
+    const file = new File([blob], "tapnpray.png", { type: "image/png" });
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "Tap N Pray",
+          text: verseText + "\n\n" + currentKey
+        });
+        return;
+      } catch {}
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "tapnpray.png";
+    a.click();
+    URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error("Share error:", err);
+  }
+}
 
     // Rounded rectangle
     function roundRect(ctx, x, y, w, h, r) {
