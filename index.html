@@ -58,8 +58,9 @@ body::before {
 .center {
   min-height: calc(100vh - 260px);
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  flex-direction: column; /* 👈 THIS IS THE KEY FIX */
+  align-items: center;     /* centers everything */
+  justify-content: flex-start;
   padding: 20px;
 }
 
