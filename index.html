@@ -41,8 +41,7 @@ html, body {
 body::before {
   content: "";
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  inset: 0;
   background-size: cover;
   background-position: center;
   background-image: var(--bg-image);
@@ -52,7 +51,7 @@ body::before {
   z-index: -1;
 }
 
-/* TOP LOGO */
+/* LOGO */
 #topLogo {
   width: 120px;
   margin: 20px auto 10px;
@@ -83,6 +82,7 @@ body::before {
   text-align: center;
   border: 1px solid rgba(255,255,255,0.08);
 }
+
 /* ICONS */
 #readIcon, #ambientToggle {
   position: absolute;
@@ -139,7 +139,9 @@ body::before {
   color: #fff;
 }
 
-.mode-buttons button.active { background: #108cd7; }
+.mode-buttons button.active {
+  background: #108cd7;
+}
 
 .actions { margin-top: 10px; }
 
@@ -165,7 +167,7 @@ body::before {
   z-index: 20;
 }
 
-/* 🔧 FIXED STREAK MODAL */
+/* FIXED STREAK MODAL */
 #streakModal {
   position: fixed;
   inset: 0;
@@ -176,6 +178,7 @@ body::before {
   z-index: 999;
 }
 
+/* GLASS CARD (matches verse box) */
 .streak-card {
   background: rgba(0,0,0,0.45);
   backdrop-filter: blur(25px) brightness(0.9);
@@ -184,6 +187,7 @@ body::before {
   width: 100%;
   max-width: 420px;
   text-align: center;
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 /* BADGES */
@@ -197,7 +201,7 @@ body::before {
 .badge { opacity: .3; font-size: 28px; }
 .badge.active { opacity: 1; }
 
-/* PROGRESS */
+/* PROGRESS BAR */
 .progress {
   width: 100%;
   height: 10px;
@@ -209,6 +213,7 @@ body::before {
   height: 100%;
   background: #108cd7;
 }
+
 </style>
 </head>
 <body>
@@ -219,25 +224,30 @@ body::before {
 <div class="center">
   <div id="votd">
 
+    <!-- ICONS -->
     <div id="readIcon">🔊</div>
     <div id="ambientToggle">🌿</div>
 
+    <!-- CONTENT -->
     <div id="title">Daily Bible Verse</div>
     <div id="date"></div>
     <div id="verse"></div>
     <div id="ref"></div>
 
+    <!-- TRANSLATION -->
     <select id="translationSelect" class="translation-select">
       <option value="nlt">NLT</option>
       <option value="niv">NIV</option>
       <option value="kjv">KJV</option>
     </select>
 
+    <!-- MODE -->
     <div class="mode-buttons">
       <button id="dailyBtn" class="active">Daily</button>
       <button id="randomBtn">Random</button>
     </div>
 
+    <!-- ACTIONS -->
     <div class="actions">
       <button class="btn" id="shareBtn">Share</button>
     </div>
@@ -245,9 +255,10 @@ body::before {
   </div>
 </div>
 
+<!-- STREAK BADGE -->
 <div id="streak"></div>
 
-<!-- 🔧 FIXED STREAK MODAL -->
+<!-- STREAK MODAL -->
 <div id="streakModal">
   <div class="streak-card">
     <h1 id="streakCount"></h1>
@@ -265,11 +276,14 @@ body::before {
   </div>
 </div>
 
+<!-- AUDIO -->
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
 
 <script>
 
-/* DOM SHORTCUTS */
+/* =========================
+   DOM SHORTCUTS
+========================= */
 const titleEl = document.getElementById("title");
 const dateEl = document.getElementById("date");
 const verseEl = document.getElementById("verse");
@@ -290,7 +304,9 @@ const b100 = document.getElementById("b100");
 const progressBar = document.getElementById("progressBar");
 const ambientAudio = document.getElementById("ambientAudio");
 
-/* BACKGROUND SETS */
+/* =========================
+   BACKGROUNDS
+========================= */
 const bgSets = {
   morning: ["/backgrounds/morning1.png","/backgrounds/morning2.png"],
   day: ["/backgrounds/day1.png","/backgrounds/day2.png"],
@@ -309,12 +325,11 @@ function getTimeBlock() {
   return "night";
 }
 
-/* 🔧 FIXED BACKGROUND (NO FLICKER) */
+/* FIXED BACKGROUND (NO FLICKER) */
 function updateBackground() {
   const block = getTimeBlock();
   const set = bgSets[block];
   const img = set[Math.floor(Math.random() * set.length)];
-
   const brightness = (block === "night" || block === "evening") ? 0.75 : 1.0;
 
   const preload = new Image();
@@ -330,14 +345,19 @@ function updateBackground() {
 
 updateBackground();
 
-/* VERSES */
+/* =========================
+   VERSES SYSTEM
+========================= */
 let verses = { nlt:{}, niv:{}, kjv:{} };
-let translation = "nlt", dailyKey = "", currentKey = "";
+let translation = "nlt";
+let dailyKey = "";
+let currentKey = "";
 
 async function loadTranslation(t) {
   try {
     const res = await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
     if (!res.ok) return;
+
     const data = await res.json();
 
     Object.entries(data).forEach(([book, chapters]) => {
@@ -368,8 +388,12 @@ function generateDaily() {
   } else {
     const keys = Object.keys(verses.nlt);
     if (!keys.length) return;
+
     dailyKey = keys[getSeed(today) % keys.length];
-    localStorage.setItem("dailyVerse", JSON.stringify({ date: today, key: dailyKey }));
+    localStorage.setItem("dailyVerse", JSON.stringify({
+      date: today,
+      key: dailyKey
+    }));
   }
 
   currentKey = dailyKey;
@@ -387,13 +411,15 @@ function showDaily() {
 function showRandom() {
   const keys = Object.keys(verses[translation]);
   if (!keys.length) return;
+
   currentKey = keys[Math.floor(Math.random() * keys.length)];
   updateVerse("Random Bible Verse");
+
   dailyBtn.classList.remove("active");
   randomBtn.classList.add("active");
 }
 
-/* 🔧 FIXED TRANSLATION SAFETY */
+/* SAFE TRANSLATION SWITCH */
 function changeTranslation(t) {
   translation = t;
 
@@ -417,12 +443,19 @@ function updateVerse(titleText) {
   if (!text) return;
 
   titleEl.innerText = titleText;
-  verseEl.innerHTML = text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
+
+  verseEl.innerHTML = text
+    .split(" ")
+    .map(w => `<span class="word">${w}</span>`)
+    .join(" ");
+
   refEl.innerText = currentKey;
   dateEl.innerText = new Date().toDateString();
 }
 
-/* STREAK SYSTEM */
+/* =========================
+   STREAK SYSTEM
+========================= */
 function updateStreak() {
   const today = new Date().toDateString();
   const lastVisit = localStorage.getItem("lastVisit");
@@ -455,20 +488,21 @@ function openStreak() {
   streakModal.style.display = "flex";
 }
 
-/* 🔧 FIXED MODAL CLOSE */
 function closeStreak(e) {
   if (e.target === streakModal) {
     streakModal.style.display = "none";
   }
 }
 
-/* READ (TTS) */
+/* =========================
+   READ (TTS)
+========================= */
 function readVerse() {
   const words = document.querySelectorAll(".word");
   words.forEach(w => w.classList.remove("active"));
   let i = 0;
 
-  const text = verses[translation][currentKey];
+  const text = verses?.[translation]?.[currentKey];
   if (!text) return;
 
   const u = new SpeechSynthesisUtterance(text + " " + currentKey);
@@ -482,7 +516,9 @@ function readVerse() {
   } catch {}
 }
 
-/* AMBIENT AUDIO */
+/* =========================
+   AMBIENT AUDIO
+========================= */
 let ambientOn = false;
 
 function toggleAmbient() {
@@ -503,9 +539,9 @@ function toggleAmbient() {
 function fadeIn(a) {
   let v = 0;
   const i = setInterval(() => {
-    v += .05;
-    if (v >= .3) {
-      v = .3;
+    v += 0.05;
+    if (v >= 0.3) {
+      v = 0.3;
       clearInterval(i);
     }
     a.volume = v;
@@ -515,7 +551,7 @@ function fadeIn(a) {
 function fadeOut(a) {
   let v = a.volume;
   const i = setInterval(() => {
-    v -= .05;
+    v -= 0.05;
     if (v <= 0) {
       clearInterval(i);
       a.pause();
@@ -525,7 +561,9 @@ function fadeOut(a) {
   }, 100);
 }
 
-/* 🔧 SHARE FIX (NO POPUP BUG, KEEPS CANVAS) */
+/* =========================
+   PREMIUM SHARE (CANVAS)
+========================= */
 async function shareVerse() {
   try {
     if (!verses || !translation || !currentKey) return;
@@ -538,22 +576,22 @@ async function shareVerse() {
     canvas.height = 1080;
     const ctx = canvas.getContext("2d");
 
-    /* SAFE BACKGROUND */
-    let bgImg = null;
+    /* LOAD BACKGROUND SAFELY */
+    let bgLoaded = false;
+    let bgImg = new Image();
 
     if (currentBackground) {
-      bgImg = new Image();
       bgImg.crossOrigin = "anonymous";
       bgImg.src = currentBackground;
 
       await new Promise(res => {
-        bgImg.onload = res;
+        bgImg.onload = () => { bgLoaded = true; res(); };
         bgImg.onerror = res;
       });
     }
 
-    /* DRAW BG OR FALLBACK */
-    if (bgImg) {
+    /* DRAW BACKGROUND */
+    if (bgLoaded) {
       ctx.filter = `brightness(${(currentBrightness || 1) * 0.6}) blur(6px)`;
       ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
       ctx.filter = "none";
@@ -562,12 +600,8 @@ async function shareVerse() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    /* CARD */
-    const x = 120;
-    const y = 200;
-    const w = 840;
-    const h = 520;
-    const r = 40;
+    /* GLASS CARD */
+    const x = 120, y = 200, w = 840, h = 520, r = 40;
 
     ctx.beginPath();
     ctx.moveTo(x+r, y);
@@ -591,7 +625,7 @@ async function shareVerse() {
 
     const words = verseText.split(" ");
     let line = "";
-    let lines = [];
+    const lines = [];
     const maxWidth = w - 120;
 
     words.forEach(word => {
@@ -611,12 +645,12 @@ async function shareVerse() {
       ctx.fillText(l.trim(), canvas.width / 2, startY + i * 60);
     });
 
-    /* REF */
+    /* REFERENCE */
     ctx.font = "bold 36px Georgia";
     ctx.fillStyle = "#108cd7";
     ctx.fillText(currentKey, canvas.width / 2, y + h - 40);
 
-    /* LOGO SAFE LOAD */
+    /* LOGO */
     try {
       const logo = new Image();
       logo.src = "logo.svg";
@@ -641,7 +675,7 @@ async function shareVerse() {
 
     const file = new File([blob], "tapnpray.png", { type: "image/png" });
 
-    if (navigator.share) {
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
       try {
         await navigator.share({
           files: [file],
@@ -664,141 +698,9 @@ async function shareVerse() {
   }
 }
 
-    // Rounded rectangle
-    function roundRect(ctx, x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x+r, y);
-      ctx.lineTo(x+w-r, y);
-      ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-      ctx.lineTo(x+w, y+h-r);
-      ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-      ctx.lineTo(x+r, y+h);
-      ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-      ctx.lineTo(x, y+r);
-      ctx.quadraticCurveTo(x, y, x+r, y);
-      ctx.closePath();
-    }
-
-    ctx.fillStyle = "rgba(0,0,0,0.45)";
-    roundRect(ctx, cardX, cardY, cardW, cardH, 40);
-    ctx.fill();
-
-    /* === TEXT WRAPPING === */
-    function drawWrappedText(text, x, y, maxWidth, lineHeight) {
-      const words = text.split(" ");
-      let line = "";
-      const lines = [];
-
-      ctx.font = "bold 48px Georgia";
-      for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + " ";
-        const width = ctx.measureText(testLine).width;
-        if (width > maxWidth && n > 0) {
-          lines.push(line);
-          line = words[n] + " ";
-        } else {
-          line = testLine;
-        }
-      }
-      lines.push(line);
-
-      lines.forEach((l, i) => {
-        ctx.fillText(l.trim(), x, y + i * lineHeight);
-      });
-    }
-
-    /* === DRAW VERSE === */
-    ctx.fillStyle = "#F2F2F2";
-    ctx.textAlign = "center";
-
-    drawWrappedText(
-      verseText,
-      canvas.width / 2,
-      cardY + 120,
-      cardW - 120,
-      60
-    );
-
-    /* === REFERENCE === */
-    ctx.font = "bold 40px Georgia";
-    ctx.fillStyle = "#108cd7";
-    ctx.fillText(currentKey, canvas.width / 2, cardY + cardH - 50);
-
-    /* === LOAD LOGO === */
-    const logo = new Image();
-    logo.crossOrigin = "anonymous";
-    logo.src = "logo.svg";
-
-    await new Promise(res => {
-      logo.onload = res;
-      logo.onerror = res;
-    });
-
-    const logoSize = 110;
-    const logoX = 60;
-    const logoY = canvas.height - logoSize - 90;
-
-    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-
-    /* === SITE URL === */
-    ctx.font = "bold 30px Georgia";
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillText(
-      "tapnpray.github.io",
-      logoX,
-      logoY + logoSize + 40
-    );
-
-    /* === EXPORT === */
-    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
-    if (!blob) return;
-
-    const file = new File([blob], "tapnpray.png", { type: "image/png" });
-
-    /* === SHARE OR DOWNLOAD === */
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: "Tap N Pray",
-          text: verseText + "\n\n" + currentKey
-        });
-        return;
-      } catch {}
-    }
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "tapnpray.png";
-    a.click();
-    URL.revokeObjectURL(url);
-
-  } catch (err) {
-    console.error("Share failed", err);
-  }
-}
-
-    // fallback: simple download image (keeps compatibility)
-    const canvas = document.createElement("canvas");
-    canvas.width = 1080;
-    canvas.height = 1080;
-
-    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
-    if (!blob) return;
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "tapnpray.png";
-    a.click();
-    URL.revokeObjectURL(url);
-
-  } catch {}
-}
-
-/* EVENT WIRING */
+/* =========================
+   EVENTS
+========================= */
 readIcon.addEventListener("click", readVerse);
 verseEl.addEventListener("click", readVerse);
 ambientToggle.addEventListener("click", toggleAmbient);
@@ -810,14 +712,15 @@ shareBtn.addEventListener("click", shareVerse);
 streakEl.addEventListener("click", openStreak);
 streakModal.addEventListener("click", closeStreak);
 
-/* INIT */
+/* =========================
+   INIT
+========================= */
 (async () => {
   await loadTranslation("nlt");
   await loadTranslation("niv");
   await loadTranslation("kjv");
   generateDaily();
 })();
-
 </script>
 </body>
 </html>
