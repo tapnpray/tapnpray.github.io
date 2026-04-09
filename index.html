@@ -564,8 +564,10 @@ function fadeOut(a) {
 /* =========================
    PREMIUM SHARE (CANVAS)
 ========================= */
+
 async function shareVerse() {
   try {
+    /* SAFE GUARDS */
     if (!verses || !translation || !currentKey) return;
 
     const verseText = verses?.[translation]?.[currentKey];
@@ -576,7 +578,9 @@ async function shareVerse() {
     canvas.height = 1080;
     const ctx = canvas.getContext("2d");
 
-    /* LOAD BACKGROUND SAFELY */
+    /* =========================
+       LOAD BACKGROUND SAFELY
+    ========================= */
     let bgLoaded = false;
     let bgImg = new Image();
 
@@ -590,7 +594,9 @@ async function shareVerse() {
       });
     }
 
-    /* DRAW BACKGROUND */
+    /* =========================
+       DRAW BACKGROUND
+    ========================= */
     if (bgLoaded) {
       ctx.filter = `brightness(${(currentBrightness || 1) * 0.6}) blur(6px)`;
       ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
@@ -600,7 +606,9 @@ async function shareVerse() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    /* GLASS CARD */
+    /* =========================
+       GLASS CARD
+    ========================= */
     const x = 120, y = 200, w = 840, h = 520, r = 40;
 
     ctx.beginPath();
@@ -618,7 +626,9 @@ async function shareVerse() {
     ctx.fillStyle = "rgba(0,0,0,0.45)";
     ctx.fill();
 
-    /* TEXT */
+    /* =========================
+       TEXT SETUP
+    ========================= */
     ctx.fillStyle = "#F2F2F2";
     ctx.textAlign = "center";
     ctx.font = "bold 46px Georgia";
@@ -637,28 +647,34 @@ async function shareVerse() {
         line = test;
       }
     });
-    lines.push(line);
+    if (line) lines.push(line); // <-- FIXED
 
-    const startY = y + 120;
+    /* =========================
+       PERFECT VERTICAL CENTERING
+    ========================= */
     const lineHeight = 60;
+    const totalTextHeight = lines.length * lineHeight;
+    const startY = y + (h / 2) - (totalTextHeight / 2);
 
     lines.forEach((l, i) => {
       ctx.fillText(l.trim(), canvas.width / 2, startY + i * lineHeight);
-});
+    });
 
-    /* DYNAMIC REFERENCE POSITION */
-const refY = Math.min(
-  startY + (lines.length * lineHeight) + 40,
-  y + h - 30
-);
+    /* =========================
+       DYNAMIC REFERENCE POSITION
+    ========================= */
+    const refY = Math.min(
+      startY + (lines.length * lineHeight) + 40,
+      y + h - 30
+    );
 
-
-    /* REFERENCE */
     ctx.font = "bold 36px Georgia";
     ctx.fillStyle = "#108cd7";
     ctx.fillText(currentKey, canvas.width / 2, refY);
 
-    /* LOGO */
+    /* =========================
+       LOGO
+    ========================= */
     try {
       const logo = new Image();
       logo.src = "logo.svg";
@@ -671,13 +687,17 @@ const refY = Math.min(
       ctx.drawImage(logo, 60, canvas.height - 160, 100, 100);
     } catch {}
 
-    /* URL */
+    /* =========================
+       URL
+    ========================= */
     ctx.font = "bold 26px Georgia";
     ctx.fillStyle = "#fff";
     ctx.textAlign = "left";
     ctx.fillText("tapnpray.github.io", 60, canvas.height - 30);
 
-    /* EXPORT */
+    /* =========================
+       EXPORT
+    ========================= */
     const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
     if (!blob) return;
 
