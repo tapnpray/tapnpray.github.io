@@ -1,171 +1,136 @@
 <img src="icon-192.png" width="120" alt="Tap N Pray Logo" />
-Tap N Pray — Daily Bible Verse Web App
-https://tapnpray.github.io/
-A peaceful, mobile‑first Scripture experience with premium sharing, streak tracking, and ambient reflection.
+# ✝️ Tap N Pray
 
-Tap N Pray is a beautifully designed Bible verse web app built for simplicity, calm, and daily spiritual consistency. Every day, users receive a new verse displayed on a dynamic background with a frosted‑glass verse card, optional ambient audio, and text‑to‑speech reading. The app also includes a premium share engine that generates high‑quality verse images perfect for social media.
+**One Tap. One Verse. One Step Closer to Christ.**
 
-This project is fully client‑side and hosted on GitHub Pages.
+🌐 **Live Site:** https://tapnpray.github.io/
 
-✨ Features
-📅 Daily & Random Verses
-Automatically generates a new verse each day
+---
 
-Random mode for instant inspiration
+## 📖 Overview
 
-Supports NLT, NIV, and KJV
+Tap N Pray is a simple, beautiful web app designed to help you engage with Scripture daily. With one tap, you receive a Bible verse that you can read, listen to, reflect on, and share.
 
-Smooth translation switching
+Built for simplicity and spiritual focus, the experience is distraction-free and centered around God's Word.
 
-🔊 Text‑to‑Speech with Word Highlighting
-Reads the verse aloud
+---
 
-Highlights each word as it’s spoken
+## ✨ Features
 
-Works on mobile and desktop
+* 📅 **Daily Verse**
+  A new verse every day, consistent across all users.
 
-🌿 Ambient Audio
-Optional calming background audio
+* 🔀 **Random Verse Mode**
+  Explore Scripture beyond the daily selection.
 
-Smooth fade‑in / fade‑out transitions
+* 🔊 **Read Aloud (TTS)**
+  Listen to verses with built-in text-to-speech.
 
-🔥 Real Daily Streak System
-Tracks daily visits
+* 🌿 **Ambient Sound Mode**
+  Optional calming background audio for reflection.
 
-Resets if a day is missed
+* 🔁 **Streak Tracking**
+  Stay consistent with your daily time in the Word.
 
-Milestone badges: 7‑day, 30‑day, 100‑day
+* 🏆 **Milestones & Badges**
 
-Progress bar and streak modal
+  * 🌿 7 Days
+  * 🔥 30 Days
+  * 👑 100 Days
 
-🧊 Frosted‑Glass Verse Box
-Dark, semi‑transparent glass effect
+* 📸 **Shareable Verse Cards**
+  Generate beautiful, social-ready images with:
 
-Auto‑darkening background
+  * Blurred background
+  * Glass-style verse card
+  * Auto-formatted text
+  * Logo + site link
 
-Centered layout with mobile‑optimized spacing
+* 🌅 **Dynamic Backgrounds**
+  Backgrounds change based on time of day:
 
-🖼 Premium Share Engine (1080×1080)
-Generates a square, social‑media‑ready image
+  * Morning
+  * Day
+  * Evening
+  * Night
 
-Georgia font with auto‑fit text
+---
 
-Soft‑white verse text
+## 🛠️ Tech Stack
 
-Darkened verse panel
+* HTML5
+* CSS3 (Glassmorphism UI)
+* Vanilla JavaScript
+* Canvas API (for share images)
+* LocalStorage (streak tracking)
+* Web Speech API (text-to-speech)
 
-Includes your logo.svg and tapnpray.github.io branding
+---
 
-Native share on mobile
+## 📂 Project Structure
 
-Download fallback on desktop
-
-🌅 Dynamic Background System
-Morning / Day / Evening / Night background sets
-
-Auto‑brightness adjustment
-
-Soft blur for premium aesthetic
-
-📱 Mobile‑First Design
-Optimized for all screen sizes
-
-Safe‑area padding for modern phones
-
-No popups or intrusive UI
-
-📊 Google Analytics
-Tracks page views and engagement
-
-Lightweight and non‑intrusive
-
-🛠 Tech Stack
-HTML5
-
-CSS3 (frosted‑glass UI, responsive layout)
-
-Vanilla JavaScript
-
-Canvas API (premium share engine)
-
-Web Speech API (text‑to‑speech)
-
-LocalStorage (streak tracking, daily verse seed)
-
-GitHub Pages (hosting)
-
-📂 Project Structure
-Code
+```
 /
 ├── index.html
 ├── logo.svg
-├── backgrounds/
-│   ├── morning1.png
-│   ├── morning2.png
-│   ├── day1.png
-│   ├── day2.png
-│   ├── evening1.png
-│   ├── evening2.png
-│   ├── night1.png
-│   └── night2.png
-├── sounds/
-│   └── calm.mp3
-└── BIBLE/
-    ├── NLT/NLT_bible.json
-    ├── NIV/NIV_bible.json
-    └── KJV/KJV_bible.json
-🚀 How It Works
-1. Daily Verse Generation
-A deterministic seed based on the current date selects a verse, ensuring every user receives the same verse each day.
+├── favicon.png
+├── og-image.png
+├── /backgrounds
+├── /sounds
+└── /BIBLE
+```
 
-2. Streak Tracking
-LocalStorage records the last visit date and increments or resets the streak accordingly.
+---
 
-3. Premium Share Engine
-The app uses the Canvas API to generate a 1080×1080 image with:
+## 🚀 Getting Started
 
-Background
+1. Clone the repo:
 
-Frosted panel
+   ```bash
+   git clone https://github.com/tapnpray/tapnpray.github.io.git
+   ```
 
-Auto‑fit verse text
+2. Open `index.html` in your browser
+   *(or deploy via GitHub Pages)*
 
-Reference
+---
 
-Logo + URL
+## 💛 Donate
 
-4. Dynamic Backgrounds
-Time‑based background sets create a peaceful, immersive experience.
+If Tap N Pray has encouraged you or helped you stay consistent in Scripture, you can support the project here:
 
-🧪 Local Development
-Clone the repo and open index.html in a browser:
+👉 https://venmo.com/u/tapnpray
 
-bash
-git clone https://github.com/<your-username>/tapnpray.github.io
-cd tapnpray.github.io
-open index.html
-No build tools required.
+Your support goes directly toward creating **3D keytags** that link to the app. These keytags are designed to:
 
-🌐 Deployment (GitHub Pages)
-Push your code to the main branch
+* Be easily shared with others
+* Serve as a physical reminder to stay in the Word
+* Help spread Scripture in everyday life
 
-Enable GitHub Pages in repo settings
+The goal is to produce and distribute these keytags so more people can discover Tap N Pray and grow closer to Christ daily.
 
-Set the source to main
+---
 
-Your site will be live at:
-https://tapnpray.github.io/
+## 🙏 Purpose
 
-🖼 Branding
-logo.svg is used in the UI and in generated share images
+Tap N Pray exists to make it easier for people to:
 
-The site URL is automatically added to shared images
+* Spend time in Scripture daily
+* Build a consistent habit
+* Reflect, listen, and share God’s Word
 
-The top logo never overlaps the verse box
+---
 
-📜 License
-This project is open‑source under the MIT License.
+## 📢 Share the Word
 
-🙏 Acknowledgments
-Tap N Pray was built to create a peaceful, distraction‑free way to engage with Scripture daily.
-Thank you for using and supporting this project.
+If you find this helpful, share it with others:
+
+👉 https://tapnpray.github.io/
+
+---
+
+## ❤️ Built With Purpose
+
+Created to glorify God and help others grow closer to Christ through daily Scripture.
+
+---
