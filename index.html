@@ -295,7 +295,6 @@ body::before {
 
 #tapHintBubble.show {
   opacity: 1;
-  transform: translateY(0);
   animation: hintBounce 1.8s ease-in-out infinite;
 }
 
@@ -910,20 +909,14 @@ donateIcon.addEventListener("click", goDonate);
   await loadTranslation("niv");
   await loadTranslation("kjv");
   generateDaily();
+
   // 👇 FLOATING HINT
-const hint = document.getElementById("tapHintBubble");
+  const hint = document.getElementById("tapHintBubble");
 
-if (hint && !localStorage.getItem("tapHint")) {
-  setTimeout(() => {
-    hint.classList.add("show");
-  }, 1200);
-
-  setTimeout(() => {
-    hint.classList.remove("show");
-  }, 5000);
-
-  localStorage.setItem("tapHint", "shown");
-}
+  if (hint && !localStorage.getItem("tapHint")) {
+    setTimeout(() => {
+      hint.classList.add("show");
+    }, 1200);
 
     setTimeout(() => {
       hint.classList.remove("show");
@@ -931,7 +924,6 @@ if (hint && !localStorage.getItem("tapHint")) {
 
     localStorage.setItem("tapHint", "shown");
   }
-
 })();
 </script>
 </body>
