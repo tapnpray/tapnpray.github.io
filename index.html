@@ -773,16 +773,23 @@ async function shareVerse() {
     /* =========================
        TITLE
     ========================= */
-    ctx.font = "700 32px Merriweather";
-    ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
-    ctx.fillText("Daily Bible Verse", canvas.width / 2, y + 60);
+
+    /* TITLE */
+    ctx.font = "700 30px Merriweather";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("Daily Bible Verse", canvas.width / 2, y + 55);
+
+    /* DATE (same style as app) */
+    ctx.font = "600 24px Merriweather";
+    ctx.fillStyle = "#108cd7";
+    ctx.fillText(new Date().toDateString(), canvas.width / 2, y + 95);
 
     /* =========================
        VERSE TEXT
     ========================= */
     ctx.font = "700 48px Merriweather";
-    ctx.fillStyle = "#F2F2F2";
+    ctx.fillStyle = "#ffffff";
 
     const words = verseText.split(" ");
     let line = "";
@@ -801,7 +808,7 @@ async function shareVerse() {
     if (line) lines.push(line);
 
     const lineHeight = 60;
-    const startY = y + 140;
+    const startY = y + 180;
 
     lines.forEach((l, i) => {
       ctx.fillText(l.trim(), canvas.width / 2, startY + i * lineHeight);
