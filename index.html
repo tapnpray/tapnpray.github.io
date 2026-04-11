@@ -3,31 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <title>Tap N Pray</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <meta name="description" content="Tap N Pray - One Tap, One Verse, One Step Closer to Christ.">
 
-<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 
-<!-- Font -->
 <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
-
-<!-- Open Graph -->
-<meta property="og:title" content="Tap N Pray">
-<meta property="og:description" content="One Tap, One Verse, One Step Closer to Christ.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://tapnpray.github.io/">
-<meta property="og:image" content="https://tapnpray.github.io/og-image.png">
-
-<!-- Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-ELQ3E5WGCT');
-</script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <style>
 
@@ -35,15 +19,15 @@ gtag('config', 'G-ELQ3E5WGCT');
    BASE
 ========================= */
 html, body {
-  height: 100%;
   margin: 0;
+  height: 100%;
   overflow: hidden;
   font-family: 'Merriweather', serif;
   color: #fff;
 }
 
 /* =========================
-   BACKGROUND IMAGE
+   BACKGROUND
 ========================= */
 body::before {
   content: "";
@@ -56,24 +40,17 @@ body::before {
   z-index: -2;
 }
 
-/* =========================
-   BLUR + DARK OVERLAY
-========================= */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
-
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-
+  backdrop-filter: blur(22px);
   background: radial-gradient(
     circle at center,
-    rgba(0,0,0,0.35) 0%,
-    rgba(0,0,0,0.65) 60%,
-    rgba(0,0,0,0.9) 100%
+    rgba(0,0,0,0.3),
+    rgba(0,0,0,0.7),
+    rgba(0,0,0,0.9)
   );
-
   z-index: -1;
 }
 
@@ -81,8 +58,8 @@ body::after {
    LOGO
 ========================= */
 #topLogo {
-  width: 100px;
-  margin: 20px auto;
+  width: 90px;
+  margin: 20px auto 10px;
   display: block;
   opacity: 0.9;
 }
@@ -91,7 +68,7 @@ body::after {
    CENTER CONTENT
 ========================= */
 .center {
-  height: calc(100vh - 160px);
+  height: calc(100vh - 140px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -104,38 +81,52 @@ body::after {
    TEXT
 ========================= */
 #title {
-  font-size: 14px;
+  font-size: 13px;
   opacity: 0.7;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.6);
 }
 
 #date {
-  font-size: 13px;
+  font-size: 12px;
   opacity: 0.6;
   margin-bottom: 10px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.6);
 }
 
 #verse {
-  font-size: clamp(24px, 5vw, 34px);
+  font-size: clamp(26px, 6vw, 36px);
   line-height: 1.7;
-  max-width: 800px;
+  max-width: 90%;
+  text-shadow: 0 6px 30px rgba(0,0,0,0.8);
 }
 
 #ref {
-  margin-top: 15px;
+  margin-top: 14px;
   color: #108cd7;
   font-weight: bold;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.6);
 }
 
-/* Word animation */
+/* word highlight */
 .word { opacity: .35; }
 .word.active { opacity: 1; }
 
 /* =========================
-   FAB BUTTON (CENTER)
+   TAP HINT
+========================= */
+#tapHint {
+  margin-top: 12px;
+  font-size: 13px;
+  opacity: 0.6;
+  transition: opacity 0.5s;
+}
+
+/* =========================
+   FAB (CENTER)
 ========================= */
 #fab {
   position: fixed;
-  bottom: 40px;
+  bottom: 35px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
@@ -145,119 +136,72 @@ body::after {
   width: 70px;
   height: 70px;
   border-radius: 50%;
-
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.12);
   backdrop-filter: blur(12px);
-
-  border: 1px solid rgba(255,255,255,0.2);
-
+  border: 1px solid rgba(255,255,255,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 28px;
-  color: #fff;
-
   cursor: pointer;
+  transition: 0.25s;
+}
+
+.fab-main:active {
+  transform: scale(0.95);
 }
 
 /* =========================
-   FULLSCREEN MENU
+   MENU (CENTER ABOVE FAB)
 ========================= */
 .fab-menu {
   position: fixed;
-  inset: 0;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+
+  width: 90%;
+  max-width: 420px;
 
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  gap: 12px;
 
-  padding: 40px 20px 120px;
+  padding: 18px;
 
-  background: linear-gradient(
-    to top,
-    rgba(0,0,0,0.9),
-    rgba(0,0,0,0.7),
-    rgba(0,0,0,0.4),
-    transparent
-  );
-
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(20px);
+  border-radius: 22px;
 
   opacity: 0;
   pointer-events: none;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .fab-menu.open {
   opacity: 1;
+  transform: translateX(-50%) translateY(0);
   pointer-events: auto;
 }
 
-/* Menu Items */
+/* menu item */
 .fab-item {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 14px 10px;
-  font-size: 15px;
-  letter-spacing: 1px;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 14px;
   cursor: pointer;
-  opacity: 0.9;
-  transition: 0.25s;
+  font-size: 14px;
+  transition: 0.2s;
 }
 
 .fab-item:hover {
-  opacity: 1;
-  transform: translateX(6px);
+  background: rgba(255,255,255,0.08);
 }
 
 .fab-icon {
-  width: 26px;
-  text-align: center;
-}
-
-/* Close Button */
-.fab-close {
-  position: absolute;
-  bottom: 35px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(12px);
-
-  border: 1px solid rgba(255,255,255,0.2);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 26px;
-  cursor: pointer;
-}
-
-/* =========================
-   MODAL (STREAK)
-========================= */
-#streakModal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.6);
-}
-
-.streak-card {
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(20px);
-  padding: 25px;
-  border-radius: 20px;
+  width: 24px;
   text-align: center;
 }
 
@@ -268,14 +212,19 @@ body::after {
 <!-- LOGO -->
 <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
 
-<!-- CENTER CONTENT -->
+<!-- MAIN CENTER CONTENT -->
 <div class="center">
+
   <div id="title">Daily Bible Verse</div>
   <div id="date"></div>
 
   <div id="verse"></div>
 
   <div id="ref"></div>
+
+  <!-- Tap hint (restored + subtle) -->
+  <div id="tapHint">Tap verse to listen 🔊</div>
+
 </div>
 
 <!-- =========================
@@ -286,61 +235,80 @@ body::after {
 </div>
 
 <!-- =========================
-     FULLSCREEN MENU
+     MENU (CENTER ABOVE FAB)
 ========================= -->
 <div class="fab-menu" id="fabMenu">
 
-  <!-- MENU ITEMS -->
   <div class="fab-item" id="dailyBtn">
-    <div class="fab-icon">📅</div> Daily Verse
+    <div class="fab-icon">📅</div>
+    Daily Verse
   </div>
 
   <div class="fab-item" id="randomBtn">
-    <div class="fab-icon">🔀</div> Random Verse
+    <div class="fab-icon">🔀</div>
+    Random Verse
   </div>
 
-  <div class="fab-item" onclick="changeTranslation('nlt')">
-    <div class="fab-icon">🅝</div> NLT Translation
+  <div class="fab-item" data-t="nlt">
+    <div class="fab-icon">🅝</div>
+    NLT Translation
   </div>
 
-  <div class="fab-item" onclick="changeTranslation('niv')">
-    <div class="fab-icon">🅥</div> NIV Translation
+  <div class="fab-item" data-t="niv">
+    <div class="fab-icon">🅥</div>
+    NIV Translation
   </div>
 
-  <div class="fab-item" onclick="changeTranslation('kjv')">
-    <div class="fab-icon">🅚</div> KJV Translation
+  <div class="fab-item" data-t="kjv">
+    <div class="fab-icon">🅚</div>
+    KJV Translation
   </div>
 
   <div class="fab-item" id="shareBtn">
-    <div class="fab-icon">🔗</div> Share Verse
+    <div class="fab-icon">🔗</div>
+    Share Verse
   </div>
 
   <div class="fab-item" id="ambientToggle">
-    <div class="fab-icon">🌿</div> Ambient Sound
+    <div class="fab-icon">🌿</div>
+    Ambient Sound
   </div>
 
   <div class="fab-item" id="streakBtn">
-    <div class="fab-icon">🔥</div> Streak
+    <div class="fab-icon">🔥</div>
+    Streak
   </div>
 
   <div class="fab-item" id="helpIcon">
-    <div class="fab-icon">❓</div> Help
+    <div class="fab-icon">❓</div>
+    Help
   </div>
 
   <div class="fab-item" id="donateIcon">
-    <div class="fab-icon">♥</div> Support
+    <div class="fab-icon">♥</div>
+    Support
   </div>
-
-  <!-- CLOSE BUTTON -->
-  <div class="fab-close" id="fabClose">✕</div>
 
 </div>
 
 <!-- =========================
      STREAK MODAL
 ========================= -->
-<div id="streakModal">
-  <div class="streak-card" id="streakCard">
+<div id="streakModal" style="
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,0.6);
+">
+  <div style="
+    background:rgba(0,0,0,0.5);
+    backdrop-filter:blur(20px);
+    padding:25px;
+    border-radius:20px;
+    text-align:center;
+  ">
     <h1 id="streakCount"></h1>
     <div id="streakMsg"></div>
   </div>
@@ -349,8 +317,23 @@ body::after {
 <!-- =========================
      HELP MODAL
 ========================= -->
-<div id="helpModal" style="display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:rgba(0,0,0,0.6);">
-  <div style="background:rgba(0,0,0,0.5); backdrop-filter:blur(20px); padding:20px; border-radius:20px; max-width:500px; max-height:80vh; overflow:auto;" id="helpContent">
+<div id="helpModal" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,0.6);
+">
+  <div id="helpContent" style="
+    background:rgba(0,0,0,0.5);
+    backdrop-filter:blur(20px);
+    padding:20px;
+    border-radius:20px;
+    max-width:500px;
+    max-height:80vh;
+    overflow:auto;
+  ">
     Loading...
   </div>
 </div>
@@ -359,261 +342,10 @@ body::after {
      AUDIO
 ========================= -->
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
-
 <script>
-  
-/* =========================
-   DOM REFERENCES
-========================= */
-const titleEl = document.getElementById("title");
-const dateEl = document.getElementById("date");
-const verseEl = document.getElementById("verse");
-const refEl = document.getElementById("ref");
-
-const fabMain = document.getElementById("fabMain");
-const fabMenu = document.getElementById("fabMenu");
-const fabClose = document.getElementById("fabClose");
-
-const dailyBtn = document.getElementById("dailyBtn");
-const randomBtn = document.getElementById("randomBtn");
-const shareBtn = document.getElementById("shareBtn");
-const ambientToggle = document.getElementById("ambientToggle");
-const streakBtn = document.getElementById("streakBtn");
-
-const helpIcon = document.getElementById("helpIcon");
-const donateIcon = document.getElementById("donateIcon");
-
-const streakModal = document.getElementById("streakModal");
-const streakCard = document.getElementById("streakCard");
-const streakCount = document.getElementById("streakCount");
-const streakMsg = document.getElementById("streakMsg");
-
-const helpModal = document.getElementById("helpModal");
-const helpContent = document.getElementById("helpContent");
-
-const ambientAudio = document.getElementById("ambientAudio");
 
 /* =========================
-   MENU
-========================= */
-function openMenu() {
-  fabMenu.classList.add("open");
-}
-function closeMenu() {
-  fabMenu.classList.remove("open");
-}
-
-fabMain.addEventListener("click", openMenu);
-fabClose.addEventListener("click", closeMenu);
-
-document.querySelectorAll(".fab-item").forEach(item => {
-  item.addEventListener("click", () => {
-    setTimeout(closeMenu, 150);
-  });
-});
-
-/* =========================
-   BACKGROUND SYSTEM
-========================= */
-const bgSets = {
-  morning: ["/backgrounds/morning1.png","/backgrounds/morning2.png"],
-  day: ["/backgrounds/day1.png","/backgrounds/day2.png"],
-  evening: ["/backgrounds/evening1.png","/backgrounds/evening2.png"],
-  night: ["/backgrounds/night1.png","/backgrounds/night2.png"]
-};
-
-function getTimeBlock() {
-  const h = new Date().getHours();
-  if (h < 11) return "morning";
-  if (h < 17) return "day";
-  if (h < 21) return "evening";
-  return "night";
-}
-
-function updateBackground() {
-  const block = getTimeBlock();
-  const set = bgSets[block];
-  const img = set[Math.floor(Math.random() * set.length)];
-
-  const preload = new Image();
-  preload.src = img;
-
-  preload.onload = () => {
-    document.body.style.setProperty('--bg-image', `url('${img}')`);
-  };
-}
-
-updateBackground();
-
-/* =========================
-   VERSE SYSTEM
-========================= */
-let verses = { nlt:{}, niv:{}, kjv:{} };
-let translation = "nlt";
-let currentKey = "";
-let dailyKey = "";
-
-async function loadTranslation(t) {
-  try {
-    const res = await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
-    if (!res.ok) return;
-    const data = await res.json();
-
-    Object.entries(data).forEach(([book, chapters]) => {
-      Object.entries(chapters).forEach(([chapter, versesObj]) => {
-        Object.entries(versesObj).forEach(([v, text]) => {
-          verses[t][`${book} ${chapter}:${v}`] = text;
-        });
-      });
-    });
-  } catch {}
-}
-
-function getSeed(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) {
-    h = (h << 5) - h + s.charCodeAt(i);
-    h |= 0;
-  }
-  return Math.abs(h);
-}
-
-function generateDaily() {
-  const today = new Date().toDateString();
-  const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
-
-  if (stored.date === today) {
-    dailyKey = stored.key;
-  } else {
-    const keys = Object.keys(verses[translation]);
-    if (!keys.length) return;
-
-    dailyKey = keys[getSeed(today) % keys.length];
-
-    localStorage.setItem("dailyVerse", JSON.stringify({
-      date: today,
-      key: dailyKey
-    }));
-  }
-
-  currentKey = dailyKey;
-  updateVerse("Daily Bible Verse");
-  updateStreak();
-}
-
-function showDaily() {
-  currentKey = dailyKey;
-  updateVerse("Daily Bible Verse");
-}
-
-function showRandom() {
-  const keys = Object.keys(verses[translation]);
-  if (!keys.length) return;
-
-  currentKey = keys[Math.floor(Math.random() * keys.length)];
-  updateVerse("Random Bible Verse");
-}
-
-function changeTranslation(t) {
-  translation = t;
-
-  if (!verses[translation][currentKey]) {
-    currentKey = dailyKey;
-  }
-
-  updateVerse(
-    titleEl.innerText.includes("Daily")
-      ? "Daily Bible Verse"
-      : "Random Bible Verse"
-  );
-}
-
-function updateVerse(titleText) {
-  const text = verses[translation][currentKey];
-  if (!text) return;
-
-  titleEl.innerText = titleText;
-
-  verseEl.innerHTML = text
-    .split(" ")
-    .map(w => `<span class="word">${w}</span>`)
-    .join(" ");
-
-  refEl.innerText = currentKey;
-  dateEl.innerText = new Date().toDateString();
-}
-
-/* =========================
-   STREAK SYSTEM
-========================= */
-function updateStreak() {
-  const today = new Date().toDateString();
-  const lastVisit = localStorage.getItem("lastVisit");
-  let streak = parseInt(localStorage.getItem("streak")) || 1;
-
-  if (lastVisit) {
-    const last = new Date(lastVisit);
-    const now = new Date(today);
-    const diff = Math.floor((now - last) / 86400000);
-
-    if (diff === 1) streak++;
-    else if (diff > 1) streak = 1;
-  }
-
-  localStorage.setItem("streak", streak);
-  localStorage.setItem("lastVisit", today);
-
-  streakCount.innerText = streak + " Days";
-
-  if (streak < 7) {
-    streakMsg.innerText = "Keep going — 7 days next 🌿";
-  } else if (streak < 30) {
-    streakMsg.innerText = "You're on fire 🔥";
-  } else {
-    streakMsg.innerText = "You're building something powerful 👑";
-  }
-}
-
-function openStreak() {
-  streakModal.style.display = "flex";
-}
-function closeStreak() {
-  streakModal.style.display = "none";
-}
-
-streakBtn.addEventListener("click", openStreak);
-streakModal.addEventListener("click", closeStreak);
-streakCard.addEventListener("click", e => e.stopPropagation());
-
-/* =========================
-   HELP
-========================= */
-function openHelp() {
-  helpModal.style.display = "flex";
-  helpContent.innerHTML = "Loading...";
-
-  fetch("https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/refs/heads/main/README.md")
-    .then(res => res.text())
-    .then(text => {
-      helpContent.innerHTML = marked.parse(text);
-    })
-    .catch(() => {
-      helpContent.innerText = "Unable to load help.";
-    });
-}
-
-helpIcon.addEventListener("click", openHelp);
-helpModal.addEventListener("click", () => helpModal.style.display = "none");
-
-/* =========================
-   DONATE
-========================= */
-donateIcon.addEventListener("click", () => {
-  window.open("https://venmo.com/u/tapnpray", "_blank");
-});
-
-/* =========================
-   READ ALOUD
+   READ ALOUD (KEPT ✅)
 ========================= */
 function readVerse() {
   const words = document.querySelectorAll(".word");
@@ -625,57 +357,154 @@ function readVerse() {
 
   const u = new SpeechSynthesisUtterance(text + " " + currentKey);
 
+  u.rate = 0.95;
+  u.pitch = 1;
+
   u.onboundary = () => {
     if (words[i]) words[i++].classList.add("active");
   };
 
   speechSynthesis.cancel();
-  speechSynthesis.speak(u);
+  setTimeout(() => speechSynthesis.speak(u), 100);
 }
 
 verseEl.addEventListener("click", readVerse);
 
+
 /* =========================
-   AMBIENT SOUND
+   TAP HINT (REMINDER ✅)
+========================= */
+const hint = document.getElementById("tapHint");
+
+function showHint() {
+  hint.classList.add("show");
+  setTimeout(() => hint.classList.remove("show"), 4000);
+}
+
+
+/* =========================
+   AMBIENT SOUND (SMOOTH)
 ========================= */
 let ambientOn = false;
 
-ambientToggle.addEventListener("click", () => {
+function toggleAmbient() {
   if (ambientOn) {
-    ambientAudio.pause();
+    fadeOut(ambientAudio);
   } else {
+    ambientAudio.volume = 0;
     ambientAudio.play().catch(()=>{});
+    fadeIn(ambientAudio);
   }
   ambientOn = !ambientOn;
-});
+}
+
+function fadeIn(a) {
+  let v = 0;
+  const i = setInterval(() => {
+    v += 0.05;
+    if (v >= 0.3) { v = 0.3; clearInterval(i); }
+    a.volume = v;
+  }, 100);
+}
+
+function fadeOut(a) {
+  let v = a.volume;
+  const i = setInterval(() => {
+    v -= 0.05;
+    if (v <= 0) {
+      clearInterval(i);
+      a.pause();
+      a.currentTime = 0;
+    }
+    a.volume = v;
+  }, 100);
+}
+
 
 /* =========================
-   SHARE
+   SHARE (PREMIUM IMAGE)
 ========================= */
 async function shareVerse() {
-  const verseText = verses[translation][currentKey];
-  if (!verseText) return;
+  try {
+    const verseText = verses[translation][currentKey];
+    if (!verseText) return;
 
-  const text = `${verseText} — ${currentKey}`;
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1080;
 
-  if (navigator.share) {
-    navigator.share({ text });
-  } else {
-    navigator.clipboard.writeText(text);
-    alert("Copied to clipboard 🙏");
+    const ctx = canvas.getContext("2d");
+
+    // Background
+    ctx.fillStyle = "#111";
+    ctx.fillRect(0,0,1080,1080);
+
+    // Title
+    ctx.fillStyle = "#aaa";
+    ctx.font = "28px Merriweather";
+    ctx.textAlign = "center";
+    ctx.fillText("Daily Bible Verse", 540, 150);
+
+    // Verse
+    ctx.fillStyle = "#fff";
+    ctx.font = "700 42px Merriweather";
+
+    const words = verseText.split(" ");
+    let line = "";
+    let y = 350;
+
+    words.forEach(word => {
+      const test = line + word + " ";
+      if (ctx.measureText(test).width > 800) {
+        ctx.fillText(line, 540, y);
+        line = word + " ";
+        y += 60;
+      } else {
+        line = test;
+      }
+    });
+
+    ctx.fillText(line, 540, y);
+
+    // Reference
+    ctx.fillStyle = "#108cd7";
+    ctx.font = "32px Merriweather";
+    ctx.fillText(currentKey, 540, y + 100);
+
+    const blob = await new Promise(res => canvas.toBlob(res));
+    const file = new File([blob], "verse.png", { type: "image/png" });
+
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file] });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "verse.png";
+      a.click();
+    }
+
+  } catch(e) {
+    console.error(e);
   }
 }
 
-shareBtn.addEventListener("click", shareVerse);
 
 /* =========================
    EVENTS
 ========================= */
 dailyBtn.addEventListener("click", showDaily);
 randomBtn.addEventListener("click", showRandom);
+shareBtn.addEventListener("click", shareVerse);
+ambientToggle.addEventListener("click", toggleAmbient);
+
+streakBtn.addEventListener("click", openStreak);
+helpIcon.addEventListener("click", openHelp);
+donateIcon.addEventListener("click", goDonate);
+
 
 /* =========================
-   INIT
+   INIT (FINAL)
 ========================= */
 (async () => {
   await loadTranslation("nlt");
@@ -684,8 +513,12 @@ randomBtn.addEventListener("click", showRandom);
 
   generateDaily();
   changeTranslation("nlt");
-})();
-</script>
 
+  // 👇 Show hint on first load
+  setTimeout(showHint, 800);
+})();
+
+</script>
+   
 </body>
 </html>
