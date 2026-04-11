@@ -343,6 +343,255 @@ body::after {
 ========================= -->
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
 <script>
+/* =========================
+   DOM REFERENCES (MISSING ❗)
+========================= */
+const verseEl = document.getElementById("verse");
+const titleEl = document.getElementById("title");
+const dateEl = document.getElementById("date");
+const refEl = document.getElementById("ref");
+
+const fabMain = document.getElementById("fabMain");
+const fabMenu = document.getElementById("fabMenu");
+
+const dailyBtn = document.getElementById("dailyBtn");
+const randomBtn = document.getElementById("randomBtn");
+const shareBtn = document.getElementById("shareBtn");
+const ambientToggle = document.getElementById("ambientToggle");
+const streakBtn = document.getElementById("streakBtn");
+
+const helpIcon = document.getElementById("helpIcon");
+const donateIcon = document.getElementById("donateIcon");
+
+const streakModal = document.getElementById("streakModal");
+const streakCount = document.getElementById("streakCount");
+const streakMsg = document.getElementById("streakMsg");
+
+const helpModal = document.getElementById("helpModal");
+const helpContent = document.getElementById("helpContent");
+
+const ambientAudio = document.getElementById("ambientAudio");
+<script>
+
+// DOM refs
+// verse state
+
+// ✅ PASTE HERE
+// weighted + seasonal system
+<script>
+
+/* =========================
+   WEIGHTED + SEASONAL VERSES
+========================= */
+
+const curatedVerses = [
+  { ref: "Psalm 23:1", weight: 5 },
+  { ref: "Jeremiah 29:11", weight: 5 },
+  { ref: "Isaiah 41:10", weight: 5 },
+  { ref: "Romans 8:28", weight: 5 },
+  { ref: "John 3:16", weight: 5 },
+  { ref: "Isaiah 40:31", weight: 5 },
+  { ref: "Joshua 1:9", weight: 5 },
+  { ref: "John 14:27", weight: 5 },
+
+  { ref: "Philippians 4:6", weight: 4 },
+  { ref: "Matthew 11:28", weight: 4 },
+  { ref: "Proverbs 3:5", weight: 4 },
+
+  { ref: "Psalm 46:1", weight: 4 },
+  { ref: "2 Timothy 1:7", weight: 4 },
+
+  { ref: "Galatians 5:22", weight: 3 },
+  { ref: "Romans 15:13", weight: 3 },
+  { ref: "Matthew 5:16", weight: 3 }
+];
+
+/* =========================
+   EASTER CALCULATION
+========================= */
+function getEasterDate(year) {
+  const f = Math.floor;
+  const G = year % 19;
+  const C = f(year / 100);
+  const H = (C - f(C/4) - f((8*C+13)/25) + 19*G + 15) % 30;
+  const I = H - f(H/28) * (1 - f(29/(H+1)) * f((21-G)/11));
+  const J = (year + f(year/4) + I + 2 - C + f(C/4)) % 7;
+  const L = I - J;
+
+  const month = 3 + f((L + 40) / 44);
+  const day = L + 28 - 31 * f(month / 4);
+
+  return new Date(year, month - 1, day);
+}
+
+/* =========================
+   SEASONAL BOOSTS
+========================= */
+function getSeasonalBoosts() {
+  const today = new Date();
+  const year = today.getFullYear();
+
+  // Christmas window
+  if (today.getMonth() === 11 && today.getDate() >= 20 && today.getDate() <= 26) {
+    return ["Luke 2:10", "Isaiah 9:6"];
+  }
+
+  // Easter window
+  const easter = getEasterDate(year);
+  const diff = Math.floor((today - easter) / 86400000);
+
+  if (diff === 0) return ["Matthew 28:6"];
+  if (diff >= -2 && diff <= 2) return ["John 3:16"];
+
+  return [];
+}
+
+/* =========================
+   BUILD WEIGHTED POOL
+========================= */
+function buildWeightedPool() {
+  let pool = [];
+
+  curatedVerses.forEach(v => {
+    for (let i = 0; i < v.weight; i++) {
+      pool.push(v.ref);
+    }
+  });
+
+  // Seasonal boost
+  const seasonal = getSeasonalBoosts();
+  seasonal.forEach(ref => {
+    for (let i = 0; i < 6; i++) {
+      pool.push(ref);
+    }
+  });
+
+  return pool;
+}
+
+/* =========================
+   STABLE SEED
+========================= */
+function getSeed(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+/* =========================
+   DAILY GENERATOR (FINAL)
+========================= */
+function generateDaily() {
+  const today = new Date().toDateString();
+  const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
+
+  if (stored.date === today) {
+    dailyKey = stored.key;
+  } else {
+    const pool = buildWeightedPool();
+    if (!pool.length) return;
+
+    const seed = getSeed(today);
+    dailyKey = pool[seed % pool.length];
+
+    localStorage.setItem("dailyVerse", JSON.stringify({
+      date: today,
+      key: dailyKey
+    }));
+  }
+
+  currentKey = dailyKey;
+
+  updateVerse("Daily Bible Verse");
+  updateStreak();
+}
+
+</script>
+
+/* =========================
+   VERSE STATE
+========================= */
+let verses = { nlt:{}, niv:{}, kjv:{} };
+let translation = "nlt";
+let currentKey = "";
+let dailyKey = "";
+
+/* =========================
+   WEIGHTED + SEASONAL VERSES
+========================= */
+
+const curatedVerses = [
+  { ref: "Psalm 23:1", weight: 5 },
+  { ref: "Jeremiah 29:11", weight: 5 },
+  { ref: "Isaiah 41:10", weight: 5 },
+  { ref: "Romans 8:28", weight: 5 },
+  { ref: "John 3:16", weight: 5 },
+  { ref: "Isaiah 40:31", weight: 5 },
+  { ref: "Joshua 1:9", weight: 5 },
+  { ref: "John 14:27", weight: 5 },
+
+  { ref: "Philippians 4:6", weight: 4 },
+  { ref: "Matthew 11:28", weight: 4 },
+  { ref: "Proverbs 3:5", weight: 4 },
+
+  { ref: "Psalm 46:1", weight: 4 },
+  { ref: "2 Timothy 1:7", weight: 4 },
+
+  { ref: "Galatians 5:22", weight: 3 },
+  { ref: "Romans 15:13", weight: 3 },
+  { ref: "Matthew 5:16", weight: 3 }
+];
+
+function getEasterDate(year) {
+  const f = Math.floor;
+  const G = year % 19;
+  const C = f(year / 100);
+  const H = (C - f(C/4) - f((8*C+13)/25) + 19*G + 15) % 30;
+  const I = H - f(H/28) * (1 - f(29/(H+1)) * f((21-G)/11));
+  const J = (year + f(year/4) + I + 2 - C + f(C/4)) % 7;
+  const L = I - J;
+
+  const month = 3 + f((L + 40) / 44);
+  const day = L + 28 - 31 * f(month / 4);
+
+  return new Date(year, month - 1, day);
+}
+
+function getSeasonalBoosts() {
+  const today = new Date();
+  const year = today.getFullYear();
+
+  if (today.getMonth() === 11 && today.getDate() >= 20 && today.getDate() <= 26) {
+    return ["Luke 2:10", "Isaiah 9:6"];
+  }
+
+  const easter = getEasterDate(year);
+  const diff = Math.floor((today - easter) / 86400000);
+
+  if (diff === 0) return ["Matthew 28:6"];
+  if (diff >= -2 && diff <= 2) return ["John 3:16"];
+
+  return [];
+}
+
+function buildWeightedPool() {
+  let pool = [];
+
+  curatedVerses.forEach(v => {
+    for (let i = 0; i < v.weight; i++) {
+      pool.push(v.ref);
+    }
+  });
+
+  const seasonal = getSeasonalBoosts();
+  seasonal.forEach(ref => {
+    for (let i = 0; i < 6; i++) {
+      pool.push(ref);
+    }
+  });
 
 /* =========================
    READ ALOUD (KEPT ✅)
@@ -511,10 +760,9 @@ donateIcon.addEventListener("click", goDonate);
   await loadTranslation("niv");
   await loadTranslation("kjv");
 
-  generateDaily();
-  changeTranslation("nlt");
+  changeTranslation("nlt"); // set translation FIRST
+  generateDaily();          // THEN generate verse
 
-  // 👇 Show hint on first load
   setTimeout(showHint, 800);
 })();
 
