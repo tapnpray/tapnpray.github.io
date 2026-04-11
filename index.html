@@ -38,6 +38,9 @@ html, body {
   padding-top: env(safe-area-inset-top);
 }
 
+/* =========================
+   BACKGROUND SYSTEM
+========================= */
 body::before {
   content: "";
   position: fixed;
@@ -51,14 +54,21 @@ body::before {
   z-index: -1;
 }
 
+/* =========================
+   LOGO
+========================= */
 #topLogo {
-  width: 120px;
+  width: 110px;
   margin: 20px auto 10px;
   display: block;
+  opacity: 0.9;
 }
 
+/* =========================
+   LAYOUT
+========================= */
 .center {
-  min-height: calc(100vh - 260px);
+  min-height: calc(100vh - 200px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -66,12 +76,15 @@ body::before {
   padding: 20px;
 }
 
+/* =========================
+   VERSE CARD
+========================= */
 #votd {
   position: relative;
   background: rgba(0,0,0,0.45);
   backdrop-filter: blur(25px) brightness(0.9);
   border-radius: 28px;
-  padding: 24px 20px 60px;
+  padding: 24px 20px 40px;
   max-width: 700px;
   width: 100%;
   max-height: 80vh;
@@ -81,41 +94,19 @@ body::before {
   border: 1px solid rgba(255,255,255,0.08);
 }
 
-#ambientToggle {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  font-size: 26px;
-  padding: 8px;
-  cursor: pointer;
-}
-
-#readIcon,
-#ambientToggle,
-#helpIcon,
-#donateIcon {
-  opacity: 0.6;
-  transition: all 0.2s ease;
-}
-
-#readIcon:hover,
-#ambientToggle:hover,
-#helpIcon:hover,
-#donateIcon:hover {
-  transform: scale(1.2);
-  opacity: 1;
-}
-
-#title { font-size: 15px; margin-top: 6px; }
+/* =========================
+   TEXT
+========================= */
+#title { font-size: 14px; opacity: 0.7; }
 #date, #ref { color: #108cd7; font-size: 14px; }
+
 #ref {
   font-weight: 700;
 }
+
 #verse {
   margin-top: 10px;
   font-size: clamp(22px, 5vw, 32px);
-  font-family: 'Merriweather', serif;
-  font-weight: 400;
   line-height: 1.7;
   overflow-y: auto;
   cursor: pointer;
@@ -125,60 +116,20 @@ body::before {
 .word { opacity: .35; }
 .word.active { opacity: 1; }
 
-.translation-select {
-  margin: 10px auto 6px;
-  width: 120px;
+/* =========================
+   STREAK PILL
+========================= */
+#streak {
+  margin: 14px auto 0;
+  background: rgba(0,0,0,.6);
+  padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(255,255,255,.15);
-  color: #fff;
-  border: none;
-  padding: 4px 8px;
-  text-align: center;
-}
-
-.mode-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-.mode-buttons button {
-  width: 120px;
-  padding: 8px;
-  border-radius: 999px;
-  border: none;
-  background: rgba(255,255,255,.15);
-  color: #fff;
-}
-
-.mode-buttons button.active {
-  background: #108cd7;
-}
-button, select {
-  font-family: system-ui, -apple-system, sans-serif;
-}
-
-.share-icon {
-  margin: 10px auto 0;
-  font-size: 22px;
   cursor: pointer;
 }
 
-.bottom-left, .bottom-right {
-  position: absolute;
-  bottom: 12px;
-  font-size: 22px;
-  cursor: pointer;
-}
-
-.bottom-left { left: 14px; }
-.bottom-right { right: 14px; color: #FFD700; }
-
-#donateIcon {
-  color: #FFD700;
-  font-size: 24px;
-} 
-
+/* =========================
+   MODALS
+========================= */
 #streakModal, #helpModal {
   position: fixed;
   inset: 0;
@@ -190,7 +141,7 @@ button, select {
 }
 
 .streak-card, .help-card {
-  background: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.5);
   backdrop-filter: blur(25px);
   border-radius: 28px;
   padding: 25px;
@@ -198,125 +149,143 @@ button, select {
   max-width: 500px;
   max-height: 80vh;
   overflow-y: auto;
+}
+
+/* =========================
+   FLOATING ACTION BUTTON (NEW)
+========================= */
+#fab {
+  position: fixed;
+  bottom: 25px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.fab-main {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #108cd7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.fab-menu {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.badges {
-  display: flex;
-  justify-content: center;
   gap: 10px;
-  margin-top: 10px;
-}
-
-.badge {
-  font-size: 22px;
-  opacity: 0.3;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
   transition: all 0.3s ease;
 }
 
-.badge.active {
+.fab-menu.open {
   opacity: 1;
-  transform: scale(1.2);
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
-#streak {
-  margin: 14px auto 0;
-  display: block;
-  width: fit-content;
-  background: rgba(0,0,0,.6);
-  padding: 6px 14px;
-  border-radius: 999px;
+.fab-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
   cursor: pointer;
 }
 
-.progress {
-  width: 100%;
-  height: 10px;
-  background: rgba(255,255,255,.2);
-  border-radius: 999px;
-  margin-top: 15px;
-}
-
-.progress div {
-  height: 100%;
+/* ✅ ADD THIS RIGHT HERE */
+.fab-btn.active {
   background: #108cd7;
-  border-radius: 999px;
-  width: 0%;
-  transition: width 0.4s ease;
-}
-
-#tapHintBubble {
-  position: relative;
-  margin: 8px auto 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(10px);
   color: #fff;
+  transform: scale(1.1);
+}
+  
+/* =========================
+   TAP HINT
+========================= */
+#tapHintBubble {
+  margin: 8px auto;
+  background: rgba(0,0,0,0.6);
   padding: 10px 16px;
   border-radius: 999px;
   font-size: 14px;
-  width: fit-content;
   opacity: 0;
-  transform: translateY(-6px);
   transition: all 0.6s ease;
 }
 
 #tapHintBubble.show {
   opacity: 1;
-  transform: translateY(0);
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-
-<!-- TOP LOGO -->
+<!-- LOGO -->
 <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
+
+<!-- TAP HINT -->
 <div id="tapHintBubble">Tap the verse to listen 🔊</div>
 
 <div class="center">
+  
+  <!-- VERSE CARD -->
   <div id="votd">
-
-    <!-- TOP ICONS -->
-    <div id="ambientToggle">🌿</div>
-
-    <!-- CONTENT -->
     <div id="title">Daily Bible Verse</div>
     <div id="date"></div>
     <div id="verse"></div>
     <div id="ref"></div>
-
-    <!-- TRANSLATION -->
-    <select id="translationSelect" class="translation-select">
-      <option value="nlt">NLT</option>
-      <option value="niv">NIV</option>
-      <option value="kjv">KJV</option>
-    </select>
-
-    <!-- MODE BUTTONS -->
-    <div class="mode-buttons">
-      <button id="dailyBtn" class="active">Daily</button>
-      <button id="randomBtn">Random</button>
-    </div>
-
-    <!-- SHARE ICON -->
-    <div class="share-icon" id="shareBtn">🔗</div>
-
-    <!-- BOTTOM ICONS -->
-    <div class="bottom-left" id="helpIcon">?</div>
-    <div class="bottom-right" id="donateIcon">♥</div>
-
   </div>
 
-  <!-- STREAK DISPLAY -->
+  <!-- STREAK -->
   <div id="streak"></div>
-  
+
 </div>
 
-<!-- STREAK MODAL -->
+<!-- =========================
+     FLOATING ACTION BUTTON (NEW)
+========================= -->
+<div id="fab">
+  
+  <!-- MENU BUTTONS -->
+<div class="fab-menu" id="fabMenu">
+  <div class="fab-btn" id="dailyBtn">📅</div>
+  <div class="fab-btn" id="randomBtn">🔀</div>
+
+  <!-- NEW: TRANSLATIONS -->
+  <div class="fab-btn" data-t="nlt" onclick="changeTranslation('nlt')">NLT</div>
+  <div class="fab-btn" data-t="niv" onclick="changeTranslation('niv')">NIV</div>
+  <div class="fab-btn" data-t="kjv" onclick="changeTranslation('kjv')">KJV</div>
+
+  <div class="fab-btn" id="shareBtn">🔗</div>
+  <div class="fab-btn" id="ambientToggle">🌿</div>
+  <div class="fab-btn" id="helpIcon">?</div>
+  <div class="fab-btn" id="donateIcon">♥</div>
+</div>
+
+  <!-- MAIN BUTTON -->
+  <div class="fab-main" id="fabMain">☰</div>
+
+</div>
+
+<!-- =========================
+     STREAK MODAL
+========================= -->
 <div id="streakModal">
-  <div class="streak-card">
+  <div class="streak-card" id="streakCard">
     <h1 id="streakCount"></h1>
     <div id="streakMsg"></div>
 
@@ -332,43 +301,63 @@ button, select {
   </div>
 </div>
 
-<!-- HELP MODAL -->
+<!-- =========================
+     HELP MODAL
+========================= -->
 <div id="helpModal">
   <div class="help-card" id="helpContent">
     Loading...
   </div>
 </div>
 
-<!-- AUDIO -->
+<!-- =========================
+     AUDIO
+========================= -->
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
 <script>
 
 /* =========================
-   DOM SHORTCUTS
+   DOM REFERENCES
 ========================= */
 const titleEl = document.getElementById("title");
 const dateEl = document.getElementById("date");
 const verseEl = document.getElementById("verse");
 const refEl = document.getElementById("ref");
-const translationSelect = document.getElementById("translationSelect");
+
 const dailyBtn = document.getElementById("dailyBtn");
 const randomBtn = document.getElementById("randomBtn");
 const shareBtn = document.getElementById("shareBtn");
 const ambientToggle = document.getElementById("ambientToggle");
-const streakEl = document.getElementById("streak");
-const streakModal = document.getElementById("streakModal");
-const streakCount = document.getElementById("streakCount");
-const streakMsg = document.getElementById("streakMsg");
-const b7 = document.getElementById("b7");
-const b30 = document.getElementById("b30");
-const b100 = document.getElementById("b100");
-const progressBar = document.getElementById("progressBar");
-const ambientAudio = document.getElementById("ambientAudio");
 
 const helpIcon = document.getElementById("helpIcon");
 const donateIcon = document.getElementById("donateIcon");
+
+const streakEl = document.getElementById("streak");
+const streakModal = document.getElementById("streakModal");
+const streakCard = document.getElementById("streakCard");
+
 const helpModal = document.getElementById("helpModal");
 const helpContent = document.getElementById("helpContent");
+
+const fabMain = document.getElementById("fabMain");
+const fabMenu = document.getElementById("fabMenu");
+
+const ambientAudio = document.getElementById("ambientAudio");
+
+const streakCount = document.getElementById("streakCount");
+const streakMsg = document.getElementById("streakMsg");
+const progressBar = document.getElementById("progressBar");
+
+const b7 = document.getElementById("b7");
+const b30 = document.getElementById("b30");
+const b100 = document.getElementById("b100");
+
+/* =========================
+   FAB TOGGLE
+========================= */
+fabMain.addEventListener("click", () => {
+  fabMenu.classList.toggle("open");
+});
 
 /* =========================
    BACKGROUNDS
@@ -410,25 +399,21 @@ function updateBackground() {
 }
 
 updateBackground();
+
 setInterval(() => {
   const newBlock = getTimeBlock();
   const currentBlock = document.body.dataset.block;
 
   if (newBlock !== currentBlock) {
-    document.body.dataset.block = newBlock;
     updateBackground();
   }
 }, 1000 * 60 * 5);
-/* =========================
-   CURATED VERSE SYSTEM
-========================= */
+
 /* =========================
    ELITE CURATED VERSE SYSTEM (WEIGHTED + SEASONAL)
 ========================= */
 
-/* CORE CURATED VERSES (EXPANDABLE) */
 const curatedVerses = [
-/* HIGH IMPACT (weight 5) */
 { ref: "Psalm 23:1", weight: 5 },
 { ref: "Jeremiah 29:11", weight: 5 },
 { ref: "Isaiah 41:10", weight: 5 },
@@ -443,7 +428,6 @@ const curatedVerses = [
 { ref: "Psalm 118:24", weight: 5 },
 { ref: "Philippians 4:13", weight: 5 },
 
-/* STRONG ENCOURAGEMENT (weight 4) */
 { ref: "Philippians 4:6", weight: 4 },
 { ref: "Matthew 11:28", weight: 4 },
 { ref: "Proverbs 3:5", weight: 4 },
@@ -460,7 +444,6 @@ const curatedVerses = [
 { ref: "John 10:10", weight: 4 },
 { ref: "Hebrews 13:8", weight: 4 },
 
-/* GENERAL FAITH (weight 3) */
 { ref: "Colossians 3:23", weight: 3 },
 { ref: "Galatians 5:22", weight: 3 },
 { ref: "Psalm 19:1", weight: 3 },
@@ -477,7 +460,6 @@ const curatedVerses = [
 { ref: "Proverbs 16:3", weight: 3 },
 { ref: "James 1:17", weight: 3 },
 
-/* PEACE / ANXIETY / REST (weight 4–5 mix) */
 { ref: "Psalm 55:22", weight: 5 },
 { ref: "Matthew 6:34", weight: 4 },
 { ref: "John 16:33", weight: 4 },
@@ -488,14 +470,12 @@ const curatedVerses = [
 { ref: "Psalm 62:1", weight: 4 },
 { ref: "Zephaniah 3:17", weight: 5 },
 
-/* PURPOSE / CALLING */
 { ref: "Ephesians 2:10", weight: 4 },
 { ref: "Proverbs 19:21", weight: 3 },
 { ref: "Jeremiah 1:5", weight: 4 },
 { ref: "Matthew 28:19", weight: 3 },
 { ref: "Colossians 1:16", weight: 3 },
 
-/* ADDITIONAL (fill to 365 with balanced mix) */
 { ref: "Psalm 27:1", weight: 4 },
 { ref: "Nahum 1:7", weight: 4 },
 { ref: "Psalm 91:1", weight: 5 },
@@ -515,21 +495,9 @@ const curatedVerses = [
 { ref: "Philippians 1:6", weight: 5 },
 { ref: "Colossians 2:6", weight: 3 },
 { ref: "1 Thessalonians 5:16", weight: 3 },
-{ ref: "2 Thessalonians 3:3", weight: 4 },
-
-/* (CONTINUE PATTERN) */
-
-/* NOTE:
-To keep this clean in ChatGPT format,
-this is a strong 100+ weighted base.
-Your system will already feel ELITE.
-
-If you want the FULL 365 handcrafted (no repeats at all),
-I can generate it—but it's very long.
-*/
+{ ref: "2 Thessalonians 3:3", weight: 4 }
 ];
 
-/* SEASONAL BOOSTS */
 function getEasterDate(year) {
   const f = Math.floor;
   const G = year % 19;
@@ -540,7 +508,6 @@ function getEasterDate(year) {
   const L = I - J;
   const month = 3 + f((L + 40) / 44);
   const day = L + 28 - 31 * f(month / 4);
-
   return new Date(year, month - 1, day);
 }
 
@@ -548,22 +515,20 @@ function getSeasonalBoosts() {
   const today = new Date();
   const year = today.getFullYear();
 
-  /* 🎄 CHRISTMAS */
   if (today.getMonth() === 11 && today.getDate() >= 20 && today.getDate() <= 26) {
     return ["Luke 2:10", "Isaiah 9:6", "Matthew 1:21"];
   }
 
-  /* ✝️ EASTER (DYNAMIC) */
   const easter = getEasterDate(year);
   const diffDays = Math.floor((today - easter) / 86400000);
 
-  if (diffDays === 0) return ["Matthew 28:6"]; // Easter Sunday
-  if (diffDays === -2) return ["Luke 23:46"]; // Good Friday
+  if (diffDays === 0) return ["Matthew 28:6"];
+  if (diffDays === -2) return ["Luke 23:46"];
   if (diffDays >= -3 && diffDays <= 3) return ["John 3:16"];
 
   return [];
 }
-/* BUILD WEIGHTED POOL */
+
 function buildWeightedPool() {
   let pool = [];
 
@@ -573,7 +538,6 @@ function buildWeightedPool() {
     }
   });
 
-  // Add seasonal boosts with HIGH weight
   const seasonal = getSeasonalBoosts();
   seasonal.forEach(ref => {
     for (let i = 0; i < 6; i++) {
@@ -586,7 +550,7 @@ function buildWeightedPool() {
 
 
 /* =========================
-   VERSES
+   VERSES (LOAD + DISPLAY)
 ========================= */
 let verses = { nlt:{}, niv:{}, kjv:{} };
 let translation = "nlt";
@@ -619,6 +583,7 @@ function getSeed(s) {
 }
 
 const stablePool = buildWeightedPool();
+
 function generateDaily() {
   const today = new Date().toDateString();
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
@@ -663,17 +628,29 @@ function showRandom() {
 function changeTranslation(t) {
   translation = t;
 
-  if (!verses[translation] || !Object.keys(verses[translation]).length) return;
+  // ✅ Highlight active translation button
+document.querySelectorAll('.fab-btn[data-t]').forEach(btn => {
+  if (btn.dataset.t === t) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+});
 
+
+  // Keep your existing logic
   if (!verses[translation][currentKey]) {
-  currentKey = dailyKey;
-}
+    currentKey = dailyKey;
+  }
 
   updateVerse(
     dailyBtn.classList.contains("active")
       ? "Daily Bible Verse"
       : "Random Bible Verse"
   );
+
+  // 🔥 Optional polish (recommended)
+  fabMenu.classList.remove("open");
 }
 
 function updateVerse(titleText) {
@@ -692,7 +669,7 @@ function updateVerse(titleText) {
 }
 
 /* =========================
-   STREAK
+   STREAK SYSTEM
 ========================= */
 function updateStreak() {
   const today = new Date().toDateString();
@@ -736,39 +713,44 @@ function updateStreak() {
   progressBar.style.width = Math.min(progress, 100) + "%";
 }
 
+/* =========================
+   MODALS (FIXED CLICK CLOSE)
+========================= */
 function openStreak() {
   streakModal.style.display = "flex";
 }
-
 function closeStreak() {
   streakModal.style.display = "none";
 }
 
-/* =========================
-   HELP MODAL
-========================= */
-async function openHelp() {
+function openHelp() {
   helpModal.style.display = "flex";
   helpContent.innerHTML = "Loading...";
 
-  try {
-    const res = await fetch("https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/refs/heads/main/README.md");
-    const text = await res.text();
+  fetch("https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/refs/heads/main/README.md")
+    .then(res => res.text())
+    .then(text => {
+      helpContent.innerHTML = marked.parse(text);
 
-    helpContent.innerHTML = marked.parse(text);
-
-// make links open in new tab (optional but recommended)
-helpContent.querySelectorAll("a").forEach(a => {
-  a.target = "_blank";
-});
-  } catch {
-    helpContent.innerText = "Unable to load help content.";
-  }
+      helpContent.querySelectorAll("a").forEach(a => {
+        a.target = "_blank";
+      });
+    })
+    .catch(() => {
+      helpContent.innerText = "Unable to load help content.";
+    });
 }
 
 function closeHelp() {
   helpModal.style.display = "none";
 }
+
+/* CLICK INSIDE OR OUTSIDE CLOSES */
+streakModal.addEventListener("click", closeStreak);
+streakCard.addEventListener("click", (e) => e.stopPropagation());
+
+helpModal.addEventListener("click", closeHelp);
+helpContent.addEventListener("click", (e) => e.stopPropagation());
 
 /* =========================
    DONATE
@@ -778,20 +760,19 @@ function goDonate() {
 }
 
 /* =========================
-   READ
+   READ ALOUD
 ========================= */
 function readVerse() {
   const words = document.querySelectorAll(".word");
   words.forEach(w => w.classList.remove("active"));
 
   let i = 0;
-
-  const text = verses?.[translation]?.[currentKey];
+  const text = verses[translation][currentKey];
   if (!text) return;
 
   const u = new SpeechSynthesisUtterance(text + " " + currentKey);
 
-  u.rate = 0.95; // slightly slower = more natural
+  u.rate = 0.95;
   u.pitch = 1;
 
   u.onboundary = () => {
@@ -799,15 +780,11 @@ function readVerse() {
   };
 
   speechSynthesis.cancel();
-
-  // tiny delay prevents clipping on mobile
-  setTimeout(() => {
-    speechSynthesis.speak(u);
-  }, 100);
+  setTimeout(() => speechSynthesis.speak(u), 100);
 }
 
 /* =========================
-   AMBIENT
+   AMBIENT SOUND
 ========================= */
 let ambientOn = false;
 
@@ -823,17 +800,13 @@ function toggleAmbient() {
   }
 
   ambientOn = !ambientOn;
-  ambientToggle.classList.toggle("active");
 }
 
 function fadeIn(a) {
   let v = 0;
   const i = setInterval(() => {
     v += 0.05;
-    if (v >= 0.3) {
-      v = 0.3;
-      clearInterval(i);
-    }
+    if (v >= 0.3) { v = 0.3; clearInterval(i); }
     a.volume = v;
   }, 100);
 }
@@ -852,13 +825,13 @@ function fadeOut(a) {
 }
 
 /* =========================
-   SHARE
+   SHARE (FULL CANVAS SYSTEM)
 ========================= */
 async function shareVerse() {
   try {
     await document.fonts.load("700 48px Merriweather");
 
-    const verseText = verses?.[translation]?.[currentKey];
+    const verseText = verses[translation][currentKey];
     if (!verseText) return;
 
     const canvas = document.createElement("canvas");
@@ -866,182 +839,46 @@ async function shareVerse() {
     canvas.height = 1080;
     const ctx = canvas.getContext("2d");
 
-    /* =========================
-       LOAD CURRENT BACKGROUND
-    ========================= */
-    let bgLoaded = false;
-    let bgImg = new Image();
+    ctx.fillStyle = "#111";
+    ctx.fillRect(0,0,1080,1080);
 
-    if (currentBackground) {
-      bgImg.crossOrigin = "anonymous";
-      bgImg.src = currentBackground;
-
-      await new Promise(res => {
-        bgImg.onload = () => { bgLoaded = true; res(); };
-        bgImg.onerror = res;
-      });
-    }
-
-    /* =========================
-       DRAW BACKGROUND (MEDIUM BLUR)
-    ========================= */
-    if (bgLoaded) {
-      ctx.filter = `brightness(${(currentBrightness || 1) * 0.6}) blur(8px)`;
-      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-      ctx.filter = "none";
-    } else {
-      ctx.fillStyle = "#111";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    /* =========================
-       GLASS CARD
-    ========================= */
-    const x = 100, y = 180, w = 880, h = 600, r = 50;
-
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.lineTo(x+w-r, y);
-    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-    ctx.lineTo(x+w, y+h-r);
-    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-    ctx.lineTo(x+r, y+h);
-    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-    ctx.lineTo(x, y+r);
-    ctx.quadraticCurveTo(x, y, x+r, y);
-    ctx.closePath();
-
-    ctx.fillStyle = "rgba(0,0,0,0.45)";
-
-    ctx.shadowColor = "rgba(0,0,0,0.4)";
-    ctx.shadowBlur = 25;
-
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    ctx.strokeStyle = "rgba(255,255,255,0.08)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    /* =========================
-       FROSTED EDGE GLOW
-    ========================= */
-    const edgeGradient = ctx.createLinearGradient(x, y, x, y + h);
-    edgeGradient.addColorStop(0, "rgba(255,255,255,0.12)");
-    edgeGradient.addColorStop(0.3, "rgba(255,255,255,0.04)");
-    edgeGradient.addColorStop(1, "rgba(255,255,255,0.08)");
-
-    ctx.fillStyle = edgeGradient;
-    ctx.fill();
-
-    /* =========================
-       TITLE
-    ========================= */
+    ctx.fillStyle = "#fff";
+    ctx.font = "700 40px Merriweather";
     ctx.textAlign = "center";
-
-    /* TITLE */
-    ctx.font = "700 30px Merriweather";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText("Daily Bible Verse", canvas.width / 2, y + 55);
-
-    /* DATE (same style as app) */
-    ctx.font = "600 24px Merriweather";
-    ctx.fillStyle = "#108cd7";
-    ctx.fillText(new Date().toDateString(), canvas.width / 2, y + 95);
-
-    /* =========================
-       VERSE TEXT
-    ========================= */
-    ctx.font = "700 48px Merriweather";
-    ctx.fillStyle = "#ffffff";
 
     const words = verseText.split(" ");
     let line = "";
-    const lines = [];
-    const maxWidth = w - 120;
+    let y = 400;
 
     words.forEach(word => {
       const test = line + word + " ";
-      if (ctx.measureText(test).width > maxWidth) {
-        lines.push(line);
+      if (ctx.measureText(test).width > 800) {
+        ctx.fillText(line, 540, y);
         line = word + " ";
+        y += 60;
       } else {
         line = test;
       }
     });
-    if (line) lines.push(line);
 
-    const lineHeight = 60;
-    const startY = y + 180;
+    ctx.fillText(line, 540, y);
+    ctx.fillText(currentKey, 540, y + 80);
 
-    lines.forEach((l, i) => {
-      ctx.fillText(l.trim(), canvas.width / 2, startY + i * lineHeight);
-    });
-
-    /* =========================
-       REFERENCE
-    ========================= */
-    ctx.font = "700 34px Merriweather";
-    ctx.fillStyle = "#108cd7";
-
-    const refY = Math.min(
-      startY + (lines.length * lineHeight) + 40,
-      y + h - 40
-    );
-
-    ctx.fillText(currentKey, canvas.width / 2, refY);
-
-    /* =========================
-       LOGO
-    ========================= */
-    try {
-      const logo = new Image();
-      logo.src = "logo.svg";
-
-      await new Promise(res => {
-        logo.onload = res;
-        logo.onerror = res;
-      });
-
-      ctx.drawImage(logo, 60, canvas.height - 160, 100, 100);
-    } catch {}
-
-    /* =========================
-       URL
-    ========================= */
-    ctx.font = "600 24px Merriweather";
-    ctx.fillStyle = "#ffffff";
-    ctx.textAlign = "left";
-    ctx.fillText("tapnpray.github.io", 60, canvas.height - 30);
-
-    /* =========================
-       EXPORT
-    ========================= */
-    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
-    if (!blob) return;
-
-    const file = new File([blob], "tapnpray.png", { type: "image/png" });
+    const blob = await new Promise(res => canvas.toBlob(res));
+    const file = new File([blob], "verse.png", { type: "image/png" });
 
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: "Tap N Pray",
-          text: verseText + "\n\n" + currentKey
-        });
-        return;
-      } catch {}
+      await navigator.share({ files: [file] });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "verse.png";
+      a.click();
     }
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "tapnpray.png";
-    a.click();
-    URL.revokeObjectURL(url);
-
-  } catch (err) {
-    console.error("Share error:", err);
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -1052,14 +889,10 @@ verseEl.addEventListener("click", readVerse);
 ambientToggle.addEventListener("click", toggleAmbient);
 dailyBtn.addEventListener("click", showDaily);
 randomBtn.addEventListener("click", showRandom);
-translationSelect.addEventListener("change", e => changeTranslation(e.target.value));
 shareBtn.addEventListener("click", shareVerse);
 
 streakEl.addEventListener("click", openStreak);
-streakModal.addEventListener("click", closeStreak);
-
 helpIcon.addEventListener("click", openHelp);
-helpModal.addEventListener("click", closeHelp);
 donateIcon.addEventListener("click", goDonate);
 
 /* =========================
@@ -1069,15 +902,18 @@ donateIcon.addEventListener("click", goDonate);
   await loadTranslation("nlt");
   await loadTranslation("niv");
   await loadTranslation("kjv");
+
   generateDaily();
 
-  const hint = document.getElementById("tapHintBubble");
-  if (hint) {
-    setTimeout(() => hint.classList.add("show"), 600);
-    setTimeout(() => hint.classList.remove("show"), 5600);
-  }
-})();
+  // ✅ Set default translation + activate UI
+  changeTranslation("nlt");
 
+  // ✅ Tap hint animation
+  const hint = document.getElementById("tapHintBubble");
+  setTimeout(() => hint.classList.add("show"), 600);
+  setTimeout(() => hint.classList.remove("show"), 5600);
+})();
 </script>
+
 </body>
 </html>
