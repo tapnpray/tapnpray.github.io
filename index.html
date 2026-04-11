@@ -9,6 +9,7 @@
 
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
 
 <meta property="og:title" content="Tap N Pray">
 <meta property="og:description" content="One Tap, One Verse, One Step Closer to Christ.">
@@ -697,6 +698,8 @@ function fadeOut(a) {
 ========================= */
 async function shareVerse() {
   try {
+    await document.fonts.load("700 48px Merriweather");
+    
     if (!verses || !translation || !currentKey) return;
 
     const verseText = verses?.[translation]?.[currentKey];
@@ -756,7 +759,7 @@ async function shareVerse() {
 
     /* 👉 ADD SHADOW RIGHT BEFORE FILL */
     ctx.shadowColor = "rgba(0,0,0,0.4)";
-    ctx.shadowBlur = 30;
+    ctx.shadowBlur = 20;
 
     ctx.fill();
 
@@ -773,11 +776,24 @@ async function shareVerse() {
     ctx.stroke();
 
     /* =========================
+        FROSTED GLASS EDGE LIGHT
+    ========================= */
+    const edgeGradient = ctx.createLinearGradient(x, y, x, y + h);
+
+    edgeGradient.addColorStop(0, "rgba(255,255,255,0.12)");  // top glow
+    edgeGradient.addColorStop(0.2, "rgba(255,255,255,0.05)");
+    edgeGradient.addColorStop(0.5, "rgba(255,255,255,0.02)");
+    edgeGradient.addColorStop(1, "rgba(255,255,255,0.06)");  // bottom glow
+
+    ctx.fillStyle = edgeGradient;
+    ctx.fill();
+
+    /* =========================
        TEXT
     ========================= */
     ctx.fillStyle = "#F2F2F2";
     ctx.textAlign = "center";
-    ctx.font = "bold 48px Arial";
+    ctx.font = "700 48px Merriweather";
 
     /* 👉 ADD THIS RIGHT HERE */
     ctx.font = "bold 28px Arial";
