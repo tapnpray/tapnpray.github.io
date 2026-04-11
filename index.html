@@ -179,6 +179,25 @@ body::before {
   flex-direction: column;
   gap: 12px; /* 👈 THIS FIXES SPACING */
 }
+
+/* 👇 ADD THIS RIGHT HERE */
+.badges {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.badge {
+  font-size: 22px;
+  opacity: 0.3;
+  transition: all 0.3s ease;
+}
+
+.badge.active {
+  opacity: 1;
+  transform: scale(1.2);
+}
 /* 👇 ADD THIS RIGHT HERE */
 #streak {
   margin: 14px auto 0;
