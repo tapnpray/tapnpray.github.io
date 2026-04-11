@@ -408,7 +408,7 @@ function updateBackground() {
 }
 
 updateBackground();
-
+setInterval(updateBackground, 1000 * 60 * 10); // every 10 minutes
 /* =========================
    CURATED VERSE SYSTEM
 ========================= */
@@ -422,10 +422,14 @@ const curatedYear = [
 "John 10:10","Psalm 118:24","Philippians 4:13","Galatians 5:22","Hebrews 13:8"
 ];
 
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
 function buildFullYearPool() {
-  let pool = [...curatedYear];
+  let pool = [];
   while (pool.length < 365) {
-    pool = pool.concat(curatedYear);
+    pool = pool.concat(shuffle([...curatedYear]));
   }
   return pool.slice(0, 365);
 }
@@ -433,7 +437,7 @@ function buildFullYearPool() {
 function getSeasonalPool() {
   const month = new Date().getMonth();
   if (month === 11) return ["Luke 2:10","Isaiah 9:6","Matthew 1:21"];
-  if (month === 3) return ["John 3:16","Matthew 28:6"];
+  if (month === 2 || month === 3) return ["John 3:16","Matthew 28:6"];
   return buildFullYearPool();
 }
 
@@ -517,10 +521,8 @@ function changeTranslation(t) {
   if (!verses[translation] || !Object.keys(verses[translation]).length) return;
 
   if (!verses[translation][currentKey]) {
-    const keys = Object.keys(verses[translation]);
-    if (!keys.length) return;
-    currentKey = keys[0];
-  }
+  currentKey = dailyKey;
+}
 
   updateVerse(
     dailyBtn.classList.contains("active")
@@ -641,9 +643,11 @@ function readVerse() {
   if (!text) return;
 
   const u = new SpeechSynthesisUtterance(text + " " + currentKey);
-  u.onboundary = () => {
+  u.onboundary = (event) => {
+  if (event.name === "word") {
     if (words[i]) words[i++].classList.add("active");
-  };
+  }
+};
 
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
