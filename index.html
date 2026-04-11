@@ -740,10 +740,8 @@ function openStreak() {
   streakModal.style.display = "flex";
 }
 
-function closeStreak(e) {
-  if (e.target === streakModal) {
-    streakModal.style.display = "none";
-  }
+function closeStreak() {
+  streakModal.style.display = "none";
 }
 
 /* =========================
@@ -768,10 +766,8 @@ helpContent.querySelectorAll("a").forEach(a => {
   }
 }
 
-function closeHelp(e) {
-  if (e.target === helpModal) {
-    helpModal.style.display = "none";
-  }
+function closeHelp() {
+  helpModal.style.display = "none";
 }
 
 /* =========================
