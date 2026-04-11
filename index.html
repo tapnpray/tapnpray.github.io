@@ -521,14 +521,26 @@ I can generate it—but it's very long.
 
 /* SEASONAL BOOSTS */
 function getSeasonalBoosts() {
-  const month = new Date().getMonth();
+  const today = new Date();
+  const year = today.getFullYear();
 
-  if (month === 11) { // December
+  /* 🎄 CHRISTMAS */
+  if (today.getMonth() === 11 && today.getDate() >= 20 && today.getDate() <= 26) {
     return ["Luke 2:10", "Isaiah 9:6", "Matthew 1:21"];
   }
 
-  if (month === 2 || month === 3) { // March + April (Easter season)
-    return ["John 3:16", "Matthew 28:6"];
+  /* ✝️ EASTER (TABLE-BASED) */
+  const easterStr = easterDates[year];
+
+  if (easterStr) {
+    const [month, day] = easterStr.split("-");
+    const easter = new Date(year, month - 1, day);
+
+    const diffDays = Math.floor((today - easter) / (1000 * 60 * 60 * 24));
+
+    if (diffDays >= -3 && diffDays <= 3) {
+      return ["John 3:16", "Matthew 28:6"];
+    }
   }
 
   return [];
