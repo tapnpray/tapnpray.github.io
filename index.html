@@ -267,6 +267,7 @@ button, select {
   transform: translateY(0);
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
 </head>
 <body>
 
@@ -756,7 +757,12 @@ async function openHelp() {
     const res = await fetch("https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/refs/heads/main/README.md");
     const text = await res.text();
 
-    helpContent.innerHTML = "<pre style='white-space:pre-wrap;text-align:left'>" + text + "</pre>";
+    helpContent.innerHTML = marked.parse(text);
+
+// make links open in new tab (optional but recommended)
+helpContent.querySelectorAll("a").forEach(a => {
+  a.target = "_blank";
+});
   } catch {
     helpContent.innerText = "Unable to load help content.";
   }
