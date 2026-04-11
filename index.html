@@ -80,16 +80,14 @@ body::before {
 }
 
 /* TOP ICONS */
-#readIcon, #ambientToggle {
+#ambientToggle {
   position: absolute;
   top: 12px;
+  right: 12px;
   font-size: 26px;
   padding: 8px;
   cursor: pointer;
 }
-#readIcon { left: 12px; }
-#ambientToggle { right: 12px; }
-#ambientToggle.active { color: #7CFFB2; }
 
 /* ICON COLORS + OPACITY */
 #readIcon,
@@ -119,6 +117,9 @@ body::before {
   overflow-y: auto;
   cursor: pointer;
   flex: 1;
+}
+#verse:hover {
+  opacity: 0.9;
 }
 
 .word { opacity: .35; }
@@ -266,7 +267,32 @@ body::before {
   width: 0%;
   transition: width 0.4s ease;
 }
+#tapHintBubble {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
   
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s ease;
+
+  z-index: 1000;
+}
+
+/* visible state */
+#tapHintBubble.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}  
 </style>
 </head>
 <body>
@@ -278,7 +304,6 @@ body::before {
   <div id="votd">
 
     <!-- TOP ICONS -->
-    <div id="readIcon">🔊</div>
     <div id="ambientToggle">🌿</div>
 
     <!-- CONTENT -->
@@ -356,7 +381,6 @@ const translationSelect = document.getElementById("translationSelect");
 const dailyBtn = document.getElementById("dailyBtn");
 const randomBtn = document.getElementById("randomBtn");
 const shareBtn = document.getElementById("shareBtn");
-const readIcon = document.getElementById("readIcon");
 const ambientToggle = document.getElementById("ambientToggle");
 const streakEl = document.getElementById("streak");
 const streakModal = document.getElementById("streakModal");
@@ -837,7 +861,6 @@ async function shareVerse() {
 /* =========================
    EVENTS
 ========================= */
-readIcon.addEventListener("click", readVerse);
 verseEl.addEventListener("click", readVerse);
 ambientToggle.addEventListener("click", toggleAmbient);
 dailyBtn.addEventListener("click", showDaily);
@@ -861,8 +884,23 @@ donateIcon.addEventListener("click", goDonate);
   await loadTranslation("niv");
   await loadTranslation("kjv");
   generateDaily();
+  // 👇 FLOATING HINT
+  const hint = document.getElementById("tapHintBubble");
+
+  if (!localStorage.getItem("tapHint")) {
+    setTimeout(() => {
+      hint.classList.add("show");
+    }, 1200);
+
+    setTimeout(() => {
+      hint.classList.remove("show");
+    }, 5000);
+
+    localStorage.setItem("tapHint", "shown");
+  }
+
 })();
 </script>
-
+<div id="tapHintBubble">Tap the verse to listen 🔊</div>
 </body>
 </html>
