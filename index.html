@@ -781,6 +781,7 @@ function goDonate() {
 function readVerse() {
   const words = document.querySelectorAll(".word");
   words.forEach(w => w.classList.remove("active"));
+
   let i = 0;
 
   const text = verses?.[translation]?.[currentKey];
@@ -788,12 +789,19 @@ function readVerse() {
 
   const u = new SpeechSynthesisUtterance(text + " " + currentKey);
 
-u.onboundary = () => {
-  if (words[i]) words[i++].classList.add("active");
-};
+  u.rate = 0.95; // slightly slower = more natural
+  u.pitch = 1;
+
+  u.onboundary = () => {
+    if (words[i]) words[i++].classList.add("active");
+  };
 
   speechSynthesis.cancel();
-  speechSynthesis.speak(u);
+
+  // tiny delay prevents clipping on mobile
+  setTimeout(() => {
+    speechSynthesis.speak(u);
+  }, 100);
 }
 
 /* =========================
