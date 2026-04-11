@@ -268,46 +268,28 @@ body::before {
   transition: width 0.4s ease;
 }
 #tapHintBubble {
-  position: absolute;
-  top: 12px;
-  left: 12px;
+  position: relative;
+  margin: 8px auto 0;
 
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(10px);
   color: #fff;
 
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+
+  width: fit-content;
 
   opacity: 0;
-  pointer-events: none;
-  transition: all 0.4s ease;
-
-  z-index: 5;
-}
-
-/* animation */
-@keyframes hintBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-#tapHintBubble.show {
-  opacity: 1;
-  animation: hintBounce 1.8s ease-in-out infinite;
+  transform: translateY(-6px);
+  transition: all 0.6s ease;
 }
 
 /* visible state */
-@keyframes hintBounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-6px); }
-}
-
 #tapHintBubble.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
-  animation: hintBounce 1.5s infinite;
+  transform: translateY(0);
 }
 </style>
 </head>
@@ -315,13 +297,13 @@ body::before {
 
 <!-- TOP LOGO -->
 <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
+<div id="tapHintBubble">Tap the verse to listen 🔊</div>
 
 <div class="center">
   <div id="votd">
 
     <!-- TOP ICONS -->
     <div id="ambientToggle">🌿</div>
-    <div id="tapHintBubble">Tap the verse 🔊</div>
 
     <!-- CONTENT -->
     <div id="title">Daily Bible Verse</div>
@@ -911,19 +893,17 @@ donateIcon.addEventListener("click", goDonate);
   generateDaily();
 
   // 👇 FLOATING HINT
-  const hint = document.getElementById("tapHintBubble");
+const hint = document.getElementById("tapHintBubble");
 
-  if (hint && !localStorage.getItem("tapHint")) {
-    setTimeout(() => {
-      hint.classList.add("show");
-    }, 1200);
+if (hint) {
+  setTimeout(() => {
+    hint.classList.add("show");
+  }, 600);
 
-    setTimeout(() => {
-      hint.classList.remove("show");
-    }, 5000);
-
-    localStorage.setItem("tapHint", "shown");
-  }
+  setTimeout(() => {
+    hint.classList.remove("show");
+  }, 5600);
+}
 })();
 </script>
 </body>
