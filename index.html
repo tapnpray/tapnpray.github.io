@@ -402,13 +402,22 @@ function updateBackground() {
   preload.onload = () => {
     document.body.style.setProperty('--bg-image', `url('${img}')`);
     document.body.style.setProperty('--brightness', brightness);
+    document.body.dataset.block = block;
     currentBackground = img;
     currentBrightness = brightness;
   };
 }
 
 updateBackground();
-setInterval(updateBackground, 1000 * 60 * 10); // every 10 minutes
+setInterval(() => {
+  const newBlock = getTimeBlock();
+  const currentBlock = document.body.dataset.block;
+
+  if (newBlock !== currentBlock) {
+    document.body.dataset.block = newBlock;
+    updateBackground();
+  }
+}, 1000 * 60 * 5);
 /* =========================
    CURATED VERSE SYSTEM
 ========================= */
@@ -520,6 +529,20 @@ I can generate it—but it's very long.
 ];
 
 /* SEASONAL BOOSTS */
+function getEasterDate(year) {
+  const f = Math.floor;
+  const G = year % 19;
+  const C = f(year / 100);
+  const H = (C - f(C / 4) - f((8 * C + 13) / 25) + 19 * G + 15) % 30;
+  const I = H - f(H / 28) * (1 - f(29 / (H + 1)) * f((21 - G) / 11));
+  const J = (year + f(year / 4) + I + 2 - C + f(C / 4)) % 7;
+  const L = I - J;
+  const month = 3 + f((L + 40) / 44);
+  const day = L + 28 - 31 * f(month / 4);
+
+  return new Date(year, month - 1, day);
+}
+
 function getSeasonalBoosts() {
   const today = new Date();
   const year = today.getFullYear();
@@ -529,23 +552,16 @@ function getSeasonalBoosts() {
     return ["Luke 2:10", "Isaiah 9:6", "Matthew 1:21"];
   }
 
-  /* ✝️ EASTER (TABLE-BASED) */
-  const easterStr = easterDates[year];
+  /* ✝️ EASTER (DYNAMIC) */
+  const easter = getEasterDate(year);
+  const diffDays = Math.floor((today - easter) / 86400000);
 
-  if (easterStr) {
-    const [month, day] = easterStr.split("-");
-    const easter = new Date(year, month - 1, day);
-
-    const diffDays = Math.floor((today - easter) / (1000 * 60 * 60 * 24));
-
-    if (diffDays >= -3 && diffDays <= 3) {
-      return ["John 3:16", "Matthew 28:6"];
-    }
-  }
+  if (diffDays === 0) return ["Matthew 28:6"]; // Easter Sunday
+  if (diffDays === -2) return ["Luke 23:46"]; // Good Friday
+  if (diffDays >= -3 && diffDays <= 3) return ["John 3:16"];
 
   return [];
 }
-
 /* BUILD WEIGHTED POOL */
 function buildWeightedPool() {
   let pool = [];
@@ -601,6 +617,7 @@ function getSeed(s) {
   return Math.abs(h);
 }
 
+const stablePool = buildWeightedPool();
 function generateDaily() {
   const today = new Date().toDateString();
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
@@ -608,7 +625,7 @@ function generateDaily() {
   if (stored.date === today) {
     dailyKey = stored.key;
   } else {
-    const keys = buildWeightedPool();
+    const keys = stablePool;
     if (!keys.length) return;
 
     dailyKey = keys[getSeed(today) % keys.length];
@@ -770,10 +787,9 @@ function readVerse() {
   if (!text) return;
 
   const u = new SpeechSynthesisUtterance(text + " " + currentKey);
-  u.onboundary = (event) => {
-  if (event.name === "word") {
-    if (words[i]) words[i++].classList.add("active");
-  }
+
+u.onboundary = () => {
+  if (words[i]) words[i++].classList.add("active");
 };
 
   speechSynthesis.cancel();
