@@ -727,7 +727,7 @@ async function shareVerse() {
        DRAW BACKGROUND
     ========================= */
     if (bgLoaded) {
-      ctx.filter = `brightness(${(currentBrightness || 1) * 0.6}) blur(6px)`;
+      ctx.filter = `brightness(${(currentBrightness || 1) * 0.55}) blur(3px)`;
       ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
       ctx.filter = "none";
     } else {
@@ -738,7 +738,7 @@ async function shareVerse() {
     /* =========================
        GLASS CARD
     ========================= */
-    const x = 120, y = 200, w = 840, h = 520, r = 40;
+    const x = 100, y = 180, w = 880, h = 600, r = 50;
 
     ctx.beginPath();
     ctx.moveTo(x+r, y);
@@ -755,12 +755,25 @@ async function shareVerse() {
     ctx.fillStyle = "rgba(0,0,0,0.45)";
     ctx.fill();
 
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
     /* =========================
        TEXT
     ========================= */
     ctx.fillStyle = "#F2F2F2";
     ctx.textAlign = "center";
-    ctx.font = "bold 46px Georgia";
+    ctx.font = "bold 48px Arial";
+
+    /* 👉 ADD THIS RIGHT HERE */
+    ctx.font = "bold 28px Arial";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("Daily Bible Verse", canvas.width / 2, y + 60);
+
+    /* existing verse logic */
+    ctx.font = "bold 48px Arial";
+    ctx.fillStyle = "#F2F2F2";
 
     const words = verseText.split(" ");
     let line = "";
