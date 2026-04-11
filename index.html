@@ -861,7 +861,12 @@ async function shareVerse() {
 /* =========================
    EVENTS
 ========================= */
-verseEl.addEventListener("click", readVerse);
+verseEl.addEventListener("click", () => {
+  readVerse();
+
+  const hint = document.getElementById("tapHintBubble");
+  if (hint) hint.classList.remove("show");
+});
 ambientToggle.addEventListener("click", toggleAmbient);
 dailyBtn.addEventListener("click", showDaily);
 randomBtn.addEventListener("click", showRandom);
