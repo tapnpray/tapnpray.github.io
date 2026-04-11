@@ -753,7 +753,20 @@ async function shareVerse() {
     ctx.closePath();
 
     ctx.fillStyle = "rgba(0,0,0,0.45)";
+
+    /* 👉 ADD SHADOW RIGHT BEFORE FILL */
+    ctx.shadowColor = "rgba(0,0,0,0.4)";
+    ctx.shadowBlur = 30;
+
     ctx.fill();
+
+    /* 👉 RESET so text doesn't get blurry */
+    ctx.shadowBlur = 0;
+
+    /* subtle border (you added earlier) */
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
     ctx.strokeStyle = "rgba(255,255,255,0.08)";
     ctx.lineWidth = 2;
