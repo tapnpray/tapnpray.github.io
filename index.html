@@ -877,10 +877,15 @@ shareBtn.addEventListener("click", shareVerse);
 
 streakEl.addEventListener("click", openStreak);
 streakModal.addEventListener("click", closeStreak);
-
+document.querySelector(".streak-card").addEventListener("click", () => {
+  streakModal.style.display = "none";
+});
 /* NEW */
 helpIcon.addEventListener("click", openHelp);
 helpModal.addEventListener("click", closeHelp);
+helpContent.addEventListener("click", () => {
+  helpModal.style.display = "none";
+});
 donateIcon.addEventListener("click", goDonate);
 
 /* =========================
