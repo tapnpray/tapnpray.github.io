@@ -268,24 +268,35 @@ body::before {
   transition: width 0.4s ease;
 }
 #tapHintBubble {
-  position: fixed;
-  bottom: 90px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  
+  position: absolute;
+  top: 12px;
+  left: 12px;
+
   background: rgba(0,0,0,0.7);
   backdrop-filter: blur(10px);
   color: #fff;
-  
-  padding: 10px 16px;
-  border-radius: 999px;
-  font-size: 14px;
+
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
 
   opacity: 0;
   pointer-events: none;
   transition: all 0.4s ease;
 
-  z-index: 1000;
+  z-index: 5;
+}
+
+/* animation */
+@keyframes hintBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+#tapHintBubble.show {
+  opacity: 1;
+  transform: translateY(0);
+  animation: hintBounce 1.8s ease-in-out infinite;
 }
 
 /* visible state */
@@ -311,6 +322,7 @@ body::before {
 
     <!-- TOP ICONS -->
     <div id="ambientToggle">🌿</div>
+    <div id="tapHintBubble">Tap the verse 🔊</div>
 
     <!-- CONTENT -->
     <div id="title">Daily Bible Verse</div>
@@ -922,6 +934,5 @@ if (hint && !localStorage.getItem("tapHint")) {
 
 })();
 </script>
-<div id="tapHintBubble">Tap the verse to listen 🔊</div>
 </body>
 </html>
