@@ -289,10 +289,16 @@ body::before {
 }
 
 /* visible state */
+@keyframes hintBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-6px); }
+}
+
 #tapHintBubble.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
-}  
+  animation: hintBounce 1.5s infinite;
+}
 </style>
 </head>
 <body>
@@ -865,7 +871,10 @@ verseEl.addEventListener("click", () => {
   readVerse();
 
   const hint = document.getElementById("tapHintBubble");
-  if (hint) hint.classList.remove("show");
+if (hint) {
+  hint.classList.remove("show");
+  hint.style.display = "none";
+}
 });
 ambientToggle.addEventListener("click", toggleAmbient);
 dailyBtn.addEventListener("click", showDaily);
@@ -890,12 +899,19 @@ donateIcon.addEventListener("click", goDonate);
   await loadTranslation("kjv");
   generateDaily();
   // 👇 FLOATING HINT
-  const hint = document.getElementById("tapHintBubble");
+const hint = document.getElementById("tapHintBubble");
 
-  if (!localStorage.getItem("tapHint")) {
-    setTimeout(() => {
-      hint.classList.add("show");
-    }, 1200);
+if (hint && !localStorage.getItem("tapHint")) {
+  setTimeout(() => {
+    hint.classList.add("show");
+  }, 1200);
+
+  setTimeout(() => {
+    hint.classList.remove("show");
+  }, 5000);
+
+  localStorage.setItem("tapHint", "shown");
+}
 
     setTimeout(() => {
       hint.classList.remove("show");
