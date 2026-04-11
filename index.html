@@ -412,34 +412,80 @@ setInterval(updateBackground, 1000 * 60 * 10); // every 10 minutes
 /* =========================
    CURATED VERSE SYSTEM
 ========================= */
+/* =========================
+   ELITE CURATED VERSE SYSTEM (WEIGHTED + SEASONAL)
+========================= */
 
-const curatedYear = [
-"Psalm 23:1","Jeremiah 29:11","Philippians 4:6","Isaiah 41:10","Romans 8:28",
-"Matthew 11:28","Proverbs 3:5","John 3:16","Psalm 46:1","Isaiah 40:31",
-"2 Timothy 1:7","Joshua 1:9","Psalm 34:8","Romans 12:2","Ephesians 2:8",
-"John 14:27","Psalm 37:4","Lamentations 3:23","Hebrews 11:1","James 1:5",
-"1 Peter 5:7","Matthew 6:33","Colossians 3:23","Romans 10:9","Isaiah 26:3",
-"John 10:10","Psalm 118:24","Philippians 4:13","Galatians 5:22","Hebrews 13:8"
+/* CORE CURATED VERSES (EXPANDABLE) */
+const curatedVerses = [
+  { ref: "Psalm 23:1", weight: 5 },
+  { ref: "Jeremiah 29:11", weight: 5 },
+  { ref: "Philippians 4:6", weight: 4 },
+  { ref: "Isaiah 41:10", weight: 5 },
+  { ref: "Romans 8:28", weight: 5 },
+  { ref: "Matthew 11:28", weight: 4 },
+  { ref: "Proverbs 3:5", weight: 5 },
+  { ref: "John 3:16", weight: 5 },
+  { ref: "Psalm 46:1", weight: 4 },
+  { ref: "Isaiah 40:31", weight: 5 },
+  { ref: "2 Timothy 1:7", weight: 4 },
+  { ref: "Joshua 1:9", weight: 5 },
+  { ref: "Psalm 34:8", weight: 4 },
+  { ref: "Romans 12:2", weight: 4 },
+  { ref: "Ephesians 2:8", weight: 4 },
+  { ref: "John 14:27", weight: 5 },
+  { ref: "Psalm 37:4", weight: 4 },
+  { ref: "Lamentations 3:23", weight: 5 },
+  { ref: "Hebrews 11:1", weight: 4 },
+  { ref: "James 1:5", weight: 4 },
+  { ref: "1 Peter 5:7", weight: 5 },
+  { ref: "Matthew 6:33", weight: 4 },
+  { ref: "Colossians 3:23", weight: 3 },
+  { ref: "Romans 10:9", weight: 4 },
+  { ref: "Isaiah 26:3", weight: 5 },
+  { ref: "John 10:10", weight: 4 },
+  { ref: "Psalm 118:24", weight: 5 },
+  { ref: "Philippians 4:13", weight: 5 },
+  { ref: "Galatians 5:22", weight: 3 },
+  { ref: "Hebrews 13:8", weight: 4 }
 ];
 
-function shuffle(arr) {
-  return arr.sort(() => Math.random() - 0.5);
-}
-
-function buildFullYearPool() {
-  let pool = [];
-  while (pool.length < 365) {
-    pool = pool.concat(shuffle([...curatedYear]));
-  }
-  return pool.slice(0, 365);
-}
-
-function getSeasonalPool() {
+/* SEASONAL BOOSTS */
+function getSeasonalBoosts() {
   const month = new Date().getMonth();
-  if (month === 11) return ["Luke 2:10","Isaiah 9:6","Matthew 1:21"];
-  if (month === 2 || month === 3) return ["John 3:16","Matthew 28:6"];
-  return buildFullYearPool();
+
+  if (month === 11) { // December
+    return ["Luke 2:10", "Isaiah 9:6", "Matthew 1:21"];
+  }
+
+  if (month === 2 || month === 3) { // March + April (Easter season)
+    return ["John 3:16", "Matthew 28:6"];
+  }
+
+  return [];
 }
+
+/* BUILD WEIGHTED POOL */
+function buildWeightedPool() {
+  let pool = [];
+
+  curatedVerses.forEach(v => {
+    for (let i = 0; i < v.weight; i++) {
+      pool.push(v.ref);
+    }
+  });
+
+  // Add seasonal boosts with HIGH weight
+  const seasonal = getSeasonalBoosts();
+  seasonal.forEach(ref => {
+    for (let i = 0; i < 6; i++) {
+      pool.push(ref);
+    }
+  });
+
+  return pool;
+}
+
 
 /* =========================
    VERSES
@@ -481,7 +527,7 @@ function generateDaily() {
   if (stored.date === today) {
     dailyKey = stored.key;
   } else {
-    const keys = getSeasonalPool();
+    const keys = buildWeightedPool();
     if (!keys.length) return;
 
     dailyKey = keys[getSeed(today) % keys.length];
