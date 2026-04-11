@@ -462,13 +462,26 @@ function updateStreak() {
 
   streakEl.innerText = "🔥 " + streak + " Day Streak";
   streakCount.innerText = streak + " Days";
-  streakMsg.innerText = "Keep going — 100 days is your next big milestone.";
+if (streak < 7) {
+  streakMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
+} else if (streak < 30) {
+  streakMsg.innerText = "You're on fire — 30 days is next 🔥";
+} else if (streak < 100) {
+  streakMsg.innerText = "Stay strong — 100 days is next 👑";
+} else {
+  streakMsg.innerText = "You're building something powerful 💪";
+}
 
   b7.classList.toggle("active", streak >= 7);
   b30.classList.toggle("active", streak >= 30);
   b100.classList.toggle("active", streak >= 100);
 
-  progressBar.style.width = Math.min(100, streak) + "%";
+let goal = 7;
+if (streak >= 7) goal = 30;
+if (streak >= 30) goal = 100;
+
+const progress = (streak / goal) * 100;
+progressBar.style.width = Math.min(progress, 100) + "%";
 }
 
 function openStreak() {
