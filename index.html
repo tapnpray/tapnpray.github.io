@@ -262,6 +262,27 @@ button, select {
   transition: all 0.6s ease;
 }
 
+#toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(10px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: 9999;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+  
+  
 #tapHintBubble.show {
   opacity: 1;
   transform: translateY(0);
@@ -396,6 +417,9 @@ function updateBackground() {
   const set = bgSets[block];
   const img = set[Math.floor(Math.random() * set.length)];
   const brightness = (block === "night" || block === "evening") ? 0.75 : 1.0;
+
+  // ✅ Prevent flicker if same image is selected
+  if (img === currentBackground) return;
 
   const preload = new Image();
   preload.src = img;
@@ -794,9 +818,11 @@ function readVerse() {
   u.rate = 0.95; // slightly slower = more natural
   u.pitch = 1;
 
-  u.onboundary = () => {
+  u.onboundary = (event) => {
+  if (event.name === "word") {
     if (words[i]) words[i++].classList.add("active");
-  };
+  }
+};
 
   speechSynthesis.cancel();
 
@@ -1018,27 +1044,34 @@ async function shareVerse() {
        EXPORT
     ========================= */
     const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
-    if (!blob) return;
+if (!blob) return;
 
-    const file = new File([blob], "tapnpray.png", { type: "image/png" });
+const file = new File([blob], "tapnpray.png", { type: "image/png" });
 
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: "Tap N Pray",
-          text: verseText + "\n\n" + currentKey
-        });
-        return;
-      } catch {}
-    }
+const canNativeShare =
+  navigator.share &&
+  navigator.canShare &&
+  navigator.canShare({ files: [file] });
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "tapnpray.png";
-    a.click();
-    URL.revokeObjectURL(url);
+if (canNativeShare) {
+  try {
+    await navigator.share({
+      files: [file],
+      title: "Tap N Pray",
+      text: verseText + "\n\n" + currentKey
+    });
+    showToast("Shared successfully 🙌");
+    return;
+  } catch {}
+}
+
+const url = URL.createObjectURL(blob);
+const a = document.createElement("a");
+a.href = url;
+a.download = "tapnpray.png";
+a.click();
+URL.revokeObjectURL(url);
+showToast(); // 👈 EXACTLY HERE    
 
   } catch (err) {
     console.error("Share error:", err);
@@ -1079,5 +1112,9 @@ donateIcon.addEventListener("click", goDonate);
 })();
 
 </script>
+
+<div id="toast">Saved to device 📥</div>  
+
+  
 </body>
 </html>
