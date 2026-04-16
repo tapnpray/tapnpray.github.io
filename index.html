@@ -202,6 +202,25 @@ button, select {
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  /* 👇 ADD THIS */
+  position: relative;
+}
+
+/* 👇 ADD THIS RIGHT BELOW */
+.close-btn {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 22px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: 0.2s ease;
+}
+
+.close-btn:hover {
+  opacity: 1;
+  transform: scale(1.2);
 }
 
 .badges {
@@ -395,8 +414,16 @@ button, select {
 
 <!-- HELP MODAL -->
 <div id="helpModal">
-  <div class="help-card" id="helpContent">
-    Loading...
+  <div class="help-card">
+
+    <!-- CLOSE BUTTON -->
+    <div class="help-close" id="helpCloseBtn">✕</div>
+
+    <!-- CONTENT -->
+    <div id="helpContent">
+      Loading...
+    </div>
+
   </div>
 </div>
 
