@@ -210,8 +210,8 @@ button, select {
 /* 👇 ADD THIS RIGHT BELOW */
 .close-btn {
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 10px;
+  right: 12px;
   font-size: 22px;
   cursor: pointer;
   opacity: 0.6;
@@ -1209,8 +1209,13 @@ streakEl.addEventListener("click", openStreak);
 streakModal.addEventListener("click", closeStreak);
 
 helpIcon.addEventListener("click", openHelp);
-helpModal.addEventListener("click", closeHelp);
+helpModal.addEventListener("click", (e) => {
+  if (e.target === helpModal) {
+    closeHelp();
+  }
+});
 donateIcon.addEventListener("click", goDonate);
+document.getElementById("closeHelpBtn").addEventListener("click", closeHelp);
 
 saveImageBtn.addEventListener("click", () => {
   const blob = window._shareBlob;
