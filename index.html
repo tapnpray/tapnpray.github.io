@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Tap N Pray</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1a2a">
 
 <meta name="description" content="Tap N Pray - One Tap, One Verse, One Step Closer to Christ.">
 
@@ -402,8 +403,8 @@ button, select {
 <!-- SHARE FALLBACK MODAL -->
 <div id="shareModal">
   <div class="share-card">
-    <h2>Share not supported</h2>
-    <p>You can still save and share the image manually.</p>
+    <h2>Almost there 🙌</h2>
+    <p>Your device doesn't support direct sharing, but you can still save and share the image manually.</p>
 
     <div class="share-actions">
       <button id="saveImageBtn">Save Image 📥</button>
@@ -938,7 +939,7 @@ function fadeOut(a) {
 ========================= */
 async function shareVerse() {
   try {
-    showToast("Preparing image..."); // 👈 ADD RIGHT HERE
+    showToast("Preparing..."); // 👈 ADD RIGHT HERE
     
     await document.fonts.load("700 48px Merriweather");
 
@@ -1123,7 +1124,7 @@ if (canNativeShare) {
       text: `${verseText}\n\n${currentKey}\n\nTap N Pray`
     });
 
-    showToast("Shared successfully 🙌");
+    showToast("Shared 🙌");
     return;
 
   } catch {}
@@ -1195,7 +1196,7 @@ saveImageBtn.addEventListener("click", () => {
   a.click();
   URL.revokeObjectURL(url);
 
-  showToast();
+  showToast("Saved 📥");
   closeShareModal();
 });
 
