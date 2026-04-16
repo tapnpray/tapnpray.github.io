@@ -493,11 +493,11 @@ setInterval(() => {
   const newBlock = getTimeBlock();
   const currentBlock = document.body.dataset.block;
 
+  // ✅ ONLY update when time-of-day changes
   if (newBlock !== currentBlock) {
-    document.body.dataset.block = newBlock;
     updateBackground();
   }
-}, 1000 * 60 * 5);
+}, 1000 * 60 * 2); // check every 2 minutes (lightweight)
 /* =========================
    CURATED VERSE SYSTEM
 ========================= */
@@ -860,6 +860,9 @@ function goDonate() {
    READ
 ========================= */
 function readVerse() {
+  // ✅ cancel immediately when user taps
+  speechSynthesis.cancel();
+
   const words = document.querySelectorAll(".word");
   words.forEach(w => w.classList.remove("active"));
 
@@ -870,16 +873,14 @@ function readVerse() {
 
   const u = new SpeechSynthesisUtterance(text + " " + currentKey);
 
-  u.rate = 0.95; // slightly slower = more natural
+  u.rate = 0.95;
   u.pitch = 1;
 
   u.onboundary = (event) => {
-  if (event.name === "word") {
-    if (words[i]) words[i++].classList.add("active");
-  }
-};
-
-  speechSynthesis.cancel();
+    if (event.name === "word") {
+      if (words[i]) words[i++].classList.add("active");
+    }
+  };
 
   // tiny delay prevents clipping on mobile
   setTimeout(() => {
@@ -1100,7 +1101,11 @@ async function shareVerse() {
 /* =========================
    EXPORT
 ========================= */
-const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+const blob = await new Promise(res => canvas.toBlob(b => res(b), "image/png"));
+if (!blob) {
+  showToast("Failed to create image");
+  return;
+}
 if (!blob) return;
 
 const file = new File([blob], "tapnpray.png", { type: "image/png" });
