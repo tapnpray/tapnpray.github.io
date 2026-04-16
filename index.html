@@ -216,6 +216,7 @@ button, select {
   cursor: pointer;
   opacity: 0.6;
   transition: 0.2s ease;
+  z-index: 10;
 }
 
 .close-btn:hover {
@@ -417,7 +418,7 @@ button, select {
   <div class="help-card">
 
     <!-- CLOSE BUTTON -->
-    <div class="help-close" id="helpCloseBtn">✕</div>
+    <div class="close-btn" id="helpCloseBtn">✕</div>
 
     <!-- CONTENT -->
     <div id="helpContent">
@@ -703,7 +704,10 @@ let currentKey = "";
 async function loadTranslation(t) {
   try {
     const res = await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
-    if (!res.ok) return;
+    if (!res.ok) {
+  console.error("Failed to load:", t);
+  return;
+}
     const data = await res.json();
 
     Object.entries(data).forEach(([book, chapters]) => {
@@ -785,7 +789,10 @@ function changeTranslation(t) {
 
 function updateVerse(titleText) {
   const text = verses[translation][currentKey];
-  if (!text) return;
+  if (!text) {
+  console.warn("Missing verse:", currentKey, translation);
+  return;
+}
 
   titleEl.innerText = titleText;
 
@@ -1215,7 +1222,7 @@ helpModal.addEventListener("click", (e) => {
   }
 });
 donateIcon.addEventListener("click", goDonate);
-document.getElementById("closeHelpBtn").addEventListener("click", closeHelp);
+document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
 
 saveImageBtn.addEventListener("click", () => {
   const blob = window._shareBlob;
