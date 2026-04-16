@@ -287,6 +287,45 @@ button, select {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* =========================
+   SHARE MODAL
+========================= */
+#shareModal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+}
+
+.share-card {
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(25px);
+  border-radius: 28px;
+  padding: 24px;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.share-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.share-actions button {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  cursor: pointer;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
 </head>
@@ -360,6 +399,19 @@ button, select {
   </div>
 </div>
 
+<!-- SHARE FALLBACK MODAL -->
+<div id="shareModal">
+  <div class="share-card">
+    <h2>Share not supported</h2>
+    <p>You can still save and share the image manually.</p>
+
+    <div class="share-actions">
+      <button id="saveImageBtn">Save Image 📥</button>
+      <button id="cancelShareBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- AUDIO -->
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
 <script>
@@ -390,6 +442,9 @@ const helpIcon = document.getElementById("helpIcon");
 const donateIcon = document.getElementById("donateIcon");
 const helpModal = document.getElementById("helpModal");
 const helpContent = document.getElementById("helpContent");
+const shareModal = document.getElementById("shareModal");
+const saveImageBtn = document.getElementById("saveImageBtn");
+const cancelShareBtn = document.getElementById("cancelShareBtn");
 
 /* =========================
    BACKGROUNDS
@@ -882,6 +937,8 @@ function fadeOut(a) {
 ========================= */
 async function shareVerse() {
   try {
+    showToast("Preparing image..."); // 👈 ADD RIGHT HERE
+    
     await document.fonts.load("700 48px Merriweather");
 
     const verseText = verses?.[translation]?.[currentKey];
@@ -1040,42 +1097,69 @@ async function shareVerse() {
     ctx.textAlign = "left";
     ctx.fillText("tapnpray.github.io", 60, canvas.height - 30);
 
-    /* =========================
-       EXPORT
-    ========================= */
-    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+/* =========================
+   EXPORT
+========================= */
+const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
 if (!blob) return;
 
 const file = new File([blob], "tapnpray.png", { type: "image/png" });
 
 const canNativeShare =
-  navigator.share &&
-  navigator.canShare &&
-  navigator.canShare({ files: [file] });
+  typeof navigator.share === "function" &&
+  (!navigator.canShare || navigator.canShare({ files: [file] }));
 
+// ✅ FIXED: properly wrapped condition
 if (canNativeShare) {
   try {
     await navigator.share({
       files: [file],
       title: "Tap N Pray",
-      text: verseText + "\n\n" + currentKey
+      text: `${verseText}\n\n${currentKey}\n\nTap N Pray`
     });
+
     showToast("Shared successfully 🙌");
     return;
+
   } catch {}
 }
 
-const url = URL.createObjectURL(blob);
-const a = document.createElement("a");
-a.href = url;
-a.download = "tapnpray.png";
-a.click();
-URL.revokeObjectURL(url);
-showToast(); // 👈 EXACTLY HERE    
+// 👇 FINAL fallback (your modal)
+window._shareBlob = blob;
+openShareModal();
 
-  } catch (err) {
-    console.error("Share error:", err);
-  }
+} catch (err) {
+  console.error("Share error:", err);
+}
+} // 👈 end of shareVerse()
+
+/* =========================
+   SHARE MODAL FUNCTIONS
+========================= */
+function openShareModal() {
+  shareModal.style.display = "flex";
+}
+
+function closeShareModal() {
+  shareModal.style.display = "none";
+}
+
+let toastTimeout;
+/* =========================
+   TOAST
+========================= */
+function showToast(msg = "Saved to device 📥") {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+
+  toast.innerText = msg;
+  toast.classList.add("show");
+
+  clearTimeout(toastTimeout);
+
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2200);
 }
 
 /* =========================
@@ -1095,6 +1179,30 @@ helpIcon.addEventListener("click", openHelp);
 helpModal.addEventListener("click", closeHelp);
 donateIcon.addEventListener("click", goDonate);
 
+saveImageBtn.addEventListener("click", () => {
+  const blob = window._shareBlob;
+  if (!blob) return;
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "tapnpray.png";
+  a.click();
+  URL.revokeObjectURL(url);
+
+  showToast();
+  closeShareModal();
+});
+
+cancelShareBtn.addEventListener("click", closeShareModal);
+
+shareModal.addEventListener("click", (e) => {
+  if (e.target === shareModal) {
+    closeShareModal();
+  }
+});
+  
+  
 /* =========================
    INIT
 ========================= */
