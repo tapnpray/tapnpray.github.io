@@ -1065,7 +1065,7 @@ async function shareVerse() {
 
     /* DATE (same style as app) */
     ctx.font = "600 24px Merriweather";
-    ctx.fillStyle = "#108cd7";
+    ctx.fillStyle = "#1da1f2";
     ctx.fillText(new Date().toDateString(), canvas.width / 2, y + 95);
 
     /* =========================
@@ -1097,19 +1097,28 @@ async function shareVerse() {
       ctx.fillText(l.trim(), canvas.width / 2, startY + i * lineHeight);
     });
 
-    /* =========================
-       REFERENCE
-    ========================= */
-    ctx.font = "700 34px Merriweather";
-    ctx.fillStyle = "#108cd7";
+/* =========================
+   REFERENCE (FIXED FOR ALL DEVICES)
+========================= */
+ctx.textAlign = "center";
+    
+ctx.font = "700 36px Merriweather";
 
-    const refY = Math.min(
-      startY + (lines.length * lineHeight) + 40,
-      y + h - 40
-    );
+const refY = Math.min(
+  startY + (lines.length * lineHeight) + 40,
+  y + h - 40
+);
 
-    ctx.fillText(currentKey, canvas.width / 2, refY);
+// 👇 PASS 1 (shadow + base color)
+ctx.fillStyle = "#2fb4ff"; // brighter base for iOS
+ctx.shadowColor = "rgba(0,0,0,1)";
+ctx.shadowBlur = 22;
+ctx.fillText(currentKey, canvas.width / 2, refY);
 
+// 👇 PASS 2 (color reinforcement — fixes washed-out mobile)
+ctx.shadowBlur = 0;
+ctx.fillStyle = "#1da1ff";
+ctx.fillText(currentKey, canvas.width / 2, refY);
     /* =========================
        LOGO
     ========================= */
