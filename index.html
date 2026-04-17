@@ -973,7 +973,7 @@ function fadeOut(a) {
 ========================= */
 async function shareVerse() {
   try {
-    showToast("Preparing..."); // 👈 ADD RIGHT HERE
+    showToast("Opening share…");
     
     await document.fonts.load("700 48px Merriweather");
 
@@ -1158,17 +1158,31 @@ const canNativeShare =
   typeof navigator.share === "function" &&
   (!navigator.canShare || navigator.canShare({ files: [file] }));
 
+await new Promise(r => setTimeout(r, 100));
+showToast("Opening share…");
+
 // ✅ FIXED: properly wrapped condition
 if (canNativeShare) {
   try {
-    await navigator.share({
-      files: [file],
-      title: "Tap N Pray",
-      text: `${verseText}\n\n${currentKey}\n\nTap N Pray`
-    });
+showToast("Opening share…");
 
-    showToast("Shared 🙌");
-    return;
+try {
+  await navigator.share({
+    files: [file],
+    title: "Tap N Pray",
+    text: `${verseText}\n\n${currentKey}\n\nTap N Pray`
+  });
+
+  // ❌ DO NOT show "Shared" here
+
+} catch (err) {
+  // Only show error if user didn’t cancel
+  if (err.name !== "AbortError") {
+    showToast("Share failed");
+  }
+}
+
+return;
 
   } catch {}
 }
