@@ -163,6 +163,13 @@ button, select {
   margin: 10px auto 0;
   font-size: 22px;
   cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.2s ease;
+
+  will-change: transform;
+}
+
+.share-icon:active {
+  transform: scale(0.85);
 }
 
 .bottom-left, .bottom-right {
@@ -1233,7 +1240,24 @@ ambientToggle.addEventListener("click", toggleAmbient);
 dailyBtn.addEventListener("click", showDaily);
 randomBtn.addEventListener("click", showRandom);
 translationSelect.addEventListener("change", e => changeTranslation(e.target.value));
-shareBtn.addEventListener("click", shareVerse);
+shareBtn.addEventListener("click", async () => {
+  // 👇 PRESS ANIMATION
+  shareBtn.style.transform = "scale(0.85)";
+
+  setTimeout(() => {
+    shareBtn.style.transform = "scale(1.05)";
+    setTimeout(() => {
+      shareBtn.style.transform = "scale(1)";
+    }, 100);
+  }, 80);
+
+  // 👇 HAPTIC (mobile)
+  if (navigator.vibrate) {
+    navigator.vibrate(10); // very subtle tap
+  }
+
+  await shareVerse();
+});
 
 streakEl.addEventListener("click", openStreak);
 streakModal.addEventListener("click", closeStreak);
