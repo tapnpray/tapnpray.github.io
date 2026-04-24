@@ -1024,6 +1024,7 @@ async function shareVerse() {
    const ctx = canvas.getContext("2d");
    ctx.scale(scale, scale);
 
+
    // ✅ iOS render stabilization (ADD THIS HERE)
    await new Promise(requestAnimationFrame);
    await new Promise(requestAnimationFrame);
@@ -1158,6 +1159,11 @@ ctx.shadowColor = "rgba(0,0,0,1)";
 ctx.shadowBlur = 22;
 ctx.fillText(currentKey, canvas.width / 2, refY);
 
+// FINAL iOS SAFETY FLUSH (CRITICAL)
+await new Promise(requestAnimationFrame);
+await new Promise(requestAnimationFrame);
+    
+    
 // 👇 PASS 2 (color reinforcement — fixes washed-out mobile)
 ctx.shadowBlur = 0;
 ctx.fillStyle = "#1da1ff";
@@ -1186,8 +1192,9 @@ ctx.fillText(currentKey, canvas.width / 2, refY);
     ctx.fillText("tapnpray.github.io", 60, canvas.height - 30);
 
 /* =========================
-   EXPORT
+   EXPORT (FIXED + STABLE SHARE FLOW)
 ========================= */
+
 const blob = await new Promise((resolve) => {
   canvas.toBlob((b) => resolve(b), "image/png");
 });
@@ -1204,6 +1211,9 @@ const canNativeShare =
   typeof navigator.share === "function" &&
   (!navigator.canShare || navigator.canShare({ files: [file] }));
 
+// small UX delay so iOS doesn’t glitch or drop UI state
+await new Promise(r => setTimeout(r, 100));
+
 showToast("Opening share…");
 
 if (canNativeShare) {
@@ -1217,6 +1227,8 @@ if (canNativeShare) {
     if (err.name !== "AbortError") {
       showToast("Share failed");
     }
+  } finally {
+    isSharing = false;
   }
 
   return;
