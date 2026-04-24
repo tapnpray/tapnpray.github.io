@@ -10,6 +10,7 @@
 
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
 
 <meta property="og:title" content="Tap N Pray">
@@ -29,43 +30,40 @@ gtag('config', 'G-ELQ3E5WGCT');
 </script>
 
 <style>
-  html, body {
-    height: 100%;
-    margin: 0;
-    /* Prevent scrolling to keep everything on one screen */
-    overflow-x: hidden;
-    overflow-y: auto;
-    font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
-    color: #fff;
-    /* Handles physical notch areas on newer phones */
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-top: env(safe-area-inset-top);
-  }
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
+  color: #fff;
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
+}
 
-  canvas {
-    image-rendering: -webkit-optimize-contrast;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    -webkit-filter: blur(0px);
-    filter: blur(0px);
-  }
+canvas {
+  image-rendering: -webkit-optimize-contrast;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-filter: blur(0px);
+  filter: blur(0px);
+}
 
-  /* BACKGROUND LAYER */
-  #bg-layer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    transform: scale(1.05);
-    /* Darkened slightly more for better text contrast */
-    filter: brightness(calc(var(--brightness) * 0.50)) blur(3px);
-    z-index: -1;
-    will-change: transform, filter;
-  }
+/* BACKGROUND LAYER */
+#bg-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: scale(1.05);
+  filter: brightness(calc(var(--brightness) * 0.50)) blur(3px);
+  z-index: -1;
+  will-change: transform, filter;
+}
 
 #topLogo {
   position: fixed;
@@ -75,61 +73,53 @@ gtag('config', 'G-ELQ3E5WGCT');
   width: 70px;
   opacity: 0.85;
   z-index: 100;
-
   filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
 }
 
-  /* CONTENT CONTAINER */
+/* CONTENT CONTAINER */
 .center {
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  /* 👇 THIS is the key change */
   justify-content: center;
-
-  /* 👇 remove the artificial vertical push */
   padding: 80px 20px 20px;
-  
   box-sizing: border-box;
 }
 
-  #votd {
-    position: relative;
-    max-width: 800px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    /* Prevent elements from overlapping/touching */
-    gap: 6px;
-  }
+#votd {
+  position: relative;
+  max-width: 800px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+/* AMBIENT & UI ICONS */
+#ambientToggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 26px;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 100;
+}
 
-  /* AMBIENT & UI ICONS */
-  #ambientToggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    font-size: 26px;
-    padding: 8px;
-    cursor: pointer;
-    z-index: 100;
-  }
+.icon-btn {
+  padding: 8px;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
 
-  .icon-btn {
-    padding: 8px;
-    opacity: 0.6;
-    transition: all 0.2s ease;
-  }
+.icon-btn:hover {
+  transform: scale(1.2);
+  opacity: 1;
+}
 
-  .icon-btn:hover {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-
-  /* NOTIFICATION: Locked at the very top center */
+/* TITLE */
 #title {
   width: 100%;
   text-align: center;
@@ -140,327 +130,236 @@ gtag('config', 'G-ELQ3E5WGCT');
   opacity: 0.9;
 }
 
-  #date {
-    color: rgba(255,255,255,0.8);
-    font-size: 14px;
-    margin-bottom: 5px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-  }
-
-  #verse {
-    margin-top: 6px;
-    /* Scale size safely for mobile */
-    font-size: clamp(24px, 5.8vw, 40px);
-    font-family: 'Merriweather', serif;
-    font-weight: 400;
-    line-height: 1.5;
-    cursor: pointer;
-    flex: none;
-    /* High-contrast multi-layered shadow for readability */
-    text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5);
-  }
-
-  .word {
-    opacity: .35;
-  }
-
-  .word.active {
-    opacity: 1;
-  }
-
-  #ref {
-    font-weight: 700;
-    margin-top: 15px;
-    font-size: 18px;
-    /* Lighter blue for better contrast on dark backgrounds */
-    color: #5cc2ff;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.9);
-  }
-
-  /* BUTTONS & SELECTS */
-  .translation-select, .mode-buttons button {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    margin-top: 10px;
-  }
-
-  .mode-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .mode-buttons button {
-    width: 110px;
-    padding: 8px;
-    border-radius: 999px;
-    border: none;
-    background: rgba(255,255,255,.15);
-    color: #fff;
-    font-family: system-ui, sans-serif;
-  }
-
-  .mode-buttons button.active {
-    background: #108cd7;
-  }
-
-  /* SHARE ICON */
-  .share-icon {
-    margin: 10px auto 0;
-    font-size: 22px;
-    cursor: pointer;
-    transition: transform 0.12s ease, opacity 0.2s ease;
-    will-change: transform;
-  }
-
-  .share-icon.pressed {
-    transform: scale(0.85);
-  }
-
-  /* NAVIGATION FOOTER ICONS: Centered around logo */
-  .bottom-left, .bottom-right {
-    position: fixed;
-    bottom: calc(25px + env(safe-area-inset-bottom));
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 100;
-    opacity: 0.5;
-  }
-
-.bottom-left {
-  left: 20px;
-  bottom: calc(20px + env(safe-area-inset-bottom));
+#date {
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+  margin-bottom: 5px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
+#verse {
+  margin-top: 6px;
+  font-size: clamp(24px, 5.8vw, 40px);
+  font-family: 'Merriweather', serif;
+  font-weight: 400;
+  line-height: 1.5;
+  cursor: pointer;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5);
+}
+
+.word { opacity: .35; }
+.word.active { opacity: 1; }
+
+#ref {
+  font-weight: 700;
+  margin-top: 15px;
+  font-size: 18px;
+  color: #5cc2ff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+}
+
+/* BUTTONS */
+.translation-select,
+.mode-buttons button {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 10px;
+}
+
+.mode-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mode-buttons button {
+  width: 110px;
+  padding: 8px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  font-family: system-ui, sans-serif;
+}
+
+.mode-buttons button.active {
+  background: #108cd7;
+}
+
+/* SHARE ICON */
+.share-icon {
+  margin: 10px auto 0;
+  font-size: 22px;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.2s ease;
+  will-change: transform;
+}
+
+.share-icon.pressed {
+  transform: scale(0.85);
+}
+
+/* FOOTER ICONS */
+.bottom-left,
 .bottom-right {
-  right: 20px;
-  bottom: calc(20px + env(safe-area-inset-bottom));
+  position: fixed;
+  bottom: calc(25px + env(safe-area-inset-bottom));
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 100;
+  opacity: 0.5;
 }
 
-  #donateIcon {
-    color: #FFD700;
-  }
+.bottom-left { left: 20px; }
+.bottom-right { right: 20px; }
 
-  /* HINT BUBBLE - Positioned under Notification Area */
-  #tapHintBubble {
-    position: fixed;
-    top: 145px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-10px);
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(10px);
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 999px;
-    font-size: 13px;
-    width: fit-content;
-    opacity: 0;
-    transition: all 0.6s ease;
-    z-index: 110;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
+#donateIcon { color: #FFD700; }
 
-  #tapHintBubble.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+/* HINT */
+#tapHintBubble {
+  position: fixed;
+  top: 145px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  opacity: 0;
+  transition: all 0.6s ease;
+  z-index: 110;
+}
 
-  /* MODALS & NOTIFICATIONS */
+#tapHintBubble.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* MODALS */
 #streakModal {
   position: fixed;
   inset: 0;
-
   display: none;
-
   align-items: center;
   justify-content: center;
-
   padding: 20px;
-
   background: rgba(0,0,0,0.4);
   z-index: 999;
-
-  /* ✅ safest mobile layout combo */
   width: 100%;
   height: 100vh;
   height: 100dvh;
 }
-
-  /* STREAK: Positioned directly above the logo */
-#streak {
-  position: fixed;
-  top: calc(10px + env(safe-area-inset-top));
-  left: 15px;
-
-  /* icon-only sizing */
-  padding: 8px;
-  width: 38px;
-  height: 38px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 999px;
-  font-size: 18px;
-
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1);
-
-  z-index: 100;
-
-  cursor: pointer;
-  user-select: none;
-
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-/* hover (desktop) */
-#streak:hover {
-  transform: scale(1.15);
-  opacity: 1;
-}
-
-/* tap feedback (mobile) */
-#streak:active {
-  transform: scale(0.9);
-}
-
-  #toast {
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(10px);
-    padding: 10px 18px;
-    border-radius: 999px;
-    font-size: 14px;
-    opacity: 0;
-    transition: all 0.4s ease;
-    z-index: 9999;
-  }
-
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* SHARE MODAL */
-  #shareModal {
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-    padding: 20px;
-  }
-
-  .share-card {
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(25px);
-    border-radius: 28px;
-    padding: 24px;
-    text-align: center;
-    max-width: 400px;
-    width: 100%;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .share-actions {
-    margin-top: 16px;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
-
-  .share-actions button {
-    padding: 10px 16px;
-    border-radius: 999px;
-    border: none;
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-    cursor: pointer;
-  }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
+
 <body>
-  <div id="bg-layer"></div>
 
-  <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
-  <div id="ambientToggle" class="icon-btn">🌿</div>
-  <div id="tapHintBubble">Tap the verse to listen 🔊</div>
+<div id="bg-layer"></div>
 
-  <div class="center">
-    <div id="votd">
-      <div id="title">Daily Bible Verse</div>
-      <div id="date"></div>
-      <div id="verse"></div>
-      <div id="ref"></div>
+<img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
 
-      <select id="translationSelect" class="translation-select">
-        <option value="nlt">NLT</option>
-        <option value="niv">NIV</option>
-        <option value="kjv">KJV</option>
-      </select>
+<div id="ambientToggle" class="icon-btn">🌿</div>
 
-      <div class="mode-buttons">
-        <button id="dailyBtn" class="active">Daily</button>
-        <button id="randomBtn">Random</button>
-      </div>
+<div id="tapHintBubble">Tap the verse to listen 🔊</div>
 
-      <div class="share-icon" id="shareBtn">🔗</div>
+<div class="center">
+  <div id="votd">
 
-      <div class="bottom-left icon-btn" id="helpIcon">?</div>
-      <div class="bottom-right icon-btn" id="donateIcon">♥</div>
+    <div id="title">Daily Bible Verse</div>
+    <div id="date"></div>
+    <div id="verse"></div>
+    <div id="ref"></div>
+
+    <select id="translationSelect" class="translation-select">
+      <option value="nlt">NLT</option>
+      <option value="niv">NIV</option>
+      <option value="kjv">KJV</option>
+    </select>
+
+    <div class="mode-buttons">
+      <button id="dailyBtn" class="active">Daily</button>
+      <button id="randomBtn">Random</button>
     </div>
 
-    <!-- 3. BOTTOM UI GROUP: Streak above Logo, icons to the sides -->
-    <div id="streak"></div>
+    <div class="share-icon" id="shareBtn">🔗</div>
+
+    <div class="bottom-left icon-btn" id="helpIcon">?</div>
+    <div class="bottom-right icon-btn" id="donateIcon">♥</div>
+
   </div>
 
+  <div id="streak"></div>
+</div>
+<div id="streakModal">
+  <div class="streak-card">
+    <h1 id="streakCount"></h1>
+    <div id="streakMsg"></div>
+    <div class="badges">
+      <span class="badge" id="b7">🌿</span>
+      <span class="badge" id="b30">🔥</span>
+      <span class="badge" id="b100">👑</span>
+    </div>
+    <div class="progress">
+      <div id="progressBar"></div>
+    </div>
+  </div>
+</div>
 
-<!-- AUDIO -->
+<div id="helpModal">
+  <div class="help-card">
+    <div class="close-btn" id="helpCloseBtn">✕</div>
+    <div id="helpContent">Loading...</div>
+  </div>
+</div>
+
+<div id="shareModal">
+  <div class="share-card">
+    <h2>Almost there 🙌</h2>
+    <p>Your device doesn't support direct sharing, but you can still save and share the image manually.</p>
+    <div class="share-actions">
+      <button id="saveImageBtn">Save Image 📥</button>
+      <button id="cancelShareBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
-<script>
 
-/* =========================
-   DOM SHORTCUTS
-========================= */
+<script>
+/* ========================= DOM SHORTCUTS ========================= */
+
 const titleEl = document.getElementById("title");
 const dateEl = document.getElementById("date");
 const verseEl = document.getElementById("verse");
 const refEl = document.getElementById("ref");
+
 const translationSelect = document.getElementById("translationSelect");
 const dailyBtn = document.getElementById("dailyBtn");
 const randomBtn = document.getElementById("randomBtn");
 const shareBtn = document.getElementById("shareBtn");
+
 const ambientToggle = document.getElementById("ambientToggle");
 const streakEl = document.getElementById("streak");
 const streakModal = document.getElementById("streakModal");
+
 const streakCount = document.getElementById("streakCount");
 const streakMsg = document.getElementById("streakMsg");
+
 const b7 = document.getElementById("b7");
 const b30 = document.getElementById("b30");
 const b100 = document.getElementById("b100");
+
 const progressBar = document.getElementById("progressBar");
 const ambientAudio = document.getElementById("ambientAudio");
-let isSharing = false;
-const helpIcon = document.getElementById("helpIcon");
-const donateIcon = document.getElementById("donateIcon");
-const helpModal = document.getElementById("helpModal");
-const helpContent = document.getElementById("helpContent");
-const shareModal = document.getElementById("shareModal");
-const saveImageBtn = document.getElementById("saveImageBtn");
-const cancelShareBtn = document.getElementById("cancelShareBtn");
 
-/* =========================
-   BACKGROUNDS
-========================= */
+let isSharing = false;
+/* ========================= BACKGROUNDS ========================= */
+
 const bgSets = {
   morning: ["/backgrounds/morning1.png","/backgrounds/morning2.png"],
   day: ["/backgrounds/day1.png","/backgrounds/day2.png"],
@@ -485,7 +384,6 @@ function updateBackground() {
   const img = set[Math.floor(Math.random() * set.length)];
   const brightness = (block === "night" || block === "evening") ? 0.75 : 1.0;
 
-  // ✅ Prevent flicker if same image is selected
   if (img === currentBackground && brightness === currentBrightness) return;
 
   const preload = new Image();
@@ -493,137 +391,114 @@ function updateBackground() {
 
   preload.onload = () => {
     const bg = document.getElementById("bg-layer");
-bg.style.backgroundImage = `url('${img}')`;
-bg.style.opacity = 1;
+    bg.style.backgroundImage = `url('${img}')`;
+    bg.style.opacity = 1;
+
     document.body.style.setProperty('--brightness', brightness);
     document.body.dataset.block = block;
+
     currentBackground = img;
     currentBrightness = brightness;
   };
 }
 
 updateBackground();
+
 let lastBlock = getTimeBlock();
 
 setInterval(() => {
   const newBlock = getTimeBlock();
-
   if (newBlock !== lastBlock) {
     updateBackground();
     lastBlock = newBlock;
   }
 }, 1000 * 60 * 2);
-/* =========================
-   CURATED VERSE SYSTEM
-========================= */
-/* =========================
-   ELITE CURATED VERSE SYSTEM (WEIGHTED + SEASONAL)
-========================= */
+/* ========================= CURATED VERSE SYSTEM ========================= */
 
-/* CORE CURATED VERSES (EXPANDABLE) */
 const curatedVerses = [
-/* HIGH IMPACT (weight 5) */
-{ ref: "Psalm 23:1", weight: 5 },
-{ ref: "Jeremiah 29:11", weight: 5 },
-{ ref: "Isaiah 41:10", weight: 5 },
-{ ref: "Romans 8:28", weight: 5 },
-{ ref: "John 3:16", weight: 5 },
-{ ref: "Isaiah 40:31", weight: 5 },
-{ ref: "Joshua 1:9", weight: 5 },
-{ ref: "John 14:27", weight: 5 },
-{ ref: "Lamentations 3:23", weight: 5 },
-{ ref: "1 Peter 5:7", weight: 5 },
-{ ref: "Isaiah 26:3", weight: 5 },
-{ ref: "Psalm 118:24", weight: 5 },
-{ ref: "Philippians 4:13", weight: 5 },
+  { ref: "Psalm 23:1", weight: 5 },
+  { ref: "Jeremiah 29:11", weight: 5 },
+  { ref: "Isaiah 41:10", weight: 5 },
+  { ref: "Romans 8:28", weight: 5 },
+  { ref: "John 3:16", weight: 5 },
+  { ref: "Isaiah 40:31", weight: 5 },
+  { ref: "Joshua 1:9", weight: 5 },
+  { ref: "John 14:27", weight: 5 },
+  { ref: "Lamentations 3:23", weight: 5 },
+  { ref: "1 Peter 5:7", weight: 5 },
+  { ref: "Isaiah 26:3", weight: 5 },
+  { ref: "Psalm 118:24", weight: 5 },
+  { ref: "Philippians 4:13", weight: 5 },
 
-/* STRONG ENCOURAGEMENT (weight 4) */
-{ ref: "Philippians 4:6", weight: 4 },
-{ ref: "Matthew 11:28", weight: 4 },
-{ ref: "Proverbs 3:5", weight: 4 },
-{ ref: "Psalm 46:1", weight: 4 },
-{ ref: "2 Timothy 1:7", weight: 4 },
-{ ref: "Psalm 34:8", weight: 4 },
-{ ref: "Romans 12:2", weight: 4 },
-{ ref: "Ephesians 2:8", weight: 4 },
-{ ref: "Psalm 37:4", weight: 4 },
-{ ref: "Hebrews 11:1", weight: 4 },
-{ ref: "James 1:5", weight: 4 },
-{ ref: "Matthew 6:33", weight: 4 },
-{ ref: "Romans 10:9", weight: 4 },
-{ ref: "John 10:10", weight: 4 },
-{ ref: "Hebrews 13:8", weight: 4 },
+  { ref: "Philippians 4:6", weight: 4 },
+  { ref: "Matthew 11:28", weight: 4 },
+  { ref: "Proverbs 3:5", weight: 4 },
+  { ref: "Psalm 46:1", weight: 4 },
+  { ref: "2 Timothy 1:7", weight: 4 },
+  { ref: "Psalm 34:8", weight: 4 },
+  { ref: "Romans 12:2", weight: 4 },
+  { ref: "Ephesians 2:8", weight: 4 },
+  { ref: "Psalm 37:4", weight: 4 },
+  { ref: "Hebrews 11:1", weight: 4 },
+  { ref: "James 1:5", weight: 4 },
+  { ref: "Matthew 6:33", weight: 4 },
+  { ref: "Romans 10:9", weight: 4 },
+  { ref: "John 10:10", weight: 4 },
+  { ref: "Hebrews 13:8", weight: 4 },
 
-/* GENERAL FAITH (weight 3) */
-{ ref: "Colossians 3:23", weight: 3 },
-{ ref: "Galatians 5:22", weight: 3 },
-{ ref: "Psalm 19:1", weight: 3 },
-{ ref: "Matthew 5:16", weight: 3 },
-{ ref: "Luke 6:31", weight: 3 },
-{ ref: "Romans 15:13", weight: 3 },
-{ ref: "1 Corinthians 13:4", weight: 3 },
-{ ref: "Psalm 121:1", weight: 3 },
-{ ref: "Isaiah 55:8", weight: 3 },
-{ ref: "Micah 6:8", weight: 3 },
-{ ref: "Matthew 7:7", weight: 3 },
-{ ref: "Hebrews 12:1", weight: 3 },
-{ ref: "Psalm 145:9", weight: 3 },
-{ ref: "Proverbs 16:3", weight: 3 },
-{ ref: "James 1:17", weight: 3 },
+  { ref: "Colossians 3:23", weight: 3 },
+  { ref: "Galatians 5:22", weight: 3 },
+  { ref: "Psalm 19:1", weight: 3 },
+  { ref: "Matthew 5:16", weight: 3 },
+  { ref: "Luke 6:31", weight: 3 },
+  { ref: "Romans 15:13", weight: 3 },
+  { ref: "1 Corinthians 13:4", weight: 3 },
+  { ref: "Psalm 121:1", weight: 3 },
+  { ref: "Isaiah 55:8", weight: 3 },
+  { ref: "Micah 6:8", weight: 3 },
+  { ref: "Matthew 7:7", weight: 3 },
+  { ref: "Hebrews 12:1", weight: 3 },
+  { ref: "Psalm 145:9", weight: 3 },
+  { ref: "Proverbs 16:3", weight: 3 },
+  { ref: "James 1:17", weight: 3 },
 
-/* PEACE / ANXIETY / REST (weight 4–5 mix) */
-{ ref: "Psalm 55:22", weight: 5 },
-{ ref: "Matthew 6:34", weight: 4 },
-{ ref: "John 16:33", weight: 4 },
-{ ref: "Psalm 94:19", weight: 4 },
-{ ref: "Isaiah 30:15", weight: 4 },
-{ ref: "Exodus 14:14", weight: 5 },
-{ ref: "Psalm 4:8", weight: 4 },
-{ ref: "Psalm 62:1", weight: 4 },
-{ ref: "Zephaniah 3:17", weight: 5 },
+  { ref: "Psalm 55:22", weight: 5 },
+  { ref: "Matthew 6:34", weight: 4 },
+  { ref: "John 16:33", weight: 4 },
+  { ref: "Psalm 94:19", weight: 4 },
+  { ref: "Isaiah 30:15", weight: 4 },
+  { ref: "Exodus 14:14", weight: 5 },
+  { ref: "Psalm 4:8", weight: 4 },
+  { ref: "Psalm 62:1", weight: 4 },
+  { ref: "Zephaniah 3:17", weight: 5 },
 
-/* PURPOSE / CALLING */
-{ ref: "Ephesians 2:10", weight: 4 },
-{ ref: "Proverbs 19:21", weight: 3 },
-{ ref: "Jeremiah 1:5", weight: 4 },
-{ ref: "Matthew 28:19", weight: 3 },
-{ ref: "Colossians 1:16", weight: 3 },
+  { ref: "Ephesians 2:10", weight: 4 },
+  { ref: "Proverbs 19:21", weight: 3 },
+  { ref: "Jeremiah 1:5", weight: 4 },
+  { ref: "Matthew 28:19", weight: 3 },
+  { ref: "Colossians 1:16", weight: 3 },
 
-/* ADDITIONAL (fill to 365 with balanced mix) */
-{ ref: "Psalm 27:1", weight: 4 },
-{ ref: "Nahum 1:7", weight: 4 },
-{ ref: "Psalm 91:1", weight: 5 },
-{ ref: "Isaiah 43:2", weight: 5 },
-{ ref: "Romans 5:8", weight: 4 },
-{ ref: "2 Corinthians 5:7", weight: 3 },
-{ ref: "Hebrews 4:16", weight: 4 },
-{ ref: "Psalm 100:5", weight: 3 },
-{ ref: "Psalm 16:11", weight: 4 },
-{ ref: "John 8:12", weight: 4 },
-{ ref: "Psalm 73:26", weight: 4 },
-{ ref: "1 John 4:19", weight: 4 },
-{ ref: "Psalm 119:105", weight: 4 },
-{ ref: "Romans 6:23", weight: 4 },
-{ ref: "Galatians 6:9", weight: 4 },
-{ ref: "Ephesians 6:10", weight: 4 },
-{ ref: "Philippians 1:6", weight: 5 },
-{ ref: "Colossians 2:6", weight: 3 },
-{ ref: "1 Thessalonians 5:16", weight: 3 },
-{ ref: "2 Thessalonians 3:3", weight: 4 },
-
-/* (CONTINUE PATTERN) */
-
-/* NOTE:
-To keep this clean in ChatGPT format,
-this is a strong 100+ weighted base.
-Your system will already feel ELITE.
-
-If you want the FULL 365 handcrafted (no repeats at all),
-I can generate it—but it's very long.
-*/
+  { ref: "Psalm 27:1", weight: 4 },
+  { ref: "Nahum 1:7", weight: 4 },
+  { ref: "Psalm 91:1", weight: 5 },
+  { ref: "Isaiah 43:2", weight: 5 },
+  { ref: "Romans 5:8", weight: 4 },
+  { ref: "2 Corinthians 5:7", weight: 3 },
+  { ref: "Hebrews 4:16", weight: 4 },
+  { ref: "Psalm 100:5", weight: 3 },
+  { ref: "Psalm 16:11", weight: 4 },
+  { ref: "John 8:12", weight: 4 },
+  { ref: "Psalm 73:26", weight: 4 },
+  { ref: "1 John 4:19", weight: 4 },
+  { ref: "Psalm 119:105", weight: 4 },
+  { ref: "Romans 6:23", weight: 4 },
+  { ref: "Galatians 6:9", weight: 4 },
+  { ref: "Ephesians 6:10", weight: 4 },
+  { ref: "Philippians 1:6", weight: 5 },
+  { ref: "Colossians 2:6", weight: 3 },
+  { ref: "1 Thessalonians 5:16", weight: 3 },
+  { ref: "2 Thessalonians 3:3", weight: 4 },
 ];
-
-/* SEASONAL BOOSTS */
 function getEasterDate(year) {
   const f = Math.floor;
   const G = year % 19;
@@ -634,7 +509,6 @@ function getEasterDate(year) {
   const L = I - J;
   const month = 3 + f((L + 40) / 44);
   const day = L + 28 - 31 * f(month / 4);
-
   return new Date(year, month - 1, day);
 }
 
@@ -642,25 +516,23 @@ function getSeasonalBoosts() {
   const today = new Date();
   const year = today.getFullYear();
 
-  /* 🎄 CHRISTMAS */
   if (today.getMonth() === 11 && today.getDate() >= 20 && today.getDate() <= 26) {
     return ["Luke 2:10", "Isaiah 9:6", "Matthew 1:21"];
   }
 
-  /* ✝️ EASTER (DYNAMIC) */
   const easter = getEasterDate(year);
   const diffDays = Math.floor((today - easter) / 86400000);
 
-  if (diffDays === 0) return ["Matthew 28:6"]; // Easter Sunday
-  if (diffDays === -2) return ["Luke 23:46"]; // Good Friday
+  if (diffDays === 0) return ["Matthew 28:6"];
+  if (diffDays === -2) return ["Luke 23:46"];
   if (diffDays >= -3 && diffDays <= 3) return ["John 3:16"];
 
   return [];
 }
-/* BUILD WEIGHTED POOL */
 let cachedPool = null;
 let recentVerses = JSON.parse(localStorage.getItem("recentVerses") || "[]");
-const RECENT_LIMIT = 14; // last 14 verses remembered
+const RECENT_LIMIT = 14;
+
 function buildWeightedPool() {
   if (cachedPool) return cachedPool;
 
@@ -672,7 +544,6 @@ function buildWeightedPool() {
     }
   });
 
-  // Add seasonal boosts with HIGH weight
   const seasonal = getSeasonalBoosts();
   seasonal.forEach(ref => {
     for (let i = 0; i < 6; i++) {
@@ -681,28 +552,20 @@ function buildWeightedPool() {
   });
 
   const filtered = pool.filter(v => !recentVerses.includes(v));
-
   cachedPool = filtered.length ? filtered : pool;
 
   return cachedPool;
 }
 
-
-/* =========================
-   VERSES
-========================= */
 let verses = { nlt:{}, niv:{}, kjv:{} };
 let translation = "nlt";
 let dailyKey = "";
 let currentKey = "";
-
 async function loadTranslation(t) {
   try {
     const res = await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
-    if (!res.ok) {
-  console.error("Failed to load:", t);
-  return;
-}
+    if (!res.ok) return;
+
     const data = await res.json();
 
     Object.entries(data).forEach(([book, chapters]) => {
@@ -726,6 +589,7 @@ function getSeed(s) {
 
 function generateDaily() {
   cachedPool = null;
+
   const today = new Date().toDateString();
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
@@ -733,8 +597,6 @@ function generateDaily() {
     dailyKey = stored.key;
   } else {
     const keys = buildWeightedPool();
-    if (!keys.length) return;
-
     dailyKey = keys[getSeed(today) % keys.length];
 
     localStorage.setItem("dailyVerse", JSON.stringify({
@@ -748,7 +610,6 @@ function generateDaily() {
   updateStreak();
   addToRecent(dailyKey);
 }
-
 function showDaily() {
   currentKey = dailyKey;
   updateVerse("Daily Bible Verse");
@@ -758,10 +619,9 @@ function showDaily() {
 
 function showRandom() {
   const keys = buildWeightedPool();
-  if (!keys.length) return;
-
   currentKey = keys[Math.floor(Math.random() * keys.length)];
   updateVerse("Random Bible Verse");
+
   addToRecent(currentKey);
 
   dailyBtn.classList.remove("active");
@@ -771,11 +631,11 @@ function showRandom() {
 function changeTranslation(t) {
   translation = t;
 
-  if (!verses[translation] || !Object.keys(verses[translation]).length) return;
-
   if (!verses[translation][currentKey]) {
-  currentKey = verses[translation][dailyKey] ? dailyKey : Object.keys(verses[translation])[0];
-}
+    currentKey = verses[translation][dailyKey]
+      ? dailyKey
+      : Object.keys(verses[translation])[0];
+  }
 
   updateVerse(
     dailyBtn.classList.contains("active")
@@ -786,14 +646,10 @@ function changeTranslation(t) {
 
 function updateVerse(titleText) {
   const text = verses[translation][currentKey];
-  if (!text) {
-    console.warn("Missing verse:", currentKey, translation);
-    return;
-  }
+  if (!text) return;
 
   titleEl.innerText = titleText;
 
-  // Wraps words in spans for the "Read Aloud" highlighting feature
   verseEl.innerHTML = text
     .split(" ")
     .map(w => `<span class="word">${w}</span>`)
@@ -801,17 +657,13 @@ function updateVerse(titleText) {
 
   refEl.innerText = currentKey;
   dateEl.innerText = new Date().toDateString();
-  
-  // Reset scroll position to top (safety check for internal div)
+
   window.scrollTo(0, 0);
 }
-
-/* =========================
-   STREAK
-========================= */
 function updateStreak() {
   const today = new Date().toDateString();
   const lastVisit = localStorage.getItem("lastVisit");
+
   let streak = parseInt(localStorage.getItem("streak")) || 1;
 
   if (lastVisit) {
@@ -829,15 +681,10 @@ function updateStreak() {
   streakEl.innerText = "🔥";
   streakCount.innerText = streak + " Days";
 
-  if (streak < 7) {
-    streakMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
-  } else if (streak < 30) {
-    streakMsg.innerText = "You're on fire — 30 days is next 🔥";
-  } else if (streak < 100) {
-    streakMsg.innerText = "Stay strong — 100 days is next 👑";
-  } else {
-    streakMsg.innerText = "You're building something powerful 💪";
-  }
+  if (streak < 7) streakMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
+  else if (streak < 30) streakMsg.innerText = "You're on fire — 30 days is next 🔥";
+  else if (streak < 100) streakMsg.innerText = "Stay strong — 100 days is next 👑";
+  else streakMsg.innerText = "You're building something powerful 💪";
 
   b7.classList.toggle("active", streak >= 7);
   b30.classList.toggle("active", streak >= 30);
@@ -850,94 +697,33 @@ function updateStreak() {
   const progress = (streak / goal) * 100;
   progressBar.style.width = Math.min(progress, 100) + "%";
 }
-
-function openStreak() {
-  streakModal.style.display = "flex";
-
-  // Force reflow (this is the iOS fix)
-  void streakModal.offsetHeight;
-
-  streakModal.style.alignItems = "center";
-  streakModal.style.justifyContent = "center";
-}
-
-function closeStreak() {
-  streakModal.style.display = "none";
-}
-
-/* =========================
-   HELP MODAL
-========================= */
-async function openHelp() {
-  helpModal.style.display = "flex";
-  helpContent.innerHTML = "Loading...";
-
-  try {
-    const res = await fetch("https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/refs/heads/main/README.md");
-    const text = await res.text();
-
-    helpContent.innerHTML = marked.parse(text);
-
-// make links open in new tab (optional but recommended)
-helpContent.querySelectorAll("a").forEach(a => {
-  a.target = "_blank";
-});
-  } catch {
-    helpContent.innerText = "Unable to load help content.";
-  }
-}
-
-function closeHelp() {
-  helpModal.style.display = "none";
-}
-
-/* =========================
-   DONATE
-========================= */
-function goDonate() {
-  window.open("https://venmo.com/u/tapnpray", "_blank");
-}
-
-/* =========================
-   READ
-========================= */
 function readVerse() {
-  // Stops any current speaking before starting the new one
-  window.speechSynthesis.cancel(); 
-  
+  window.speechSynthesis.cancel();
+
   const words = document.querySelectorAll(".word");
   words.forEach(w => w.classList.remove("active"));
-  let wordIndex = 0;
 
-  let i = 0;
+  let wordIndex = 0;
 
   const text = verses?.[translation]?.[currentKey];
   if (!text) return;
 
   const u = new SpeechSynthesisUtterance(text + " " + currentKey);
-
   u.rate = 0.95;
-  u.pitch = 1;
 
   u.onboundary = (event) => {
-  if (event.name === "word") {
-    if (words[wordIndex]) {
-      words[wordIndex].classList.add("active");
-      wordIndex++;
+    if (event.name === "word") {
+      if (words[wordIndex]) {
+        words[wordIndex].classList.add("active");
+        wordIndex++;
+      }
     }
-  }
-};
+  };
 
-  // tiny delay prevents clipping on mobile
-  wordIndex = 0;
   setTimeout(() => {
     speechSynthesis.speak(u);
   }, 100);
 }
-
-/* =========================
-   AMBIENT
-========================= */
 let ambientOn = false;
 
 function toggleAmbient() {
@@ -969,6 +755,7 @@ function fadeIn(a) {
 
 function fadeOut(a) {
   let v = a.volume;
+
   const i = setInterval(() => {
     v -= 0.05;
     if (v <= 0) {
@@ -979,29 +766,31 @@ function fadeOut(a) {
     a.volume = v;
   }, 100);
 }
-
 async function shareVerse() {
   try {
     if (isSharing) return;
     isSharing = true;
+
     showToast("Generating image...");
 
     await document.fonts.ready;
+
     const verseText = verses?.[translation]?.[currentKey];
-    if (!verseText) { isSharing = false; return; }
+    if (!verseText) {
+      isSharing = false;
+      return;
+    }
 
     const canvas = document.createElement("canvas");
-    const size = 1080; 
+    const size = 1080;
     canvas.width = size;
     canvas.height = size;
+
     const ctx = canvas.getContext("2d");
 
-/* =========================
-       1. BACKGROUND (FORCE-RENDER BLUR)
-    ========================= */
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous";
-    bgImg.src = currentBackground + "?t=" + new Date().getTime(); 
+    bgImg.src = currentBackground + "?t=" + new Date().getTime();
 
     await new Promise((resolve) => {
       bgImg.onload = resolve;
@@ -1012,60 +801,49 @@ async function shareVerse() {
       const scale = Math.max(size / bgImg.width, size / bgImg.height);
       const drawW = bgImg.width * scale;
       const drawH = bgImg.height * scale;
+
       const offX = (size - drawW) / 2;
       const offY = (size - drawH) / 2;
 
-      // 1. Set the filter
       ctx.filter = "blur(30px) brightness(0.6)";
-      
-      // 2. The "Triple Draw" Hack for iOS
-      // We draw it once to 'prime' the engine
-      ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
-      
-      // 3. Tiny delay to let the GPU catch up
-      await new Promise(r => setTimeout(r, 15));
-      
-      // 4. Draw it again to force the blur to "stick"
       ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
 
-      // 5. Reset filter so text stays sharp
+      await new Promise(r => setTimeout(r, 15));
+
+      ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
       ctx.filter = "none";
-      
     } else {
       ctx.fillStyle = "#0b1a2a";
       ctx.fillRect(0, 0, size, size);
     }
-    /* =========================
-       2. THE GLASS CARD
-    ========================= */
-    const cardX = 80, cardY = 160, cardW = 920, cardH = 650, r = 40;
+      const cardX = 80, cardY = 160, cardW = 920, cardH = 650, r = 40;
+
     ctx.fillStyle = "rgba(0,0,0,0.5)";
     ctx.beginPath();
     if (ctx.roundRect) {
-        ctx.roundRect(cardX, cardY, cardW, cardH, r);
+      ctx.roundRect(cardX, cardY, cardW, cardH, r);
     } else {
-        ctx.rect(cardX, cardY, cardW, cardH);
+      ctx.rect(cardX, cardY, cardW, cardH);
     }
     ctx.fill();
+
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    /* =========================
-       3. TEXT DYNAMICS (PREVENT OVERFLOW)
-    ========================= */
     ctx.textAlign = "center";
     ctx.fillStyle = "#ffffff";
+
     ctx.font = "700 32px Merriweather";
     ctx.fillText("Daily Bible Verse", size / 2, cardY + 70);
-    
+
     ctx.fillStyle = "#2fb4ff";
     ctx.font = "400 24px Merriweather";
     ctx.fillText(new Date().toDateString(), size / 2, cardY + 110);
 
-    // Dynamic sizing for long verses like Isaiah 43:2
-    let fontSize = verseText.length > 180 ? 36 : 46; 
+    let fontSize = verseText.length > 180 ? 36 : 46;
     ctx.font = `700 ${fontSize}px Merriweather`;
+
     ctx.fillStyle = "#ffffff";
 
     const words = verseText.split(" ");
@@ -1082,20 +860,17 @@ async function shareVerse() {
         currentLine = testLine;
       }
     });
+
     lines.push(currentLine.trim());
 
     const lineHeight = fontSize * 1.4;
     const totalTextHeight = lines.length * lineHeight;
-    // Calculate vertical center relative to the card's usable space
     const startY = cardY + 200 + ((cardH - 320 - totalTextHeight) / 2);
 
     lines.forEach((l, i) => {
       ctx.fillText(l, size / 2, startY + (i * lineHeight));
     });
 
-    /* =========================
-       4. REFERENCE & BRANDING
-    ========================= */
     ctx.font = "700 34px Merriweather";
     ctx.fillStyle = "#2fb4ff";
     ctx.fillText(currentKey, size / 2, cardY + cardH - 60);
@@ -1104,11 +879,12 @@ async function shareVerse() {
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.fillText("tapnpray.github.io", size / 2, size - 60);
 
-    /* =========================
-       5. EXPORT
-    ========================= */
     canvas.toBlob(async (blob) => {
-      if (!blob) { isSharing = false; return; }
+      if (!blob) {
+        isSharing = false;
+        return;
+      }
+
       const file = new File([blob], "tapnpray.png", { type: "image/png" });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -1124,6 +900,7 @@ async function shareVerse() {
       } else {
         openShareModal(blob);
       }
+
       isSharing = false;
     }, "image/png");
 
@@ -1132,38 +909,6 @@ async function shareVerse() {
     isSharing = false;
   }
 }
-
-function openShareModal(blob) {
-  window._shareBlob = blob;
-  shareModal.style.display = "flex";
-}
-  
-/* =========================
-   SHARE MODAL FUNCTIONS
-========================= */
-
-function openShareModal() {
-  // safety guard
-  if (!shareModal) return;
-
-  // show modal
-  shareModal.style.display = "flex";
-}
-
-function closeShareModal() {
-  if (!shareModal) return;
-
-  // hide modal
-  shareModal.style.display = "none";
-
-  // cleanup blob memory safely
-  window._shareBlob = null;
-}
-
-let toastTimeout;
-/* =========================
-   TOAST
-========================= */
 function showToast(msg = "Saved to device 📥") {
   const toast = document.getElementById("toast");
   if (!toast) return;
@@ -1178,26 +923,19 @@ function showToast(msg = "Saved to device 📥") {
   }, 2200);
 }
 
-/* =========================
-   EVENTS
-========================= */
+/* EVENTS */
 verseEl.addEventListener("click", readVerse);
 ambientToggle.addEventListener("click", toggleAmbient);
 dailyBtn.addEventListener("click", showDaily);
 randomBtn.addEventListener("click", showRandom);
+
 translationSelect.addEventListener("change", e => changeTranslation(e.target.value));
+
 shareBtn.addEventListener("click", async () => {
-  // 👇 PRESS ANIMATION
   shareBtn.classList.add("pressed");
+  setTimeout(() => shareBtn.classList.remove("pressed"), 120);
 
-setTimeout(() => {
-  shareBtn.classList.remove("pressed");
-}, 120);
-
-  // 👇 HAPTIC (mobile)
-  if (navigator.vibrate) {
-    navigator.vibrate(10); // very subtle tap
-  }
+  if (navigator.vibrate) navigator.vibrate(10);
 
   await shareVerse();
 });
@@ -1207,25 +945,27 @@ streakModal.addEventListener("click", closeStreak);
 
 helpIcon.addEventListener("click", openHelp);
 helpModal.addEventListener("click", (e) => {
-  if (e.target === helpModal) {
-    closeHelp();
-  }
+  if (e.target === helpModal) closeHelp();
 });
+
 donateIcon.addEventListener("click", goDonate);
+
 document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
 
-// Fix for the Fallback Share Modal
 saveImageBtn.addEventListener("click", () => {
   const blob = window._shareBlob;
   if (!blob) return;
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
+
   a.href = url;
   a.download = "tapnpray.png";
-  document.body.appendChild(a); // Required for some iOS browsers
+
+  document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+
   URL.revokeObjectURL(url);
 
   showToast("Saved to device 📥");
@@ -1235,18 +975,14 @@ saveImageBtn.addEventListener("click", () => {
 cancelShareBtn.addEventListener("click", closeShareModal);
 
 shareModal.addEventListener("click", (e) => {
-if (e.target === shareModal) {
-    closeShareModal();
-  }
+  if (e.target === shareModal) closeShareModal();
 });
 
 function addToRecent(key) {
   if (!key) return;
 
-  // Add to start of array
   recentVerses.unshift(key);
 
-  // Keep only the last 14 (RECENT_LIMIT)
   if (recentVerses.length > RECENT_LIMIT) {
     recentVerses.pop();
   }
@@ -1254,34 +990,25 @@ function addToRecent(key) {
   localStorage.setItem("recentVerses", JSON.stringify(recentVerses));
 }
 
-/* =========================
-   INITIALIZE
-========================= */
+/* INIT */
 async function init() {
-  // Load primary translation first
   await loadTranslation("nlt");
   generateDaily();
-  
-  // Load others in background
+
   loadTranslation("niv");
   loadTranslation("kjv");
 
-  // Show the hint bubble under the logo after a brief delay
   setTimeout(() => {
     const hint = document.getElementById("tapHintBubble");
     if (hint) {
       hint.classList.add("show");
-      // Auto-hide after 6 seconds so it doesn't clutter the screen
       setTimeout(() => hint.classList.remove("show"), 6000);
     }
   }, 2500);
 }
 
-// Ensure the app starts
 init();
-
 </script>
-
 
 <div id="toast"></div>
 
@@ -1291,6 +1018,27 @@ init();
     <div id="streakMsg"></div>
     <div class="badges">
       <span class="badge" id="b7">🌿</span>
+      <span class="badge" id="b30">🔥</span>
+      <span class="badge" id="b100">👑</span>
+    </div>
+    <div class="progress">
+      <div id="progressBar"></div>
+    </div>
+  </div>
+</div>
+
+<div id="helpModal">
+  <div class="help-card">
+    <div class="close-btn" id="helpCloseBtn">✕</div>
+    <div id="helpContent">Loading...</div>
+  </div>
+</div>
+
+<div id="shareModal">
+  <div class="share-card">
+    ...
+  </div>
+</div>
 
 </body>
 </html>
