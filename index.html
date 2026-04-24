@@ -39,17 +39,22 @@ html, body {
   padding-top: env(safe-area-inset-top);
 }
 
-body::before {
-  content: "";
+#bg-layer {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
   background-size: cover;
   background-position: center;
-  background-image: var(--bg-image);
-  filter: brightness(calc(var(--brightness) * 0.55)) blur(3px);
+  background-repeat: no-repeat;
+
   transform: scale(1.05);
-  transition: filter 1s ease;
+  filter: brightness(calc(var(--brightness) * 0.55)) blur(3px);
+
   z-index: -1;
+  will-change: transform, filter;
 }
 
 #topLogo {
@@ -360,7 +365,7 @@ button, select {
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
 </head>
 <body>
-
+<div id="bg-layer"></div>
 <!-- TOP LOGO -->
 <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
 <div id="tapHintBubble">Tap the verse to listen 🔊</div>
@@ -518,7 +523,9 @@ function updateBackground() {
   preload.src = img;
 
   preload.onload = () => {
-    document.body.style.setProperty('--bg-image', `url('${img}')`);
+    const bg = document.getElementById("bg-layer");
+bg.style.backgroundImage = `url('${img}')`;
+bg.style.opacity = 1;
     document.body.style.setProperty('--brightness', brightness);
     document.body.dataset.block = block;
     currentBackground = img;
@@ -1014,15 +1021,19 @@ async function shareVerse() {
 
    const canvas = document.createElement("canvas");
 
-   const scale = window.devicePixelRatio || 1;
+   const size = 1080;
+   const dpr = window.devicePixelRatio || 1;
 
-   canvas.width = 1080 * scale;
-   canvas.height = 1080 * scale;
-   canvas.style.width = "1080px";
-   canvas.style.height = "1080px";
+   canvas.width = size * dpr;
+   canvas.height = size * dpr;
+
+   canvas.style.width = size + "px";
+   canvas.style.height = size + "px";
 
    const ctx = canvas.getContext("2d");
-   ctx.scale(scale, scale);
+
+// IMPORTANT: reset transform then apply DPR cleanly
+ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
 
    // ✅ iOS render stabilization (ADD THIS HERE)
@@ -1051,11 +1062,14 @@ async function shareVerse() {
 
 if (bgLoaded) {
 
-  const blurCanvas = document.createElement("canvas");
-  blurCanvas.width = canvas.width;
-  blurCanvas.height = canvas.height;
+const blurCanvas = document.createElement("canvas");
 
-  const bctx = blurCanvas.getContext("2d");
+const size = 1080;
+
+blurCanvas.width = size;
+blurCanvas.height = size;
+
+const bctx = blurCanvas.getContext("2d");
 
   // 🔥 CRITICAL iOS FIX: force high-quality scaling
   bctx.imageSmoothingEnabled = true;
@@ -1067,12 +1081,12 @@ if (bgLoaded) {
   const scale = 0.12;
 
   // draw small version (blur source)
-  bctx.drawImage(
-    bgImg,
-    0, 0,
-    blurCanvas.width * scale,
-    blurCanvas.height * scale
-  );
+bctx.drawImage(
+  bgImg,
+  0, 0,
+  size * 0.12,
+  size * 0.12
+);
 
   // upscale back (creates blur effect)
   ctx.globalAlpha = 0.75;
