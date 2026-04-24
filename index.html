@@ -32,36 +32,36 @@ gtag('config', 'G-ELQ3E5WGCT');
 html, body {
   height: 100%;
   margin: 0;
-  overflow-x: hidden;
+  /* Prevent scrolling to keep everything on one screen */
+  overflow: hidden; 
   font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
   color: #fff;
+  /* Handles physical notch areas on newer phones */
   padding-bottom: env(safe-area-inset-bottom);
   padding-top: env(safe-area-inset-top);
 }
+
 canvas {
-    image-rendering: -webkit-optimize-contrast;
-    /* Helps iOS maintain canvas memory during high-res exports */
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    /* "Primes" the filter engine for iOS Safari */
-    -webkit-filter: blur(0px); 
-    filter: blur(0px);
+  image-rendering: -webkit-optimize-contrast;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-filter: blur(0px); 
+  filter: blur(0px);
 }
-  
+
+/* BACKGROUND LAYER */
 #bg-layer {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
   transform: scale(1.05);
-  filter: brightness(calc(var(--brightness) * 0.55)) blur(3px);
-
+  /* Darkened slightly more for better text contrast */
+  filter: brightness(calc(var(--brightness) * 0.50)) blur(3px);
   z-index: -1;
   will-change: transform, filter;
 }
@@ -69,7 +69,7 @@ canvas {
 #topLogo {
   filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
   width: 100px;
-  position: fixed; /* Keeps it at the top regardless of scrolling */
+  position: fixed;
   top: 30px;
   left: 50%;
   transform: translateX(-50%);
@@ -78,30 +78,33 @@ canvas {
   z-index: 100;
 }
 
-/* 1. Ensure the container takes the full screen and centers everything */
+/* CONTENT CONTAINER */
 .center {
-  min-height: 100vh; 
+  height: 100%; /* Force height to match screen */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Dead center vertical alignment */
-  padding: 40px 20px;
+  justify-content: center;
+  /* Shift content UP by 10% of the screen height to combat browser UI offset */
+  padding: 20px 20px 10vh 20px;
   box-sizing: border-box;
 }
 
-/* 2. Remove the card styling from #votd */
 #votd {
   position: relative;
   max-width: 800px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Ensures the buttons center under the verse */
+  align-items: center;
   text-align: center;
+  /* Prevent elements from overlapping/touching */
+  gap: 8px;
 }
 
+/* AMBIENT & UI ICONS */
 #ambientToggle {
-  position: fixed; /* Move it out of the container flow */
+  position: fixed;
   top: 20px;
   right: 20px;
   font-size: 26px;
@@ -109,6 +112,7 @@ canvas {
   cursor: pointer;
   z-index: 100;
 }
+
 .icon-btn {
   opacity: 0.6;
   transition: all 0.2s ease;
@@ -119,50 +123,53 @@ canvas {
   opacity: 1;
 }
 
-#readIcon:hover,
-#ambientToggle:hover,
-#helpIcon:hover,
-#donateIcon:hover {
-  transform: scale(1.2);
-  opacity: 1;
+/* TEXT ELEMENTS & SHADOWS */
+#title { 
+  font-size: 15px; 
+  margin-top: 6px; 
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
 
-#title { font-size: 15px; margin-top: 6px; }
 #date {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.8);
   font-size: 14px;
   margin-bottom: 5px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
-/* 4. Style the reference and date to match */
-#ref {
-  font-weight: 700;
-  margin-top: 20px;
-  font-size: 18px;
-  color: #108cd7;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
-/* 3. Make the verse text pop without the card */
+
 #verse {
   margin-top: 10px;
-  font-size: clamp(28px, 6vw, 42px); /* Larger, more immersive size */
+  /* Scale size safely for mobile */
+  font-size: clamp(24px, 5.8vw, 40px); 
   font-family: 'Merriweather', serif;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.5;
   cursor: pointer;
-  flex: none; /* Let it sit naturally in the center */
-  
-  /* CRITICAL: Text shadow ensures readability on all backgrounds */
-  text-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3);
+  flex: none;
+  /* High-contrast multi-layered shadow for readability */
+  text-shadow: 
+    0 2px 10px rgba(0,0,0,0.9), 
+    0 0 30px rgba(0,0,0,0.5);
 }
 
 .word { opacity: .35; }
 .word.active { opacity: 1; }
 
-.translation-select, .mode-buttons button {
-  background: rgba(0, 0, 0, 0.4); /* Darker "pill" look */
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+#ref {
+  font-weight: 700;
   margin-top: 15px;
+  font-size: 18px;
+  /* Lighter blue for better contrast on dark backgrounds */
+  color: #5cc2ff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+}
+
+/* BUTTONS & SELECTS */
+.translation-select, .mode-buttons button {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 10px;
 }
 
 .mode-buttons {
@@ -172,37 +179,36 @@ canvas {
 }
 
 .mode-buttons button {
-  width: 120px;
+  width: 110px;
   padding: 8px;
   border-radius: 999px;
   border: none;
   background: rgba(255,255,255,.15);
   color: #fff;
+  font-family: system-ui, sans-serif;
 }
 
 .mode-buttons button.active {
   background: #108cd7;
 }
-button, select {
-  font-family: system-ui, -apple-system, sans-serif;
-}
 
+/* SHARE ICON */
 .share-icon {
   margin: 10px auto 0;
   font-size: 22px;
   cursor: pointer;
   transition: transform 0.12s ease, opacity 0.2s ease;
-
   will-change: transform;
 }
+
 .share-icon.pressed {
   transform: scale(0.85);
-  transition: transform 0.12s ease;
 }
 
+/* NAVIGATION FOOTER ICONS */
 .bottom-left, .bottom-right {
-  position: fixed; /* Changed from absolute */
-  bottom: 25px;
+  position: fixed;
+  bottom: calc(25px + env(safe-area-inset-bottom));
   font-size: 24px;
   cursor: pointer;
   z-index: 100;
@@ -213,9 +219,33 @@ button, select {
 
 #donateIcon {
   color: #FFD700;
-  font-size: 24px;
-} 
+}
 
+/* HINT BUBBLE - Positioned under Logo / Above Title */
+#tapHintBubble {
+  position: fixed;
+  top: 145px; 
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  width: fit-content;
+  opacity: 0;
+  transition: all 0.6s ease;
+  z-index: 110;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+#tapHintBubble.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* MODALS & NOTIFICATIONS */
 #streakModal, #helpModal {
   position: fixed;
   inset: 0;
@@ -227,23 +257,21 @@ button, select {
 }
 
 .streak-card, .help-card {
-  background: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.55);
   backdrop-filter: blur(25px);
   border-radius: 28px;
   padding: 25px;
   width: 100%;
   max-width: 500px;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
-
-  /* 👇 ADD THIS */
   position: relative;
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* 👇 ADD THIS RIGHT BELOW */
 .close-btn {
   position: absolute;
   top: 10px;
@@ -255,77 +283,23 @@ button, select {
   z-index: 10;
 }
 
-.close-btn:hover {
-  opacity: 1;
-  transform: scale(1.2);
-}
-
-.badges {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.badge {
-  font-size: 22px;
-  opacity: 0.3;
-  transition: all 0.3s ease;
-}
-
-.badge.active {
-  opacity: 1;
-  transform: scale(1.2);
-}
-
 #streak {
-  margin: 40px auto 0;
+  margin: 30px auto 0;
   padding: 8px 20px;
   border-radius: 999px;
   font-size: 14px;
   width: fit-content;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.4);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.1);
 }
 
-.progress {
-  width: 100%;
-  height: 10px;
-  background: rgba(255,255,255,.2);
-  border-radius: 999px;
-  margin-top: 15px;
-}
-
-.progress div {
-  height: 100%;
-  background: #108cd7;
-  border-radius: 999px;
-  width: 0%;
-  transition: width 0.4s ease;
-}
-
-#tapHintBubble {
-  position: relative;
-  margin: 8px auto 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(10px);
-  color: #fff;
-  padding: 10px 16px;
-  border-radius: 999px;
-  font-size: 14px;
-  width: fit-content;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: all 0.6s ease;
-}
-
 #toast {
   position: fixed;
-  bottom: 30px;
+  bottom: 100px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.8);
   backdrop-filter: blur(10px);
   padding: 10px 18px;
   border-radius: 999px;
@@ -339,16 +313,8 @@ button, select {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-  
-  
-#tapHintBubble.show {
-  opacity: 1;
-  transform: translateY(0);
-}
 
-/* =========================
-   SHARE MODAL
-========================= */
+/* SHARE MODAL */
 #shareModal {
   position: fixed;
   inset: 0;
@@ -360,13 +326,14 @@ button, select {
 }
 
 .share-card {
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(25px);
   border-radius: 28px;
   padding: 24px;
   text-align: center;
   max-width: 400px;
   width: 100%;
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 .share-actions {
@@ -817,12 +784,13 @@ function changeTranslation(t) {
 function updateVerse(titleText) {
   const text = verses[translation][currentKey];
   if (!text) {
-  console.warn("Missing verse:", currentKey, translation);
-  return;
-}
+    console.warn("Missing verse:", currentKey, translation);
+    return;
+  }
 
   titleEl.innerText = titleText;
 
+  // Wraps words in spans for the "Read Aloud" highlighting feature
   verseEl.innerHTML = text
     .split(" ")
     .map(w => `<span class="word">${w}</span>`)
@@ -830,6 +798,9 @@ function updateVerse(titleText) {
 
   refEl.innerText = currentKey;
   dateEl.innerText = new Date().toDateString();
+  
+  // Reset scroll position to top (safety check for internal div)
+  window.scrollTo(0, 0);
 }
 
 /* =========================
@@ -922,9 +893,9 @@ function goDonate() {
    READ
 ========================= */
 function readVerse() {
-  // ✅ cancel immediately when user taps
-  speechSynthesis.cancel();
-
+  // Stops any current speaking before starting the new one
+  window.speechSynthesis.cancel(); 
+  
   const words = document.querySelectorAll(".word");
   words.forEach(w => w.classList.remove("active"));
   let wordIndex = 0;
@@ -1278,26 +1249,26 @@ function addToRecent(key) {
    INITIALIZE
 ========================= */
 async function init() {
-  // Load NLT first as it's the primary default
+  // Load primary translation first
   await loadTranslation("nlt");
   generateDaily();
   
-  // Load others in background to keep UI snappy
+  // Load others in background
   loadTranslation("niv");
   loadTranslation("kjv");
 
-  // Show hint bubble after 3 seconds
+  // Show the hint bubble under the logo after a brief delay
   setTimeout(() => {
     const hint = document.getElementById("tapHintBubble");
     if (hint) {
       hint.classList.add("show");
-      // Auto-hide after 5 seconds
-      setTimeout(() => hint.classList.remove("show"), 5000);
+      // Auto-hide after 6 seconds so it doesn't clutter the screen
+      setTimeout(() => hint.classList.remove("show"), 6000);
     }
-  }, 3000);
+  }, 2500);
 }
 
-// Start the app
+// Ensure the app starts
 init();
 
 </script>
