@@ -1012,32 +1012,35 @@ async function shareVerse() {
     if (!verseText) { isSharing = false; return; }
 
     const canvas = document.createElement("canvas");
-    const size = 1080; // Standard Instagram Square
+    const size = 1080; 
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext("2d");
 
     /* =========================
-       1. BACKGROUND (CENTRAL CROP)
+       1. BACKGROUND (CENTRAL CROP FIX)
     ========================= */
-    let bgImg = new Image();
+    const bgImg = new Image();
     bgImg.crossOrigin = "anonymous";
-    bgImg.src = currentBackground;
+    // Force a re-load to ensure the canvas can "see" the image data
+    bgImg.src = currentBackground + "?t=" + new Date().getTime(); 
 
-    await new Promise(res => {
-      bgImg.onload = res;
-      bgImg.onerror = res;
+    await new Promise((resolve) => {
+      bgImg.onload = resolve;
+      bgImg.onerror = resolve;
     });
 
     if (bgImg.complete && bgImg.width > 0) {
-      // Math to ensure the image fills the 1080x1080 square completely
+      // Calculate scale to fill the square without stretching
       const scale = Math.max(size / bgImg.width, size / bgImg.height);
-      const bx = (size - bgImg.width * scale) / 2;
-      const by = (size - bgImg.height * scale) / 2;
+      const drawW = bgImg.width * scale;
+      const drawH = bgImg.height * scale;
+      const offX = (size - drawW) / 2;
+      const offY = (size - drawH) / 2;
 
-      ctx.filter = "blur(12px) brightness(0.6)";
-      // Bleed of 50px prevents white edges
-      ctx.drawImage(bgImg, bx - 50, by - 50, (bgImg.width * scale) + 100, (bgImg.height * scale) + 100);
+      ctx.filter = "blur(15px) brightness(0.6)";
+      // Draw with 50px bleed to hide blurry white edges
+      ctx.drawImage(bgImg, offX - 50, offY - 50, drawW + 100, drawH + 100);
       ctx.filter = "none";
     } else {
       ctx.fillStyle = "#1a2a3a";
@@ -1050,11 +1053,10 @@ async function shareVerse() {
     const cardX = 80, cardY = 160, cardW = 920, cardH = 650, r = 40;
     ctx.fillStyle = "rgba(0,0,0,0.5)";
     ctx.beginPath();
-    // Modern rounded rectangle
     if (ctx.roundRect) {
         ctx.roundRect(cardX, cardY, cardW, cardH, r);
     } else {
-        ctx.rect(cardX, cardY, cardW, cardH); // Fallback
+        ctx.rect(cardX, cardY, cardW, cardH);
     }
     ctx.fill();
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
@@ -1065,16 +1067,15 @@ async function shareVerse() {
        3. TEXT DYNAMICS (PREVENT OVERFLOW)
     ========================= */
     ctx.textAlign = "center";
-    
-    // Header & Date
     ctx.fillStyle = "#ffffff";
     ctx.font = "700 32px Merriweather";
     ctx.fillText("Daily Bible Verse", size / 2, cardY + 70);
+    
     ctx.fillStyle = "#2fb4ff";
     ctx.font = "400 24px Merriweather";
     ctx.fillText(new Date().toDateString(), size / 2, cardY + 110);
 
-    // Auto-adjust font size based on verse length
+    // Dynamic sizing for long verses like Isaiah 43:2
     let fontSize = verseText.length > 180 ? 36 : 46; 
     ctx.font = `700 ${fontSize}px Merriweather`;
     ctx.fillStyle = "#ffffff";
@@ -1095,9 +1096,9 @@ async function shareVerse() {
     });
     lines.push(currentLine.trim());
 
-    // Calculate vertical center so text doesn't hit the reference
     const lineHeight = fontSize * 1.4;
     const totalTextHeight = lines.length * lineHeight;
+    // Calculate vertical center relative to the card's usable space
     const startY = cardY + 180 + ((cardH - 280 - totalTextHeight) / 2);
 
     lines.forEach((l, i) => {
@@ -1109,17 +1110,14 @@ async function shareVerse() {
     ========================= */
     ctx.font = "700 34px Merriweather";
     ctx.fillStyle = "#2fb4ff";
-    // Fixed position at the bottom of the card
     ctx.fillText(currentKey, size / 2, cardY + cardH - 60);
 
-    // Website URL at the very bottom
-    ctx.textAlign = "center";
     ctx.font = "700 22px Merriweather";
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.fillText("tapnpray.github.io", size / 2, size - 60);
 
     /* =========================
-       5. EXPORT & SHARE
+       5. EXPORT
     ========================= */
     canvas.toBlob(async (blob) => {
       if (!blob) { isSharing = false; return; }
@@ -1133,11 +1131,10 @@ async function shareVerse() {
             text: `${verseText}\n\n${currentKey}`
           });
         } catch (err) {
-          if (err.name !== "AbortError") openShareModal();
+          if (err.name !== "AbortError") openShareModal(blob);
         }
       } else {
-        window._shareBlob = blob;
-        openShareModal();
+        openShareModal(blob);
       }
       isSharing = false;
     }, "image/png");
@@ -1146,6 +1143,11 @@ async function shareVerse() {
     console.error(err);
     isSharing = false;
   }
+}
+
+function openShareModal(blob) {
+  window._shareBlob = blob;
+  shareModal.style.display = "flex";
 }
   
 /* =========================
