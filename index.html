@@ -86,13 +86,13 @@ gtag('config', 'G-ELQ3E5WGCT');
   flex-direction: column;
   align-items: center;
 
-  /* 👇 THIS is the key change */
   justify-content: center;
-
-  /* 👇 remove the artificial vertical push */
   padding: 80px 20px 20px;
-  
+
   box-sizing: border-box;
+
+  position: relative; /* ✅ ADD */
+  z-index: 1;         /* ✅ ADD */
 }
 
   #votd {
@@ -118,16 +118,23 @@ gtag('config', 'G-ELQ3E5WGCT');
     z-index: 100;
   }
 
-  .icon-btn {
-    padding: 8px;
-    opacity: 0.6;
-    transition: all 0.2s ease;
-  }
+.icon-btn {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
 
-  .icon-btn:hover {
-    transform: scale(1.2);
-    opacity: 1;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0.6;
+  transition: all 0.2s ease;
+
+  cursor: pointer;
+  touch-action: manipulation;
+
+  -webkit-tap-highlight-color: transparent;
+}
 
   /* NOTIFICATION: Locked at the very top center */
 #title {
@@ -334,15 +341,26 @@ gtag('config', 'G-ELQ3E5WGCT');
   top: calc(10px + env(safe-area-inset-top));
   left: 15px;
 
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 13px;
+  width: 40px;
+  height: 40px;
 
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  z-index: 100;
+  font-size: 24px;
+
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+
+  z-index: 1000;
+  cursor: pointer;
+  opacity: 0.6;
+
+  transition: all 0.2s ease;
+
+  touch-action: manipulation;
 }
 
   #toast {
@@ -411,7 +429,8 @@ gtag('config', 'G-ELQ3E5WGCT');
   <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
   <div id="ambientToggle" class="icon-btn">🌿</div>
   <div id="tapHintBubble">Tap the verse to listen 🔊</div>
-
+  <div id="streak" class="icon-btn">🔥</div>
+  
   <div class="center">
     <div id="votd">
       <div id="title">Daily Bible Verse</div>
@@ -437,7 +456,7 @@ gtag('config', 'G-ELQ3E5WGCT');
     </div>
 
     <!-- 3. BOTTOM UI GROUP: Streak above Logo, icons to the sides -->
-    <div id="streak" class="icon-btn">🔥</div>
+    
   </div>
 
   <div id="streakModal">
