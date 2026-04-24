@@ -1291,54 +1291,43 @@ async function shareVerse() {
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.fillText("tapnpray.github.io", size / 2, size - 60);
 
-    /* =========================
-       5. EXPORT
-    ========================= */
-    canvas.toBlob(async (blob) => {
-      if (!blob) { isSharing = false; return; }
-      const file = new File([blob], "tapnpray.png", { type: "image/png" });
-
-if (navigator.canShare?.({ files: [file] })) {
+/* =========================
+   5. EXPORT (FINAL FIX)
+========================= */
+canvas.toBlob(async (blob) => {
   try {
-    await navigator.share({
-      files: [file],
-      title: "Tap N Pray",
-      text: `${verseText}\n\n${currentKey}`
-    });
+    if (!blob) {
+      isSharing = false;
+      return;
+    }
+
+    const file = new File([blob], "tapnpray.png", { type: "image/png" });
+
+    // Native share (iOS / Android / supported browsers)
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: "Tap N Pray",
+        text: `${verseText}\n\n${currentKey}`
+      });
+    } else {
+      openShareModalWithBlob(blob);
+    }
+
   } catch (err) {
+    console.warn("Share failed:", err);
     openShareModalWithBlob(blob);
+  } finally {
+    isSharing = false;
   }
-} else {
-  openShareModalWithBlob(blob);
-}
+});
+
 
 function openShareModalWithBlob(blob) {
   window._shareBlob = blob;
   shareModal.style.display = "flex";
 }
-  
-/* =========================
-   SHARE MODAL FUNCTIONS
-========================= */
-
-function openShareModal() {
-  // safety guard
-  if (!shareModal) return;
-
-  // show modal
-  shareModal.style.display = "flex";
-}
-
-function closeShareModal() {
-  if (!shareModal) return;
-
-  // hide modal
-  shareModal.style.display = "none";
-
-  // cleanup blob memory safely
-  window._shareBlob = null;
-}
-
+    
 let toastTimeout;
 /* =========================
    TOAST
@@ -1386,21 +1375,22 @@ ambientToggle.addEventListener("click", toggleAmbient);
 dailyBtn.addEventListener("click", showDaily);
 randomBtn.addEventListener("click", showRandom);
 translationSelect.addEventListener("change", e => changeTranslation(e.target.value));
-shareBtn.addEventListener("click", async () => {
-  // 👇 PRESS ANIMATION
+shareBtn?.addEventListener("click", async () => {
   shareBtn.classList.add("pressed");
+  setTimeout(() => shareBtn.classList.remove("pressed"), 120);
 
-setTimeout(() => {
-  shareBtn.classList.remove("pressed");
-}, 120);
-
-  // 👇 HAPTIC (mobile)
-  if (navigator.vibrate) {
-    navigator.vibrate(10); // very subtle tap
-  }
+  if (navigator.vibrate) navigator.vibrate(10);
 
   await shareVerse();
 });
+    
+ambientToggle?.addEventListener("click", toggleAmbient);
+
+donateIcon?.addEventListener("click", (e) => {
+  addRipple(e);
+  goDonate();
+});
+
 
 streakEl?.addEventListener("click", (e) => {
   addRipple(e);
