@@ -67,6 +67,7 @@ canvas {
 }
 
 #topLogo {
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
   width: 100px;
   position: fixed; /* Keeps it at the top regardless of scrolling */
   top: 30px;
@@ -200,14 +201,15 @@ button, select {
 }
 
 .bottom-left, .bottom-right {
-  position: absolute;
-  bottom: 12px;
-  font-size: 22px;
+  position: fixed; /* Changed from absolute */
+  bottom: 25px;
+  font-size: 24px;
   cursor: pointer;
+  z-index: 100;
+  opacity: 0.5;
 }
-
-.bottom-left { left: 14px; }
-.bottom-right { right: 14px; color: #FFD700; }
+.bottom-left { left: 25px; }
+.bottom-right { right: 25px; }
 
 #donateIcon {
   color: #FFD700;
@@ -277,9 +279,14 @@ button, select {
 }
 
 #streak {
-  margin: 30px auto 0; /* Add more space below the buttons */
-  background: rgba(0,0,0,.4);
+  margin: 40px auto 0;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  width: fit-content;
+  background: rgba(0,0,0,0.3);
   backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 .progress {
@@ -1248,59 +1255,54 @@ saveImageBtn.addEventListener("click", () => {
 cancelShareBtn.addEventListener("click", closeShareModal);
 
 shareModal.addEventListener("click", (e) => {
-  if (e.target === shareModal) {
+if (e.target === shareModal) {
     closeShareModal();
   }
 });
-  
+
 function addToRecent(key) {
   if (!key) return;
 
-  recentVerses.push(key);
+  // Add to start of array
+  recentVerses.unshift(key);
 
-  // keep only last N
+  // Keep only the last 14 (RECENT_LIMIT)
   if (recentVerses.length > RECENT_LIMIT) {
-    recentVerses.shift();
+    recentVerses.pop();
   }
 
-   localStorage.setItem("recentVerses", JSON.stringify(recentVerses));
-   cachedPool = null;
-   }
-  
+  localStorage.setItem("recentVerses", JSON.stringify(recentVerses));
+}
+
 /* =========================
-   INIT
+   INITIALIZE
 ========================= */
-(async () => {
+async function init() {
+  // Load NLT first as it's the primary default
   await loadTranslation("nlt");
-  await loadTranslation("niv");
-  await loadTranslation("kjv");
   generateDaily();
+  
+  // Load others in background to keep UI snappy
+  loadTranslation("niv");
+  loadTranslation("kjv");
 
-  const hint = document.getElementById("tapHintBubble");
-  if (hint) {
-    setTimeout(() => hint.classList.add("show"), 600);
-    setTimeout(() => hint.classList.remove("show"), 5600);
-  }
-})();
-// Fix for the Fallback Share Modal
-saveImageBtn.addEventListener("click", () => {
-  if (!window._shareBlob) return;
-  const url = URL.createObjectURL(window._shareBlob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `TapNPray-${currentKey.replace(/[: ]/g, '-')}.png`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast("Saved to device! 📥");
-  closeShareModal();
-});
+  // Show hint bubble after 3 seconds
+  setTimeout(() => {
+    const hint = document.getElementById("tapHintBubble");
+    if (hint) {
+      hint.classList.add("show");
+      // Auto-hide after 5 seconds
+      setTimeout(() => hint.classList.remove("show"), 5000);
+    }
+  }, 3000);
+}
 
-cancelShareBtn.addEventListener("click", closeShareModal);
+// Start the app
+init();
+
 </script>
 
 <div id="toast"></div>
-  
+
 </body>
 </html>
