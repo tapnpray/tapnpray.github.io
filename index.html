@@ -1057,55 +1057,52 @@ ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
 /* =========================
-   DRAW BACKGROUND (iOS FIXED BLUR)
-========================= */
+       DRAW BACKGROUND (FIXED & CONSISTENT)
+    ========================= */
+    if (bgLoaded) {
+      const canvasSize = 1080;
+      let renderW, renderH, offsetX, offsetY;
+      
+      // Calculate "Aspect Fill" (Center Crop)
+      const bgAspect = bgImg.width / bgImg.height;
+      if (bgAspect > 1) { // Landscape
+        renderH = canvasSize;
+        renderW = canvasSize * bgAspect;
+        offsetX = (canvasSize - renderW) / 2;
+        offsetY = 0;
+      } else { // Portrait
+        renderW = canvasSize;
+        renderH = canvasSize / bgAspect;
+        offsetX = 0;
+        offsetY = (canvasSize - renderH) / 2;
+      }
 
-if (bgLoaded) {
+      // Apply Blur and Brightness directly to context
+      ctx.filter = "blur(15px) brightness(0.6)"; 
+      
+      // Draw with "bleed" to prevent white blurry edges
+      const bleed = 50; 
+      ctx.drawImage(bgImg, offsetX - bleed, offsetY - bleed, renderW + (bleed * 2), renderH + (bleed * 2));
 
-const blurCanvas = document.createElement("canvas");
+      // Reset filter so it doesn't affect the text/glass card
+      ctx.filter = "none";
 
-const size = 1080;
+      // Final dark overlay for contrast
+      ctx.fillStyle = "rgba(0,0,0,0.2)";
+      ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-blurCanvas.width = size;
-blurCanvas.height = size;
-
-const bctx = blurCanvas.getContext("2d");
-
-  // 🔥 CRITICAL iOS FIX: force high-quality scaling
-  bctx.imageSmoothingEnabled = true;
-  bctx.imageSmoothingQuality = "high";
-
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-
-  const scale = 0.12;
-
-  // draw small version (blur source)
-bctx.drawImage(
-  bgImg,
-  0, 0,
-  size * 0.12,
-  size * 0.12
-);
-
-  // upscale back (creates blur effect)
-  ctx.globalAlpha = 0.75;
-  ctx.drawImage(blurCanvas, 0, 0, canvas.width, canvas.height);
-  ctx.globalAlpha = 1;
-
-  // dark overlay for readability
-  ctx.fillStyle = "rgba(0,0,0,0.25)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-} else {
-  ctx.fillStyle = "#111";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
+    } else {
+      // Solid backup gradient if image fails to load
+      const grad = ctx.createLinearGradient(0, 0, 0, 1080);
+      grad.addColorStop(0, "#0b1a2a");
+      grad.addColorStop(1, "#1e3c72");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1080, 1080);
+    }
     /* =========================
        GLASS CARD
     ========================= */
-    const x = 100, y = 180, w = 880, h = 600, r = 50;
+    const x = 90, y = 190, w = 900, h = 600, r = 50;
 
     ctx.beginPath();
     ctx.moveTo(x+r, y);
@@ -1418,7 +1415,22 @@ function addToRecent(key) {
     setTimeout(() => hint.classList.remove("show"), 5600);
   }
 })();
+// Fix for the Fallback Share Modal
+saveImageBtn.addEventListener("click", () => {
+  if (!window._shareBlob) return;
+  const url = URL.createObjectURL(window._shareBlob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `TapNPray-${currentKey.replace(/[: ]/g, '-')}.png`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("Saved to device! 📥");
+  closeShareModal();
+});
 
+cancelShareBtn.addEventListener("click", closeShareModal);
 </script>
 
 <div id="toast"></div>
