@@ -86,14 +86,13 @@ gtag('config', 'G-ELQ3E5WGCT');
   flex-direction: column;
   align-items: center;
 
-  justify-content: flex-start;
-
-  padding: calc(120px + env(safe-area-inset-top)) 20px 20px;
+  justify-content: center;
+  padding: 80px 20px 20px;
 
   box-sizing: border-box;
 
-  position: relative;
-  z-index: 1;
+  position: relative; /* ✅ ADD */
+  z-index: 1;         /* ✅ ADD */
 }
 
   #votd {
@@ -240,6 +239,7 @@ gtag('config', 'G-ELQ3E5WGCT');
   }
 
 #helpModal {
+  display: none;
   position: fixed;
   inset: 0;
   display: none;
@@ -310,6 +310,10 @@ gtag('config', 'G-ELQ3E5WGCT');
 
   /* STREAK: Positioned directly above the logo */
  #streak {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  left: 15px;
+
   width: 40px;
   height: 40px;
 
@@ -317,7 +321,7 @@ gtag('config', 'G-ELQ3E5WGCT');
   align-items: center;
   justify-content: center;
 
-  font-size: 22px;
+  font-size: 24px;
 
   background: transparent;
   border: none;
@@ -402,54 +406,37 @@ gtag('config', 'G-ELQ3E5WGCT');
   justify-content: center;
 
   font-size: 22px;
+  line-height: 1;
+
   opacity: 0.6;
-
-  position: relative;
-  z-index: 1000;
-
-  border-radius: 12px;
+  transition: transform 0.12s ease, opacity 0.12s ease;
 
   cursor: pointer;
   touch-action: manipulation;
-
   -webkit-tap-highlight-color: transparent;
 
-  will-change: transform;
+  position: fixed;
+  z-index: 1000;
 
-  /* ONLY ONE animation layer */
+  border-radius: 12px;
+  overflow: hidden;
+
+  /* ✨ idle float animation */
   animation: floatIdle 6s ease-in-out infinite;
 }
-/* =========================
-   DOCK (BOTTOM ICON BAR)
-========================= */
-#dock {
-  position: fixed;
-  bottom: calc(20px + env(safe-area-inset-bottom));
-  left: 50%;
-  transform: translateX(-50%);
 
-  display: flex;
-  gap: 14px;
-
-  padding: 10px 16px;
-
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(20px);
-
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.1);
-
-  z-index: 2000;
-}
 /* =========================
    PRESS FEEDBACK (IOS FIX)
 ========================= */
 .icon-btn.pressed {
+  transform: scale(0.85);
   opacity: 1;
-  animation: none !important;
-  transform: scale(0.88) !important;
 }
 
+.icon-btn {
+  animation: floatIdle 6s ease-in-out infinite;
+  will-change: transform;
+}
 
 @keyframes floatIdle {
   0%, 100% { transform: translate3d(0, 0px, 0); }
@@ -493,29 +480,6 @@ gtag('config', 'G-ELQ3E5WGCT');
   75% { transform: scale(1.05); }
 }
 
-/* =========================
-   ICON POSITIONS (FIX LAYOUT)
-========================= */
-
-.top-left {
-  top: calc(20px + env(safe-area-inset-top));
-  left: 20px;
-}
-
-.top-right {
-  top: calc(20px + env(safe-area-inset-top));
-  right: 20px;
-}
-
-.bottom-left {
-  bottom: calc(30px + env(safe-area-inset-bottom));
-  left: 20px;
-}
-
-.bottom-right {
-  bottom: calc(30px + env(safe-area-inset-bottom));
-  right: 20px;
-}
 
   
 </style>
@@ -525,7 +489,9 @@ gtag('config', 'G-ELQ3E5WGCT');
   <div id="bg-layer"></div>
 
   <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
+  <div id="ambientToggle" class="icon-btn top-right">🌿</div>
   <div id="tapHintBubble">Tap the verse to listen 🔊</div>
+  <div id="streak" class="icon-btn top-left">🔥</div>
   
   <div class="center">
     <div id="votd">
@@ -545,7 +511,10 @@ gtag('config', 'G-ELQ3E5WGCT');
         <button id="randomBtn">Random</button>
       </div>
 
-    
+      <div class="share-icon" id="shareBtn">🔗</div>
+
+      <div class="icon-btn bottom-left" id="helpIcon">?</div>
+      <div class="icon-btn bottom-right" id="donateIcon">♥</div>
     </div>
 
     <!-- 3. BOTTOM UI GROUP: Streak above Logo, icons to the sides -->
@@ -611,9 +580,6 @@ const b100 = document.getElementById("b100");
 const progressBar = document.getElementById("progressBar");
 const ambientAudio = document.getElementById("ambientAudio");
 let isSharing = false;
-window.addEventListener("pagehide", () => {
-  isSharing = false;
-});
 const helpIcon = document.getElementById("helpIcon");
 const donateIcon = document.getElementById("donateIcon");
 const helpModal = document.getElementById("helpModal");
@@ -670,7 +636,6 @@ function updateBackground() {
   if (img === currentBackground && brightness === currentBrightness) return;
 
   const preload = new Image();
-  preload.decoding = "async";
   preload.src = img;
 
   preload.onload = () => {
@@ -1008,10 +973,8 @@ function updateStreak() {
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
 
-if (streakEl) {
-  streakEl.textContent = "🔥";
-  streakEl.classList.toggle("active", streak >= 2);
-}
+  streakEl.innerText = "🔥";
+  streakEl.classList.add("active");
   streakCount.innerText = streak + " Days";
 
   if (streak < 7) {
@@ -1291,43 +1254,62 @@ async function shareVerse() {
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.fillText("tapnpray.github.io", size / 2, size - 60);
 
-/* =========================
-   5. EXPORT (FINAL FIX)
-========================= */
-canvas.toBlob(async (blob) => {
-  try {
-    if (!blob) {
+    /* =========================
+       5. EXPORT
+    ========================= */
+    canvas.toBlob(async (blob) => {
+      if (!blob) { isSharing = false; return; }
+      const file = new File([blob], "tapnpray.png", { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: "Tap N Pray",
+            text: `${verseText}\n\n${currentKey}`
+          });
+        } catch (err) {
+          if (err.name !== "AbortError") openShareModalWithBlob(blob);
+        }
+      } else {
+        openShareModalWithBlob(blob);
+      }
       isSharing = false;
-      return;
-    }
-
-    const file = new File([blob], "tapnpray.png", { type: "image/png" });
-
-    // Native share (iOS / Android / supported browsers)
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: "Tap N Pray",
-        text: `${verseText}\n\n${currentKey}`
-      });
-    } else {
-      openShareModalWithBlob(blob);
-    }
+    }, "image/png");
 
   } catch (err) {
-    console.warn("Share failed:", err);
-    openShareModalWithBlob(blob);
-  } finally {
+    console.error(err);
     isSharing = false;
   }
-});
-
+}
 
 function openShareModalWithBlob(blob) {
   window._shareBlob = blob;
   shareModal.style.display = "flex";
 }
-    
+  
+/* =========================
+   SHARE MODAL FUNCTIONS
+========================= */
+
+function openShareModal() {
+  // safety guard
+  if (!shareModal) return;
+
+  // show modal
+  shareModal.style.display = "flex";
+}
+
+function closeShareModal() {
+  if (!shareModal) return;
+
+  // hide modal
+  shareModal.style.display = "none";
+
+  // cleanup blob memory safely
+  window._shareBlob = null;
+}
+
 let toastTimeout;
 /* =========================
    TOAST
@@ -1375,24 +1357,23 @@ ambientToggle.addEventListener("click", toggleAmbient);
 dailyBtn.addEventListener("click", showDaily);
 randomBtn.addEventListener("click", showRandom);
 translationSelect.addEventListener("change", e => changeTranslation(e.target.value));
-shareBtn?.addEventListener("click", async () => {
+shareBtn.addEventListener("click", async () => {
+  // 👇 PRESS ANIMATION
   shareBtn.classList.add("pressed");
-  setTimeout(() => shareBtn.classList.remove("pressed"), 120);
 
-  if (navigator.vibrate) navigator.vibrate(10);
+setTimeout(() => {
+  shareBtn.classList.remove("pressed");
+}, 120);
+
+  // 👇 HAPTIC (mobile)
+  if (navigator.vibrate) {
+    navigator.vibrate(10); // very subtle tap
+  }
 
   await shareVerse();
 });
-    
-ambientToggle?.addEventListener("click", toggleAmbient);
 
-donateIcon?.addEventListener("click", (e) => {
-  addRipple(e);
-  goDonate();
-});
-
-
-streakEl?.addEventListener("click", (e) => {
+streakEl.addEventListener("click", (e) => {
   addRipple(e);
   openStreak();
 });
@@ -1442,7 +1423,7 @@ saveImageBtn.addEventListener("click", () => {
 cancelShareBtn.addEventListener("click", closeShareModal);
 
 shareModal.addEventListener("click", (e) => {
-  if (e.target === shareModal || e.target.classList.contains("share-card")) {
+if (e.target === shareModal) {
     closeShareModal();
   }
 });
