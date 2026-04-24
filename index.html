@@ -308,24 +308,35 @@ gtag('config', 'G-ELQ3E5WGCT');
   z-index: 10;
 }
 
-.streak-label {
-  margin-top: 15px;      /* Spacing below the share icon */
+.streak-pill {
+  margin-top: 20px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 8px 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;              /* Space between fire and number */
-  font-size: 22px;
+  gap: 10px;
+  color: #fff;
+  font-family: 'Merriweather', serif;
+  font-size: 16px;
   font-weight: 700;
-  color: #ffb347;        /* Nice fire-orange color */
-  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
   cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
-/* This makes the fire icon pulse when the streak is active */
-.streak-label.active span:first-child {
-  filter: drop-shadow(0 0 10px rgba(255,80,0,0.7));
+.streak-pill:active {
+  transform: scale(0.96);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* This targets the fire emoji specifically for the animation */
+.streak-pill span:first-child {
+  filter: drop-shadow(0 0 8px rgba(255,80,0,0.6));
   animation: firePulse 1.6s ease-in-out infinite;
 }
  
@@ -518,10 +529,10 @@ gtag('config', 'G-ELQ3E5WGCT');
       </div>
 
       <div class="share-icon" id="shareBtn">🔗</div>
-      <div id="streak" class="streak-label">
-         <span>🔥</span>
-         <span id="streakNumber">1</span>
-      </div>
+  <button id="streak" class="streak-pill">
+    <span>🔥</span>
+    <span id="streakText"><span id="streakNumber">1</span> Day Streak</span>
+  </button>
 
       <div class="icon-btn bottom-left" id="helpIcon">?</div>
       <div class="icon-btn bottom-right" id="donateIcon">♥</div>
@@ -982,6 +993,11 @@ function updateStreak() {
 
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
+  // This updates the number inside your new pill button
+  const streakNum = document.getElementById("streakNumber");
+  if (streakNum) {
+    streakNum.innerText = streak;
+  }
 
   streakEl.innerText = "🔥";
   streakEl.classList.add("active");
