@@ -86,13 +86,14 @@ gtag('config', 'G-ELQ3E5WGCT');
   flex-direction: column;
   align-items: center;
 
-  justify-content: center;
-  padding: 80px 20px 20px;
+  justify-content: flex-start;
+
+  padding: calc(120px + env(safe-area-inset-top)) 20px 20px;
 
   box-sizing: border-box;
 
-  position: relative; /* ✅ ADD */
-  z-index: 1;         /* ✅ ADD */
+  position: relative;
+  z-index: 1;
 }
 
   #votd {
@@ -239,7 +240,6 @@ gtag('config', 'G-ELQ3E5WGCT');
   }
 
 #helpModal {
-  display: none;
   position: fixed;
   inset: 0;
   display: none;
@@ -446,7 +446,7 @@ gtag('config', 'G-ELQ3E5WGCT');
 ========================= */
 .icon-btn.pressed {
   opacity: 1;
-  transition: transform 0.08s ease;
+  animation: none !important;
   transform: scale(0.88) !important;
 }
 
@@ -545,14 +545,7 @@ gtag('config', 'G-ELQ3E5WGCT');
         <button id="randomBtn">Random</button>
       </div>
 
-      
-<div id="dock">
-  <div class="icon-btn dock-item" id="ambientToggle">🌿</div>
-  <div class="icon-btn dock-item" id="shareBtn">🔗</div>
-  <div class="icon-btn dock-item" id="streak">🔥</div>
-  <div class="icon-btn dock-item" id="donateIcon">❤️</div>
-  <div class="icon-btn dock-item" id="helpIcon">?</div>
-</div>
+    
     </div>
 
     <!-- 3. BOTTOM UI GROUP: Streak above Logo, icons to the sides -->
@@ -608,7 +601,7 @@ const dailyBtn = document.getElementById("dailyBtn");
 const randomBtn = document.getElementById("randomBtn");
 const shareBtn = document.getElementById("shareBtn");
 const ambientToggle = document.getElementById("ambientToggle");
-const streakEl = document.getElementById("streakIcon");
+const streakEl = document.getElementById("streak");
 const streakModal = document.getElementById("streakModal");
 const streakCount = document.getElementById("streakCount");
 const streakMsg = document.getElementById("streakMsg");
@@ -618,6 +611,9 @@ const b100 = document.getElementById("b100");
 const progressBar = document.getElementById("progressBar");
 const ambientAudio = document.getElementById("ambientAudio");
 let isSharing = false;
+window.addEventListener("pagehide", () => {
+  isSharing = false;
+});
 const helpIcon = document.getElementById("helpIcon");
 const donateIcon = document.getElementById("donateIcon");
 const helpModal = document.getElementById("helpModal");
@@ -674,6 +670,7 @@ function updateBackground() {
   if (img === currentBackground && brightness === currentBrightness) return;
 
   const preload = new Image();
+  preload.decoding = "async";
   preload.src = img;
 
   preload.onload = () => {
@@ -1301,26 +1298,18 @@ async function shareVerse() {
       if (!blob) { isSharing = false; return; }
       const file = new File([blob], "tapnpray.png", { type: "image/png" });
 
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: "Tap N Pray",
-            text: `${verseText}\n\n${currentKey}`
-          });
-        } catch (err) {
-          if (err.name !== "AbortError") openShareModalWithBlob(blob);
-        }
-      } else {
-        openShareModalWithBlob(blob);
-      }
-      isSharing = false;
-    }, "image/png");
-
+if (navigator.canShare?.({ files: [file] })) {
+  try {
+    await navigator.share({
+      files: [file],
+      title: "Tap N Pray",
+      text: `${verseText}\n\n${currentKey}`
+    });
   } catch (err) {
-    console.error(err);
-    isSharing = false;
+    openShareModalWithBlob(blob);
   }
+} else {
+  openShareModalWithBlob(blob);
 }
 
 function openShareModalWithBlob(blob) {
@@ -1413,7 +1402,7 @@ setTimeout(() => {
   await shareVerse();
 });
 
-streakEl.addEventListener("click", (e) => {
+streakEl?.addEventListener("click", (e) => {
   addRipple(e);
   openStreak();
 });
@@ -1463,7 +1452,7 @@ saveImageBtn.addEventListener("click", () => {
 cancelShareBtn.addEventListener("click", closeShareModal);
 
 shareModal.addEventListener("click", (e) => {
-if (e.target === shareModal) {
+  if (e.target === shareModal || e.target.classList.contains("share-card")) {
     closeShareModal();
   }
 });
