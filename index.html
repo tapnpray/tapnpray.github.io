@@ -281,53 +281,51 @@ gtag('config', 'G-ELQ3E5WGCT');
   background: rgba(0,0,0,0.4);
   z-index: 999;
 
-  /* stable modern viewport */
+  /* ✅ safest mobile layout combo */
   width: 100%;
+  height: 100vh;
   height: 100dvh;
 }
 
-  .streak-card, .help-card {
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(25px);
-    border-radius: 28px;
-    padding: 25px;
-    width: 100%;
-    max-width: 500px;
-    max-height: 85vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    position: relative;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .close-btn {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    font-size: 22px;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: 0.2s ease;
-    z-index: 10;
-  }
-
   /* STREAK: Positioned directly above the logo */
- #streak {
+#streak {
   position: fixed;
   top: calc(10px + env(safe-area-inset-top));
   left: 15px;
 
-  padding: 6px 14px;
+  /* icon-only sizing */
+  padding: 8px;
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 18px;
 
   background: rgba(0,0,0,0.4);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.1);
 
   z-index: 100;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* hover (desktop) */
+#streak:hover {
+  transform: scale(1.15);
+  opacity: 1;
+}
+
+/* tap feedback (mobile) */
+#streak:active {
+  transform: scale(0.9);
 }
 
   #toast {
@@ -860,7 +858,7 @@ function updateStreak() {
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
 
-  streakEl.innerText = "🔥 " + streak + " Day Streak";
+  streakEl.innerText = "🔥";
   streakCount.innerText = streak + " Days";
 
   if (streak < 7) {
@@ -887,6 +885,10 @@ function updateStreak() {
 
 function openStreak() {
   streakModal.style.display = "flex";
+
+  // Force reflow (this is the iOS fix)
+  void streakModal.offsetHeight;
+
   streakModal.style.alignItems = "center";
   streakModal.style.justifyContent = "center";
 }
@@ -1312,7 +1314,36 @@ init();
 
 </script>
 
+
 <div id="toast"></div>
-<div id="streakModal">...</div>
+
+<div id="streakModal">
+  <div class="streak-card">
+    <h1 id="streakCount"></h1>
+    <div id="streakMsg"></div>
+    <div class="badges">
+      <span class="badge" id="b7">🌿</span>
+      <span class="badge" id="b30">🔥</span>
+      <span class="badge" id="b100">👑</span>
+    </div>
+    <div class="progress">
+      <div id="progressBar"></div>
+    </div>
+  </div>
+</div>
+
+<div id="helpModal">
+  <div class="help-card">
+    <div class="close-btn" id="helpCloseBtn">✕</div>
+    <div id="helpContent">Loading...</div>
+  </div>
+</div>
+
+<div id="shareModal">
+  <div class="share-card">
+    ...
+  </div>
+</div>
+
 </body>
 </html>
