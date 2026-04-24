@@ -118,23 +118,7 @@ gtag('config', 'G-ELQ3E5WGCT');
     z-index: 100;
   }
 
-.icon-btn {
-  font-size: 24px;
-  width: 40px;
-  height: 40px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  opacity: 0.6;
-  transition: all 0.2s ease;
-
-  cursor: pointer;
-  touch-action: manipulation;
-
-  -webkit-tap-highlight-color: transparent;
-}
 
   /* NOTIFICATION: Locked at the very top center */
 #title {
@@ -420,6 +404,38 @@ gtag('config', 'G-ELQ3E5WGCT');
     color: #fff;
     cursor: pointer;
   }
+
+.icon-btn {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 👇 ADD THIS RIGHT AFTER ICON STYLES */
+.icon-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 500ms ease-out;
+  background: rgba(255,255,255,0.25);
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+  
 </style>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
 </head>
@@ -526,6 +542,23 @@ const shareModal = document.getElementById("shareModal");
 const saveImageBtn = document.getElementById("saveImageBtn");
 const cancelShareBtn = document.getElementById("cancelShareBtn");
 
+
+function addRipple(e) {
+  const button = e.currentTarget;
+
+  const ripple = document.createElement("span");
+  ripple.className = "icon-ripple";
+
+  const rect = button.getBoundingClientRect();
+  ripple.style.left = (e.clientX - rect.left) + "px";
+  ripple.style.top = (e.clientY - rect.top) + "px";
+
+  button.appendChild(ripple);
+
+  setTimeout(() => ripple.remove(), 500);
+}
+
+  
 /* =========================
    BACKGROUNDS
 ========================= */
@@ -1266,16 +1299,34 @@ setTimeout(() => {
   await shareVerse();
 });
 
-streakEl.addEventListener("click", openStreak);
-streakModal.addEventListener("click", closeStreak);
+streakEl.addEventListener("click", (e) => {
+  addRipple(e);
+  openStreak();
+});
+
+// only close when clicking the background, not the card
+streakModal.addEventListener("click", (e) => {
+  if (e.target === streakModal) {
+    closeStreak();
+  }
+});
 
 helpIcon?.addEventListener("click", (e) => {
+  addRipple(e);
   e.preventDefault();
   e.stopPropagation();
   openHelp();
 });
-donateIcon.addEventListener("click", goDonate);
-document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
+
+donateIcon.addEventListener("click", (e) => {
+  addRipple(e);
+  goDonate();
+});
+
+document.getElementById("helpCloseBtn").addEventListener("click", (e) => {
+  addRipple(e);
+  closeHelp();
+});
 
 // Fix for the Fallback Share Modal
 saveImageBtn.addEventListener("click", () => {
