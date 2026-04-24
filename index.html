@@ -311,9 +311,11 @@ gtag('config', 'G-ELQ3E5WGCT');
   /* STREAK: Positioned directly above the logo */
 #streak {
   position: fixed;
-  bottom: calc(30px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
+
+  /* bottom placement (this is what you wanted) */
+  bottom: calc(30px + env(safe-area-inset-bottom));
 
   display: flex;
   align-items: center;
@@ -327,27 +329,34 @@ gtag('config', 'G-ELQ3E5WGCT');
   font-weight: 600;
 
   color: #fff;
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.12);
+
+  /* 🔥 pill look restored */
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
 
   z-index: 1000;
   cursor: pointer;
-  opacity: 0.9;
 
-  transition: all 0.2s ease;
+  opacity: 0.85;
+
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
-/* 🔥 icon inside streak */
+/* icon inside streak */
 #streak::before {
   content: "🔥";
-  font-size: 18px;
+  font-size: 16px;
 }
 
-/* hover/press feel */
+/* press feedback */
 #streak:active {
   transform: translateX(-50%) scale(0.96);
+  opacity: 1;
 }
+  
   #toast {
     position: fixed;
     bottom: 100px;
@@ -409,31 +418,60 @@ gtag('config', 'G-ELQ3E5WGCT');
 /* =========================
    ICON BASE SYSTEM
 ========================= */
-.icon-btn {
-  width: 44px;
-  height: 44px;
+#streak.icon-btn {
+  position: fixed !important;
 
+  /* 🔥 bottom center placement */
+  left: 50%;
+  bottom: calc(30px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+
+  /* 🧼 cancel icon system sizing */
+  width: auto;
+  height: auto;
+
+  /* 🧠 layout */
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 
-  font-size: 22px;
-  opacity: 0.6;
+  /* 💊 pill styling */
+  padding: 10px 16px;
+  border-radius: 999px;
 
-  position: fixed;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+
+  opacity: 0.9;
+
   z-index: 1000;
 
-  border-radius: 12px;
+  /* ❌ remove floating animation */
+  animation: none !important;
 
-  cursor: pointer;
-  touch-action: manipulation;
-
-  -webkit-tap-highlight-color: transparent;
-
+  /* smooth interaction */
+  transition: transform 0.15s ease, opacity 0.15s ease;
   will-change: transform;
+}
 
-  /* ONLY ONE animation layer */
-  animation: floatIdle 6s ease-in-out infinite;
+/* 🔥 fire icon inside pill */
+#streak.icon-btn::before {
+  content: "🔥";
+  font-size: 16px;
+}
+
+/* 👆 press feedback */
+#streak.icon-btn:active {
+  transform: translateX(-50%) scale(0.96);
+  opacity: 1;
 }
 
 /* =========================
