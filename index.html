@@ -310,10 +310,6 @@ gtag('config', 'G-ELQ3E5WGCT');
 
   /* STREAK: Positioned directly above the logo */
  #streak {
-  position: fixed;
-  top: calc(10px + env(safe-area-inset-top));
-  left: 15px;
-
   width: 40px;
   height: 40px;
 
@@ -321,7 +317,7 @@ gtag('config', 'G-ELQ3E5WGCT');
   align-items: center;
   justify-content: center;
 
-  font-size: 24px;
+  font-size: 22px;
 
   background: transparent;
   border: none;
@@ -550,13 +546,13 @@ gtag('config', 'G-ELQ3E5WGCT');
       </div>
 
       
-    <div id="dock">
-      <div class="icon-btn dock-item" id="ambientToggle">🌿</div>
-      <div class="icon-btn dock-item" id="shareBtn">🔗</div>
-      <div class="icon-btn dock-item" id="donateIcon">❤️</div>
-      <div class="icon-btn dock-item" id="helpIcon">?</div>
-    </div>
-
+<div id="dock">
+  <div class="icon-btn dock-item" id="ambientToggle">🌿</div>
+  <div class="icon-btn dock-item" id="shareBtn">🔗</div>
+  <div class="icon-btn dock-item" id="streak">🔥</div>
+  <div class="icon-btn dock-item" id="donateIcon">❤️</div>
+  <div class="icon-btn dock-item" id="helpIcon">?</div>
+</div>
     </div>
 
     <!-- 3. BOTTOM UI GROUP: Streak above Logo, icons to the sides -->
@@ -612,7 +608,7 @@ const dailyBtn = document.getElementById("dailyBtn");
 const randomBtn = document.getElementById("randomBtn");
 const shareBtn = document.getElementById("shareBtn");
 const ambientToggle = document.getElementById("ambientToggle");
-const streakEl = document.getElementById("streak");
+const streakEl = document.getElementById("streakIcon");
 const streakModal = document.getElementById("streakModal");
 const streakCount = document.getElementById("streakCount");
 const streakMsg = document.getElementById("streakMsg");
@@ -1015,8 +1011,10 @@ function updateStreak() {
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
 
-  streakEl.innerText = "🔥";
-  streakEl.classList.add("active");
+if (streakEl) {
+  streakEl.textContent = "🔥";
+  streakEl.classList.toggle("active", streak >= 2);
+}
   streakCount.innerText = streak + " Days";
 
   if (streak < 7) {
