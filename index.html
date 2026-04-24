@@ -1045,36 +1045,41 @@ async function shareVerse() {
       });
     }
 
-    /* =========================
-       DRAW BACKGROUND (MEDIUM BLUR)
-    ========================= */
-    if (bgLoaded) {
-// draw base image normally
-ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+/* =========================
+   DRAW BACKGROUND (iOS-STABLE BLUR)
+========================= */
 
-// create blur layer using downscale/upscale trick (iOS SAFE)
-const blurCanvas = document.createElement("canvas");
-blurCanvas.width = canvas.width;
-blurCanvas.height = canvas.height;
-const bctx = blurCanvas.getContext("2d");
+if (bgLoaded) {
 
-// draw small version first (forces blur-like softness)
-const scale = 0.15; // key trick
-bctx.drawImage(
-  bgImg,
-  0, 0,
-  canvas.width * scale,
-  canvas.height * scale
-);
+  // build blur layer FIRST (iOS-safe method)
+  const blurCanvas = document.createElement("canvas");
+  blurCanvas.width = canvas.width;
+  blurCanvas.height = canvas.height;
 
-// upscale back to full size (creates real blur effect on iOS)
-ctx.globalAlpha = 0.55;
-ctx.drawImage(blurCanvas, 0, 0, canvas.width, canvas.height);
-ctx.globalAlpha = 1;
-    } else {
-      ctx.fillStyle = "#111";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+  const bctx = blurCanvas.getContext("2d");
+
+  const scale = 0.12; // slightly stronger blur
+
+  bctx.drawImage(
+    bgImg,
+    0, 0,
+    canvas.width * scale,
+    canvas.height * scale
+  );
+
+  // draw blurred layer as base
+  ctx.globalAlpha = 0.75;
+  ctx.drawImage(blurCanvas, 0, 0, canvas.width, canvas.height);
+  ctx.globalAlpha = 1;
+
+  // optional dark overlay for readability
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+} else {
+  ctx.fillStyle = "#111";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
     /* =========================
        GLASS CARD
