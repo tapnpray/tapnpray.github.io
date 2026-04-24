@@ -527,15 +527,16 @@ function updateBackground() {
 }
 
 updateBackground();
+let lastBlock = getTimeBlock();
+
 setInterval(() => {
   const newBlock = getTimeBlock();
-  const currentBlock = document.body.dataset.block;
 
-  // ✅ ONLY update when time-of-day changes
-  if (newBlock !== currentBlock) {
+  if (newBlock !== lastBlock) {
     updateBackground();
+    lastBlock = newBlock;
   }
-}, 1000 * 60 * 2); // check every 2 minutes (lightweight)
+}, 1000 * 60 * 2);
 /* =========================
    CURATED VERSE SYSTEM
 ========================= */
@@ -686,8 +687,7 @@ let recentVerses = JSON.parse(localStorage.getItem("recentVerses") || "[]");
 const RECENT_LIMIT = 14; // last 14 verses remembered
 function buildWeightedPool() {
   if (cachedPool) return cachedPool;
-  function buildWeightedPool() {
-  cachedPool = null; // optional strict rebuild safety
+
   let pool = [];
 
   curatedVerses.forEach(v => {
@@ -706,7 +706,9 @@ function buildWeightedPool() {
 
   const filtered = pool.filter(v => !recentVerses.includes(v));
 
-  return filtered.length ? filtered : pool;
+  cachedPool = filtered.length ? filtered : pool;
+
+  return cachedPool;
 }
 
 
@@ -796,7 +798,7 @@ function changeTranslation(t) {
   if (!verses[translation] || !Object.keys(verses[translation]).length) return;
 
   if (!verses[translation][currentKey]) {
-  currentKey = dailyKey;
+  currentKey = verses[translation][dailyKey] ? dailyKey : Object.keys(verses[translation])[0];
 }
 
   updateVerse(
@@ -1234,8 +1236,9 @@ openShareModal();
   console.error("Share error:", err);
 } finally {
   isSharing = false;
-} // ✅ CLOSES shareVerse FUNCTION
-
+}
+} // END shareVerse()
+  
 /* =========================
    SHARE MODAL FUNCTIONS
 ========================= */
@@ -1345,12 +1348,9 @@ function addToRecent(key) {
     recentVerses.shift();
   }
 
-  localStorage.setItem("recentVerses", JSON.stringify(recentVerses));
-  cachedPool = null;
-  
-  // ✅ ADD THIS (IMPORTANT FIX)
-  cachedPool = null;
-}
+   localStorage.setItem("recentVerses", JSON.stringify(recentVerses));
+   cachedPool = null;
+   }
   
 /* =========================
    INIT
