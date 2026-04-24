@@ -91,12 +91,14 @@ body::before {
   cursor: pointer;
 }
 
-#readIcon,
-#ambientToggle,
-#helpIcon,
-#donateIcon {
+.icon-btn {
   opacity: 0.6;
   transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  transform: scale(1.2);
+  opacity: 1;
 }
 
 #readIcon:hover,
@@ -167,9 +169,9 @@ button, select {
 
   will-change: transform;
 }
-
-.share-icon:active {
+.share-icon.pressed {
   transform: scale(0.85);
+  transition: transform 0.12s ease;
 }
 
 .bottom-left, .bottom-right {
@@ -367,7 +369,7 @@ button, select {
   <div id="votd">
 
     <!-- TOP ICONS -->
-    <div id="ambientToggle">🌿</div>
+    <div id="ambientToggle" class="icon-btn">🌿</div>
 
     <!-- CONTENT -->
     <div id="title">Daily Bible Verse</div>
@@ -392,8 +394,8 @@ button, select {
     <div class="share-icon" id="shareBtn">🔗</div>
 
     <!-- BOTTOM ICONS -->
-    <div class="bottom-left" id="helpIcon">?</div>
-    <div class="bottom-right" id="donateIcon">♥</div>
+    <div class="bottom-left icon-btn" id="helpIcon">?</div>
+    <div class="bottom-right icon-btn" id="donateIcon">♥</div>
 
   </div>
 
@@ -473,7 +475,7 @@ const b30 = document.getElementById("b30");
 const b100 = document.getElementById("b100");
 const progressBar = document.getElementById("progressBar");
 const ambientAudio = document.getElementById("ambientAudio");
-
+let isSharing = false;
 const helpIcon = document.getElementById("helpIcon");
 const donateIcon = document.getElementById("donateIcon");
 const helpModal = document.getElementById("helpModal");
@@ -510,7 +512,7 @@ function updateBackground() {
   const brightness = (block === "night" || block === "evening") ? 0.75 : 1.0;
 
   // ✅ Prevent flicker if same image is selected
-  if (img === currentBackground) return;
+  if (img === currentBackground && brightness === currentBrightness) return;
 
   const preload = new Image();
   preload.src = img;
@@ -679,7 +681,13 @@ function getSeasonalBoosts() {
   return [];
 }
 /* BUILD WEIGHTED POOL */
+let cachedPool = null;
+let recentVerses = JSON.parse(localStorage.getItem("recentVerses") || "[]");
+const RECENT_LIMIT = 14; // last 14 verses remembered
 function buildWeightedPool() {
+  if (cachedPool) return cachedPool;
+  function buildWeightedPool() {
+  cachedPool = null; // optional strict rebuild safety
   let pool = [];
 
   curatedVerses.forEach(v => {
@@ -696,7 +704,9 @@ function buildWeightedPool() {
     }
   });
 
-  return pool;
+  const filtered = pool.filter(v => !recentVerses.includes(v));
+
+  return filtered.length ? filtered : pool;
 }
 
 
@@ -736,15 +746,15 @@ function getSeed(s) {
   return Math.abs(h);
 }
 
-const stablePool = buildWeightedPool();
 function generateDaily() {
+  cachedPool = null;
   const today = new Date().toDateString();
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
   if (stored.date === today) {
     dailyKey = stored.key;
   } else {
-    const keys = stablePool;
+    const keys = buildWeightedPool();
     if (!keys.length) return;
 
     dailyKey = keys[getSeed(today) % keys.length];
@@ -758,6 +768,7 @@ function generateDaily() {
   currentKey = dailyKey;
   updateVerse("Daily Bible Verse");
   updateStreak();
+  addToRecent(dailyKey);
 }
 
 function showDaily() {
@@ -768,11 +779,12 @@ function showDaily() {
 }
 
 function showRandom() {
-  const keys = Object.keys(verses[translation]);
+  const keys = buildWeightedPool();
   if (!keys.length) return;
 
   currentKey = keys[Math.floor(Math.random() * keys.length)];
   updateVerse("Random Bible Verse");
+  addToRecent(currentKey);
 
   dailyBtn.classList.remove("active");
   randomBtn.classList.add("active");
@@ -907,6 +919,7 @@ function readVerse() {
 
   const words = document.querySelectorAll(".word");
   words.forEach(w => w.classList.remove("active"));
+  let wordIndex = 0;
 
   let i = 0;
 
@@ -919,12 +932,16 @@ function readVerse() {
   u.pitch = 1;
 
   u.onboundary = (event) => {
-    if (event.name === "word") {
-      if (words[i]) words[i++].classList.add("active");
+  if (event.name === "word") {
+    if (words[wordIndex]) {
+      words[wordIndex].classList.add("active");
+      wordIndex++;
     }
-  };
+  }
+};
 
   // tiny delay prevents clipping on mobile
+  wordIndex = 0;
   setTimeout(() => {
     speechSynthesis.speak(u);
   }, 100);
@@ -980,17 +997,30 @@ function fadeOut(a) {
 ========================= */
 async function shareVerse() {
   try {
-    showToast("Opening share…");
-    
+
+    if (isSharing) return;
+    isSharing = true;
+
     await document.fonts.load("700 48px Merriweather");
 
     const verseText = verses?.[translation]?.[currentKey];
-    if (!verseText) return;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = 1080;
-    canvas.height = 1080;
-    const ctx = canvas.getContext("2d");
+    if (!verseText) {
+      isSharing = false;
+      return;
+    }
+
+   const canvas = document.createElement("canvas");
+
+   const scale = window.devicePixelRatio || 1;
+
+   canvas.width = 1080 * scale;
+   canvas.height = 1080 * scale;
+   canvas.style.width = "1080px";
+   canvas.style.height = "1080px";
+
+   const ctx = canvas.getContext("2d");
+   ctx.scale(scale, scale);
 
     /* =========================
        LOAD CURRENT BACKGROUND
@@ -1153,45 +1183,47 @@ ctx.fillText(currentKey, canvas.width / 2, refY);
    EXPORT
 ========================= */
 const blob = await new Promise(res => canvas.toBlob(b => res(b), "image/png"));
+
 if (!blob) {
   showToast("Failed to create image");
+  isSharing = false;
   return;
 }
-if (!blob) return;
 
 const file = new File([blob], "tapnpray.png", { type: "image/png" });
+
+// ✅ SAFETY: ensure file exists before any UI feedback
+if (!file) {
+  showToast("Failed to create image");
+  isSharing = false;
+  return;
+}
 
 const canNativeShare =
   typeof navigator.share === "function" &&
   (!navigator.canShare || navigator.canShare({ files: [file] }));
 
+// ✅ UX FIX: only show toast AFTER validation passes
 await new Promise(r => setTimeout(r, 100));
 showToast("Opening share…");
 
-// ✅ FIXED: properly wrapped condition
 if (canNativeShare) {
   try {
-showToast("Opening share…");
+    await navigator.share({
+      files: [file],
+      title: "Tap N Pray",
+      text: `${verseText}\n\n${currentKey}\n\nTap N Pray`
+    });
 
-try {
-  await navigator.share({
-    files: [file],
-    title: "Tap N Pray",
-    text: `${verseText}\n\n${currentKey}\n\nTap N Pray`
-  });
+    // ❌ intentionally no "Shared" toast here
 
-  // ❌ DO NOT show "Shared" here
-
-} catch (err) {
-  // Only show error if user didn’t cancel
-  if (err.name !== "AbortError") {
-    showToast("Share failed");
+  } catch (err) {
+    if (err.name !== "AbortError") {
+      showToast("Share failed");
+    }
   }
-}
 
-return;
-
-  } catch {}
+  return;
 }
 
 // 👇 FINAL fallback (your modal)
@@ -1200,18 +1232,30 @@ openShareModal();
 
 } catch (err) {
   console.error("Share error:", err);
-}
-} // 👈 end of shareVerse()
+} finally {
+  isSharing = false;
+} // ✅ CLOSES shareVerse FUNCTION
 
 /* =========================
    SHARE MODAL FUNCTIONS
 ========================= */
+
 function openShareModal() {
+  // safety guard
+  if (!shareModal) return;
+
+  // show modal
   shareModal.style.display = "flex";
 }
 
 function closeShareModal() {
+  if (!shareModal) return;
+
+  // hide modal
   shareModal.style.display = "none";
+
+  // cleanup blob memory safely
+  window._shareBlob = null;
 }
 
 let toastTimeout;
@@ -1242,14 +1286,11 @@ randomBtn.addEventListener("click", showRandom);
 translationSelect.addEventListener("change", e => changeTranslation(e.target.value));
 shareBtn.addEventListener("click", async () => {
   // 👇 PRESS ANIMATION
-  shareBtn.style.transform = "scale(0.85)";
+  shareBtn.classList.add("pressed");
 
-  setTimeout(() => {
-    shareBtn.style.transform = "scale(1.05)";
-    setTimeout(() => {
-      shareBtn.style.transform = "scale(1)";
-    }, 100);
-  }, 80);
+setTimeout(() => {
+  shareBtn.classList.remove("pressed");
+}, 120);
 
   // 👇 HAPTIC (mobile)
   if (navigator.vibrate) {
@@ -1294,6 +1335,22 @@ shareModal.addEventListener("click", (e) => {
   }
 });
   
+function addToRecent(key) {
+  if (!key) return;
+
+  recentVerses.push(key);
+
+  // keep only last N
+  if (recentVerses.length > RECENT_LIMIT) {
+    recentVerses.shift();
+  }
+
+  localStorage.setItem("recentVerses", JSON.stringify(recentVerses));
+  cachedPool = null;
+  
+  // ✅ ADD THIS (IMPORTANT FIX)
+  cachedPool = null;
+}
   
 /* =========================
    INIT
@@ -1313,8 +1370,7 @@ shareModal.addEventListener("click", (e) => {
 
 </script>
 
-<div id="toast">Saved to device 📥</div>  
-
+<div id="toast"></div>
   
 </body>
 </html>
