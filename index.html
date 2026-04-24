@@ -265,7 +265,7 @@ gtag('config', 'G-ELQ3E5WGCT');
   align-items: center;
   justify-content: center;
   background: rgba(0,0,0,0.4);
-  z-index: 999;
+  z-index: 9999;
 
   height: 100vh;
   height: 100dvh;
@@ -282,7 +282,7 @@ gtag('config', 'G-ELQ3E5WGCT');
 
   padding: 20px;
   background: rgba(0,0,0,0.4);
-  z-index: 999;
+  z-index: 9999;
 
   height: 100vh;
   height: 100dvh;
@@ -406,17 +406,48 @@ gtag('config', 'G-ELQ3E5WGCT');
   }
 
 .icon-btn {
-  font-size: 24px;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  font-size: 22px;
+
   opacity: 0.6;
   transition: all 0.2s ease;
+
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+
+  border-radius: 12px;
+
+  position: fixed;      /* IMPORTANT: keeps corner positioning */
+  z-index: 100;
+
+  overflow: hidden;     /* ripple clipping */
+}
+
+.top-left {
+  top: calc(12px + env(safe-area-inset-top));
+  left: 12px;
+}
+
+.top-right {
+  top: calc(12px + env(safe-area-inset-top));
+  right: 12px;
+}
+
+.bottom-left {
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  left: 12px;
+}
+
+.bottom-right {
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  right: 12px;
 }
 
 /* 👇 ADD THIS RIGHT AFTER ICON STYLES */
@@ -443,9 +474,9 @@ gtag('config', 'G-ELQ3E5WGCT');
   <div id="bg-layer"></div>
 
   <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
-  <div id="ambientToggle" class="icon-btn">🌿</div>
+  <div id="ambientToggle" class="icon-btn top-right">🌿</div>
   <div id="tapHintBubble">Tap the verse to listen 🔊</div>
-  <div id="streak" class="icon-btn">🔥</div>
+  <div id="streak" class="icon-btn top-left">🔥</div>
   
   <div class="center">
     <div id="votd">
@@ -467,8 +498,8 @@ gtag('config', 'G-ELQ3E5WGCT');
 
       <div class="share-icon" id="shareBtn">🔗</div>
 
-      <div class="bottom-left icon-btn" id="helpIcon">?</div>
-      <div class="bottom-right icon-btn" id="donateIcon">♥</div>
+      <div class="icon-btn bottom-left" id="helpIcon">?</div>
+      <div class="icon-btn bottom-right" id="donateIcon">♥</div>
     </div>
 
     <!-- 3. BOTTOM UI GROUP: Streak above Logo, icons to the sides -->
@@ -555,7 +586,7 @@ function addRipple(e) {
 
   button.appendChild(ripple);
 
-  setTimeout(() => ripple.remove(), 500);
+  ripple.addEventListener("animationend", () => ripple.remove());
 }
 
   
