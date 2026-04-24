@@ -68,12 +68,13 @@ canvas {
 
 #topLogo {
   width: 100px;
-  margin: 0; /* Remove top margin */
-  position: fixed; /* Fix it to the top */
+  position: fixed; /* Keeps it at the top regardless of scrolling */
   top: 30px;
   left: 50%;
   transform: translateX(-50%);
   opacity: 0.8;
+  margin: 0;
+  z-index: 100;
 }
 
 /* 1. Ensure the container takes the full screen and centers everything */
@@ -82,33 +83,31 @@ canvas {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Centers the content vertically */
-  padding: 20px;
+  justify-content: center; /* Dead center vertical alignment */
+  padding: 40px 20px;
   box-sizing: border-box;
 }
 
 /* 2. Remove the card styling from #votd */
 #votd {
   position: relative;
-  background: none;         /* REMOVED glass background */
-  backdrop-filter: none;   /* REMOVED blur */
-  border: none;             /* REMOVED border */
   max-width: 800px;
   width: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center; /* Ensures the buttons center under the verse */
   text-align: center;
 }
 
 #ambientToggle {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+  position: fixed; /* Move it out of the container flow */
+  top: 20px;
+  right: 20px;
   font-size: 26px;
   padding: 8px;
   cursor: pointer;
+  z-index: 100;
 }
-
 .icon-btn {
   opacity: 0.6;
   transition: all 0.2s ease;
@@ -382,96 +381,71 @@ button, select {
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
 </head>
 <body>
-<div id="bg-layer"></div>
-<!-- TOP LOGO -->
-<img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
-<div id="tapHintBubble">Tap the verse to listen 🔊</div>
+  <div id="bg-layer"></div>
 
-<div class="center">
-  <div id="votd">
+  <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
+  <div id="ambientToggle" class="icon-btn">🌿</div>
+  <div id="tapHintBubble">Tap the verse to listen 🔊</div>
 
-    <!-- TOP ICONS -->
-    <div id="bg-layer"></div>
-    <div id="ambientToggle" class="icon-btn" style="position: fixed; top: 20px; right: 20px; z-index: 100;">🌿</div>
+  <div class="center">
+    <div id="votd">
+      <div id="title">Daily Bible Verse</div>
+      <div id="date"></div>
+      <div id="verse"></div>
+      <div id="ref"></div>
 
-    <!-- CONTENT -->
-    <div id="title">Daily Bible Verse</div>
-    <div id="date"></div>
-    <div id="verse"></div>
-    <div id="ref"></div>
+      <select id="translationSelect" class="translation-select">
+        <option value="nlt">NLT</option>
+        <option value="niv">NIV</option>
+        <option value="kjv">KJV</option>
+      </select>
 
-    <!-- TRANSLATION -->
-    <select id="translationSelect" class="translation-select">
-      <option value="nlt">NLT</option>
-      <option value="niv">NIV</option>
-      <option value="kjv">KJV</option>
-    </select>
+      <div class="mode-buttons">
+        <button id="dailyBtn" class="active">Daily</button>
+        <button id="randomBtn">Random</button>
+      </div>
 
-    <!-- MODE BUTTONS -->
-    <div class="mode-buttons">
-      <button id="dailyBtn" class="active">Daily</button>
-      <button id="randomBtn">Random</button>
+      <div class="share-icon" id="shareBtn">🔗</div>
+
+      <div class="bottom-left icon-btn" id="helpIcon">?</div>
+      <div class="bottom-right icon-btn" id="donateIcon">♥</div>
     </div>
 
-    <!-- SHARE ICON -->
-    <div class="share-icon" id="shareBtn">🔗</div>
-
-    <!-- BOTTOM ICONS -->
-    <div class="bottom-left icon-btn" id="helpIcon">?</div>
-    <div class="bottom-right icon-btn" id="donateIcon">♥</div>
-
+    <div id="streak"></div>
   </div>
 
-  <!-- STREAK DISPLAY -->
-  <div id="streak"></div>
-  
-</div>
-
-<!-- STREAK MODAL -->
-<div id="streakModal">
-  <div class="streak-card">
-    <h1 id="streakCount"></h1>
-    <div id="streakMsg"></div>
-
-    <div class="badges">
-      <span class="badge" id="b7">🌿</span>
-      <span class="badge" id="b30">🔥</span>
-      <span class="badge" id="b100">👑</span>
-    </div>
-
-    <div class="progress">
-      <div id="progressBar"></div>
+  <div id="streakModal">
+    <div class="streak-card">
+      <h1 id="streakCount"></h1>
+      <div id="streakMsg"></div>
+      <div class="badges">
+        <span class="badge" id="b7">🌿</span>
+        <span class="badge" id="b30">🔥</span>
+        <span class="badge" id="b100">👑</span>
+      </div>
+      <div class="progress">
+        <div id="progressBar"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- HELP MODAL -->
-<div id="helpModal">
-  <div class="help-card">
-
-    <!-- CLOSE BUTTON -->
-    <div class="close-btn" id="helpCloseBtn">✕</div>
-
-    <!-- CONTENT -->
-    <div id="helpContent">
-      Loading...
-    </div>
-
-  </div>
-</div>
-
-<!-- SHARE FALLBACK MODAL -->
-<div id="shareModal">
-  <div class="share-card">
-    <h2>Almost there 🙌</h2>
-    <p>Your device doesn't support direct sharing, but you can still save and share the image manually.</p>
-
-    <div class="share-actions">
-      <button id="saveImageBtn">Save Image 📥</button>
-      <button id="cancelShareBtn">Cancel</button>
+  <div id="helpModal">
+    <div class="help-card">
+      <div class="close-btn" id="helpCloseBtn">✕</div>
+      <div id="helpContent">Loading...</div>
     </div>
   </div>
-</div>
+
+  <div id="shareModal">
+    <div class="share-card">
+      <h2>Almost there 🙌</h2>
+      <p>Your device doesn't support direct sharing, but you can still save and share the image manually.</p>
+      <div class="share-actions">
+        <button id="saveImageBtn">Save Image 📥</button>
+        <button id="cancelShareBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
 
 <!-- AUDIO -->
 <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
