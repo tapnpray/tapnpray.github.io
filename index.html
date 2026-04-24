@@ -67,33 +67,37 @@ canvas {
 }
 
 #topLogo {
-  width: 120px;
-  margin: 20px auto 10px;
-  display: block;
+  width: 100px;
+  margin: 0; /* Remove top margin */
+  position: fixed; /* Fix it to the top */
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.8;
 }
 
+/* 1. Ensure the container takes the full screen and centers everything */
 .center {
-  min-height: calc(100vh - 260px);
+  min-height: 100vh; 
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center; /* Centers the content vertically */
   padding: 20px;
+  box-sizing: border-box;
 }
 
+/* 2. Remove the card styling from #votd */
 #votd {
   position: relative;
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(25px) brightness(0.9);
-  border-radius: 28px;
-  padding: 24px 20px 60px;
-  max-width: 700px;
+  background: none;         /* REMOVED glass background */
+  backdrop-filter: none;   /* REMOVED blur */
+  border: none;             /* REMOVED border */
+  max-width: 800px;
   width: 100%;
-  max-height: 80vh;
   display: flex;
   flex-direction: column;
   text-align: center;
-  border: 1px solid rgba(255,255,255,0.08);
 }
 
 #ambientToggle {
@@ -124,33 +128,41 @@ canvas {
 }
 
 #title { font-size: 15px; margin-top: 6px; }
-#date, #ref { color: #108cd7; font-size: 14px; }
+#date {
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+/* 4. Style the reference and date to match */
 #ref {
   font-weight: 700;
+  margin-top: 20px;
+  font-size: 18px;
+  color: #108cd7;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
+/* 3. Make the verse text pop without the card */
 #verse {
   margin-top: 10px;
-  font-size: clamp(22px, 5vw, 32px);
+  font-size: clamp(28px, 6vw, 42px); /* Larger, more immersive size */
   font-family: 'Merriweather', serif;
   font-weight: 400;
-  line-height: 1.7;
-  overflow-y: auto;
+  line-height: 1.6;
   cursor: pointer;
-  flex: 1;
+  flex: none; /* Let it sit naturally in the center */
+  
+  /* CRITICAL: Text shadow ensures readability on all backgrounds */
+  text-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3);
 }
 
 .word { opacity: .35; }
 .word.active { opacity: 1; }
 
-.translation-select {
-  margin: 10px auto 6px;
-  width: 120px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.15);
-  color: #fff;
-  border: none;
-  padding: 4px 8px;
-  text-align: center;
+.translation-select, .mode-buttons button {
+  background: rgba(0, 0, 0, 0.4); /* Darker "pill" look */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 15px;
 }
 
 .mode-buttons {
@@ -266,13 +278,9 @@ button, select {
 }
 
 #streak {
-  margin: 14px auto 0;
-  display: block;
-  width: fit-content;
-  background: rgba(0,0,0,.6);
-  padding: 6px 14px;
-  border-radius: 999px;
-  cursor: pointer;
+  margin: 30px auto 0; /* Add more space below the buttons */
+  background: rgba(0,0,0,.4);
+  backdrop-filter: blur(10px);
 }
 
 .progress {
@@ -383,7 +391,8 @@ button, select {
   <div id="votd">
 
     <!-- TOP ICONS -->
-    <div id="ambientToggle" class="icon-btn">🌿</div>
+    <div id="bg-layer"></div>
+    <div id="ambientToggle" class="icon-btn" style="position: fixed; top: 20px; right: 20px; z-index: 100;">🌿</div>
 
     <!-- CONTENT -->
     <div id="title">Daily Bible Verse</div>
