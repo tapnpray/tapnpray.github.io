@@ -266,24 +266,39 @@ gtag('config', 'G-ELQ3E5WGCT');
     transform: translateX(-50%) translateY(0);
   }
 
+#helpModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+  z-index: 999;
+
+  height: 100vh;
+  height: 100dvh;
+}
+  
   /* MODALS & NOTIFICATIONS */
 #streakModal {
   position: fixed;
   inset: 0;
-
   display: none;
 
   align-items: center;
   justify-content: center;
 
   padding: 20px;
-
   background: rgba(0,0,0,0.4);
   z-index: 999;
 
-  /* stable modern viewport */
-  width: 100%;
+  height: 100vh;
   height: 100dvh;
+}
+
+.streak-card {
+  margin: auto;
 }
 
   .streak-card, .help-card {
@@ -422,7 +437,7 @@ gtag('config', 'G-ELQ3E5WGCT');
     </div>
 
     <!-- 3. BOTTOM UI GROUP: Streak above Logo, icons to the sides -->
-    <div id="streak"></div>
+    <div id="streak" class="icon-btn">🔥</div>
   </div>
 
   <div id="streakModal">
@@ -546,7 +561,7 @@ setInterval(() => {
     updateBackground();
     lastBlock = newBlock;
   }
-}, 1000 * 60 * 2);
+}, 1000 * 60);
 /* =========================
    CURATED VERSE SYSTEM
 ========================= */
@@ -860,7 +875,7 @@ function updateStreak() {
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
 
-  streakEl.innerText = "🔥 " + streak + " Day Streak";
+  streakEl.innerText = "🔥";
   streakCount.innerText = streak + " Days";
 
   if (streak < 7) {
@@ -1149,10 +1164,10 @@ async function shareVerse() {
             text: `${verseText}\n\n${currentKey}`
           });
         } catch (err) {
-          if (err.name !== "AbortError") openShareModal(blob);
+          if (err.name !== "AbortError") openShareModalWithBlob(blob);
         }
       } else {
-        openShareModal(blob);
+        openShareModalWithBlob(blob);
       }
       isSharing = false;
     }, "image/png");
@@ -1163,7 +1178,7 @@ async function shareVerse() {
   }
 }
 
-function openShareModal(blob) {
+function openShareModalWithBlob(blob) {
   window._shareBlob = blob;
   shareModal.style.display = "flex";
 }
@@ -1235,11 +1250,10 @@ setTimeout(() => {
 streakEl.addEventListener("click", openStreak);
 streakModal.addEventListener("click", closeStreak);
 
-helpIcon.addEventListener("click", openHelp);
-helpModal.addEventListener("click", (e) => {
-  if (e.target === helpModal) {
-    closeHelp();
-  }
+helpIcon?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  openHelp();
 });
 donateIcon.addEventListener("click", goDonate);
 document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
@@ -1313,6 +1327,5 @@ init();
 </script>
 
 <div id="toast"></div>
-<div id="streakModal">...</div>
 </body>
 </html>
