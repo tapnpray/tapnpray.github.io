@@ -1001,291 +1001,152 @@ function fadeOut(a) {
   }, 100);
 }
 
-/* =========================
-   SHARE
-========================= */
 async function shareVerse() {
   try {
-
     if (isSharing) return;
     isSharing = true;
+    showToast("Generating image...");
 
     await document.fonts.ready;
-
     const verseText = verses?.[translation]?.[currentKey];
+    if (!verseText) { isSharing = false; return; }
 
-    if (!verseText) {
-      isSharing = false;
-      return;
-    }
-
-   const canvas = document.createElement("canvas");
-
-   const size = 1080;
-   const dpr = window.devicePixelRatio || 1;
-
-   canvas.width = size * dpr;
-   canvas.height = size * dpr;
-
-   canvas.style.width = size + "px";
-   canvas.style.height = size + "px";
-
-   const ctx = canvas.getContext("2d");
-
-// IMPORTANT: reset transform then apply DPR cleanly
-ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-
-   // ✅ iOS render stabilization (ADD THIS HERE)
-   await new Promise(requestAnimationFrame);
-   await new Promise(requestAnimationFrame);
+    const canvas = document.createElement("canvas");
+    const size = 1080; // Standard Instagram Square
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
 
     /* =========================
-       LOAD CURRENT BACKGROUND
+       1. BACKGROUND (CENTRAL CROP)
     ========================= */
-    let bgLoaded = false;
     let bgImg = new Image();
+    bgImg.crossOrigin = "anonymous";
+    bgImg.src = currentBackground;
 
-    if (currentBackground) {
-      bgImg.crossOrigin = "anonymous";
-      bgImg.src = currentBackground;
+    await new Promise(res => {
+      bgImg.onload = res;
+      bgImg.onerror = res;
+    });
 
-      await new Promise(res => {
-        bgImg.onload = () => { bgLoaded = true; res(); };
-        bgImg.onerror = res;
-      });
-    }
+    if (bgImg.complete && bgImg.width > 0) {
+      // Math to ensure the image fills the 1080x1080 square completely
+      const scale = Math.max(size / bgImg.width, size / bgImg.height);
+      const bx = (size - bgImg.width * scale) / 2;
+      const by = (size - bgImg.height * scale) / 2;
 
-/* =========================
-       DRAW BACKGROUND (FIXED & CONSISTENT)
-    ========================= */
-    if (bgLoaded) {
-      const canvasSize = 1080;
-      let renderW, renderH, offsetX, offsetY;
-      
-      // Calculate "Aspect Fill" (Center Crop)
-      const bgAspect = bgImg.width / bgImg.height;
-      if (bgAspect > 1) { // Landscape
-        renderH = canvasSize;
-        renderW = canvasSize * bgAspect;
-        offsetX = (canvasSize - renderW) / 2;
-        offsetY = 0;
-      } else { // Portrait
-        renderW = canvasSize;
-        renderH = canvasSize / bgAspect;
-        offsetX = 0;
-        offsetY = (canvasSize - renderH) / 2;
-      }
-
-      // Apply Blur and Brightness directly to context
-      ctx.filter = "blur(15px) brightness(0.6)"; 
-      
-      // Draw with "bleed" to prevent white blurry edges
-      const bleed = 50; 
-      ctx.drawImage(bgImg, offsetX - bleed, offsetY - bleed, renderW + (bleed * 2), renderH + (bleed * 2));
-
-      // Reset filter so it doesn't affect the text/glass card
+      ctx.filter = "blur(12px) brightness(0.6)";
+      // Bleed of 50px prevents white edges
+      ctx.drawImage(bgImg, bx - 50, by - 50, (bgImg.width * scale) + 100, (bgImg.height * scale) + 100);
       ctx.filter = "none";
-
-      // Final dark overlay for contrast
-      ctx.fillStyle = "rgba(0,0,0,0.2)";
-      ctx.fillRect(0, 0, canvasSize, canvasSize);
-
     } else {
-      // Solid backup gradient if image fails to load
-      const grad = ctx.createLinearGradient(0, 0, 0, 1080);
-      grad.addColorStop(0, "#0b1a2a");
-      grad.addColorStop(1, "#1e3c72");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 1080, 1080);
+      ctx.fillStyle = "#1a2a3a";
+      ctx.fillRect(0, 0, size, size);
     }
+
     /* =========================
-       GLASS CARD
+       2. THE GLASS CARD
     ========================= */
-    const x = 90, y = 190, w = 900, h = 600, r = 50;
-
+    const cardX = 80, cardY = 160, cardW = 920, cardH = 650, r = 40;
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
     ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.lineTo(x+w-r, y);
-    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-    ctx.lineTo(x+w, y+h-r);
-    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-    ctx.lineTo(x+r, y+h);
-    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-    ctx.lineTo(x, y+r);
-    ctx.quadraticCurveTo(x, y, x+r, y);
-    ctx.closePath();
-
-    ctx.fillStyle = "rgba(0,0,0,0.45)";
-
-    ctx.shadowColor = "rgba(0,0,0,0.4)";
-    ctx.shadowBlur = 25;
-
+    // Modern rounded rectangle
+    if (ctx.roundRect) {
+        ctx.roundRect(cardX, cardY, cardW, cardH, r);
+    } else {
+        ctx.rect(cardX, cardY, cardW, cardH); // Fallback
+    }
     ctx.fill();
-    ctx.shadowBlur = 0;
-
-    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.strokeStyle = "rgba(255,255,255,0.1)";
     ctx.lineWidth = 2;
     ctx.stroke();
 
     /* =========================
-       FROSTED EDGE GLOW
-    ========================= */
-    const edgeGradient = ctx.createLinearGradient(x, y, x, y + h);
-    edgeGradient.addColorStop(0, "rgba(255,255,255,0.12)");
-    edgeGradient.addColorStop(0.3, "rgba(255,255,255,0.04)");
-    edgeGradient.addColorStop(1, "rgba(255,255,255,0.08)");
-
-    ctx.fillStyle = edgeGradient;
-    ctx.fill();
-
-    /* =========================
-       TITLE
+       3. TEXT DYNAMICS (PREVENT OVERFLOW)
     ========================= */
     ctx.textAlign = "center";
-
-    /* TITLE */
-    ctx.font = "700 30px Merriweather";
+    
+    // Header & Date
     ctx.fillStyle = "#ffffff";
-    ctx.fillText("Daily Bible Verse", canvas.width / 2, y + 55);
+    ctx.font = "700 32px Merriweather";
+    ctx.fillText("Daily Bible Verse", size / 2, cardY + 70);
+    ctx.fillStyle = "#2fb4ff";
+    ctx.font = "400 24px Merriweather";
+    ctx.fillText(new Date().toDateString(), size / 2, cardY + 110);
 
-    /* DATE (same style as app) */
-    ctx.font = "600 24px Merriweather";
-    ctx.fillStyle = "#1da1f2";
-    ctx.fillText(new Date().toDateString(), canvas.width / 2, y + 95);
-
-    /* =========================
-       VERSE TEXT
-    ========================= */
-    ctx.font = "700 48px Merriweather";
+    // Auto-adjust font size based on verse length
+    let fontSize = verseText.length > 180 ? 36 : 46; 
+    ctx.font = `700 ${fontSize}px Merriweather`;
     ctx.fillStyle = "#ffffff";
 
     const words = verseText.split(" ");
-    let line = "";
     const lines = [];
-    const maxWidth = w - 120;
+    let currentLine = "";
+    const maxWidth = cardW - 140;
 
     words.forEach(word => {
-      const test = line + word + " ";
-      if (ctx.measureText(test).width > maxWidth) {
-        lines.push(line);
-        line = word + " ";
+      let testLine = currentLine + word + " ";
+      if (ctx.measureText(testLine).width > maxWidth) {
+        lines.push(currentLine.trim());
+        currentLine = word + " ";
       } else {
-        line = test;
+        currentLine = testLine;
       }
     });
-    if (line) lines.push(line);
+    lines.push(currentLine.trim());
 
-    const lineHeight = 60;
-    const startY = y + 180;
+    // Calculate vertical center so text doesn't hit the reference
+    const lineHeight = fontSize * 1.4;
+    const totalTextHeight = lines.length * lineHeight;
+    const startY = cardY + 180 + ((cardH - 280 - totalTextHeight) / 2);
 
     lines.forEach((l, i) => {
-      ctx.fillText(l.trim(), canvas.width / 2, startY + i * lineHeight);
+      ctx.fillText(l, size / 2, startY + (i * lineHeight));
     });
 
-/* =========================
-   REFERENCE (FIXED FOR ALL DEVICES)
-========================= */
-ctx.textAlign = "center";
-    
-ctx.font = "700 36px Merriweather";
-
-const refY = Math.min(
-  startY + (lines.length * lineHeight) + 40,
-  y + h - 40
-);
-
-// 👇 PASS 1 (shadow + base color)
-ctx.fillStyle = "#2fb4ff"; // brighter base for iOS
-ctx.shadowColor = "rgba(0,0,0,1)";
-ctx.shadowBlur = 22;
-ctx.fillText(currentKey, canvas.width / 2, refY);
-
-// FINAL iOS SAFETY FLUSH (CRITICAL)
-await new Promise(requestAnimationFrame);
-await new Promise(requestAnimationFrame);
-    
-    
-// 👇 PASS 2 (color reinforcement — fixes washed-out mobile)
-ctx.shadowBlur = 0;
-ctx.fillStyle = "#1da1ff";
-ctx.fillText(currentKey, canvas.width / 2, refY);
     /* =========================
-       LOGO
+       4. REFERENCE & BRANDING
     ========================= */
-    try {
-      const logo = new Image();
-      logo.src = "logo.svg";
+    ctx.font = "700 34px Merriweather";
+    ctx.fillStyle = "#2fb4ff";
+    // Fixed position at the bottom of the card
+    ctx.fillText(currentKey, size / 2, cardY + cardH - 60);
 
-      await new Promise(res => {
-        logo.onload = res;
-        logo.onerror = res;
-      });
-
-      ctx.drawImage(logo, 60, canvas.height - 160, 100, 100);
-    } catch {}
+    // Website URL at the very bottom
+    ctx.textAlign = "center";
+    ctx.font = "700 22px Merriweather";
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.fillText("tapnpray.github.io", size / 2, size - 60);
 
     /* =========================
-       URL
+       5. EXPORT & SHARE
     ========================= */
-    ctx.font = "600 24px Merriweather";
-    ctx.fillStyle = "#ffffff";
-    ctx.textAlign = "left";
-    ctx.fillText("tapnpray.github.io", 60, canvas.height - 30);
+    canvas.toBlob(async (blob) => {
+      if (!blob) { isSharing = false; return; }
+      const file = new File([blob], "tapnpray.png", { type: "image/png" });
 
-/* =========================
-   EXPORT (FIXED + STABLE SHARE FLOW)
-========================= */
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: "Tap N Pray",
+            text: `${verseText}\n\n${currentKey}`
+          });
+        } catch (err) {
+          if (err.name !== "AbortError") openShareModal();
+        }
+      } else {
+        window._shareBlob = blob;
+        openShareModal();
+      }
+      isSharing = false;
+    }, "image/png");
 
-const blob = await new Promise((resolve) => {
-  canvas.toBlob((b) => resolve(b), "image/png");
-});
-
-if (!blob) {
-  showToast("Failed to create image");
-  isSharing = false;
-  return;
-}
-
-const file = new File([blob], "tapnpray.png", { type: "image/png" });
-
-const canNativeShare =
-  typeof navigator.share === "function" &&
-  (!navigator.canShare || navigator.canShare({ files: [file] }));
-
-// small UX delay so iOS doesn’t glitch or drop UI state
-await new Promise(r => setTimeout(r, 100));
-
-showToast("Opening share…");
-
-if (canNativeShare) {
-  try {
-    await navigator.share({
-      files: [file],
-      title: "Tap N Pray",
-      text: `${verseText}\n\n${currentKey}\n\nTap N Pray`
-    });
   } catch (err) {
-    if (err.name !== "AbortError") {
-      showToast("Share failed");
-    }
-  } finally {
+    console.error(err);
     isSharing = false;
   }
-
-  return;
 }
-
-// fallback
-window._shareBlob = blob;
-openShareModal();
-
-} catch (err) {
-  console.error("Share error:", err);
-} finally {
-  isSharing = false;
-}
-} // END shareVerse()
   
 /* =========================
    SHARE MODAL FUNCTIONS
