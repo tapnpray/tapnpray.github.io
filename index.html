@@ -40,7 +40,9 @@ html, body {
 }
 canvas {
     image-rendering: -webkit-optimize-contrast;
-    -webkit-filter: blur(0); /* "Primes" the filter engine for iOS */
+    /* This hidden style helps iOS maintain canvas memory during high-res exports */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
   
 #bg-layer {
@@ -1022,7 +1024,7 @@ async function shareVerse() {
     const ctx = canvas.getContext("2d");
 
 /* =========================
-       1. BACKGROUND (CENTRAL CROP FIX)
+       1. BACKGROUND (IOS BLUR FIX)
     ========================= */
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous";
@@ -1040,22 +1042,21 @@ async function shareVerse() {
       const offX = (size - drawW) / 2;
       const offY = (size - drawH) / 2;
 
-      // iOS FIX: Save the state and apply the filter before drawing
+      // iOS specific sequence: Filter -> Draw -> Clear Filter
       ctx.save(); 
       
-      // We use a slightly higher blur for iOS to ensure it registers
-      ctx.filter = "blur(20px) brightness(0.6)"; 
+      // Higher blur (30px) handles Retina displays better
+      ctx.filter = "blur(30px) brightness(0.6)"; 
       
-      // DRAW PASS 1: The Background
-      ctx.drawImage(bgImg, offX - 60, offY - 60, drawW + 120, drawH + 120);
+      // We draw the image slightly larger than the canvas (-100, -100)
+      // to prevent "light leak" edges caused by the blur radius.
+      ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
       
-      // iOS FIX: We MUST restore and reset to 'none' immediately 
-      // otherwise iOS might ignore the filter entirely or blur the text too.
       ctx.restore();
       ctx.filter = "none"; 
       
     } else {
-      ctx.fillStyle = "#1a2a3a";
+      ctx.fillStyle = "#0b1a2a";
       ctx.fillRect(0, 0, size, size);
     }
 
@@ -1238,6 +1239,7 @@ helpModal.addEventListener("click", (e) => {
 donateIcon.addEventListener("click", goDonate);
 document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
 
+// Fix for the Fallback Share Modal
 saveImageBtn.addEventListener("click", () => {
   const blob = window._shareBlob;
   if (!blob) return;
@@ -1246,10 +1248,12 @@ saveImageBtn.addEventListener("click", () => {
   const a = document.createElement("a");
   a.href = url;
   a.download = "tapnpray.png";
+  document.body.appendChild(a); // Required for some iOS browsers
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  showToast("Saved 📥");
+  showToast("Saved to device 📥");
   closeShareModal();
 });
 
