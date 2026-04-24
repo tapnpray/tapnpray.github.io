@@ -1051,43 +1051,35 @@ async function shareVerse() {
 
 if (bgLoaded) {
 
-  // IMPORTANT: force iOS to decode image cleanly first
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-
-  // STEP 1: draw full image (base layer)
-  ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-
-  // STEP 2: create blur canvas (downscale aggressively)
   const blurCanvas = document.createElement("canvas");
   blurCanvas.width = canvas.width;
   blurCanvas.height = canvas.height;
 
   const bctx = blurCanvas.getContext("2d");
 
+  // 🔥 CRITICAL iOS FIX: force high-quality scaling
   bctx.imageSmoothingEnabled = true;
-  bctx.imageSmoothingQuality = "low";
+  bctx.imageSmoothingQuality = "high";
 
-  // stronger downscale = better iOS blur consistency
-  const scale = 0.08;
-
-  bctx.drawImage(
-    bgImg,
-    0, 0,
-    canvas.width * scale,
-    canvas.height * scale
-  );
-
-  // STEP 3: upscale back with smoothing ON (THIS is what fixes iOS)
-  ctx.globalAlpha = 0.65;
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
 
-  ctx.drawImage(blurCanvas, 0, 0, canvas.width, canvas.height);
+  const scale = 0.12;
 
+  // draw small version (blur source)
+  bctx.drawImage(
+    bgImg,
+    0, 0,
+    blurCanvas.width * scale,
+    blurCanvas.height * scale
+  );
+
+  // upscale back (creates blur effect)
+  ctx.globalAlpha = 0.75;
+  ctx.drawImage(blurCanvas, 0, 0, canvas.width, canvas.height);
   ctx.globalAlpha = 1;
 
-  // optional dark overlay for readability consistency
+  // dark overlay for readability
   ctx.fillStyle = "rgba(0,0,0,0.25)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
