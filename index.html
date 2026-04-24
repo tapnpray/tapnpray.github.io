@@ -209,25 +209,6 @@ gtag('config', 'G-ELQ3E5WGCT');
     transform: scale(0.85);
   }
 
-  /* NAVIGATION FOOTER ICONS: Centered around logo */
-  .bottom-left, .bottom-right {
-    position: fixed;
-    bottom: calc(25px + env(safe-area-inset-bottom));
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 100;
-    opacity: 0.5;
-  }
-
-.bottom-left {
-  left: 20px;
-  bottom: calc(20px + env(safe-area-inset-bottom));
-}
-
-.bottom-right {
-  right: 20px;
-  bottom: calc(20px + env(safe-area-inset-bottom));
-}
 
   #donateIcon {
     color: #FFD700;
@@ -309,15 +290,23 @@ gtag('config', 'G-ELQ3E5WGCT');
   }
 
   .close-btn {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    font-size: 22px;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: 0.2s ease;
-    z-index: 10;
-  }
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top));
+  right: 16px;
+
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+  cursor: pointer;
+
+  opacity: 0.7;
+  z-index: 10;
+}
 
   /* STREAK: Positioned directly above the logo */
  #streak {
@@ -422,34 +411,36 @@ gtag('config', 'G-ELQ3E5WGCT');
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 
+  position: fixed;
+  z-index: 1000;
+
   border-radius: 12px;
-
-  position: fixed;      /* IMPORTANT: keeps corner positioning */
-  z-index: 100;
-
-  overflow: hidden;     /* ripple clipping */
+  overflow: hidden;
 }
 
+/* TOP LEFT (🔥 streak) */
 .top-left {
   top: calc(12px + env(safe-area-inset-top));
   left: 12px;
 }
 
+/* TOP RIGHT (🌿 ambient) */
 .top-right {
   top: calc(12px + env(safe-area-inset-top));
   right: 12px;
 }
 
+/* BOTTOM LEFT (help) */
 .bottom-left {
   bottom: calc(20px + env(safe-area-inset-bottom));
   left: 12px;
 }
 
+/* BOTTOM RIGHT (donate) */
 .bottom-right {
   bottom: calc(20px + env(safe-area-inset-bottom));
   right: 12px;
 }
-
 /* 👇 ADD THIS RIGHT AFTER ICON STYLES */
 .icon-ripple {
   position: absolute;
