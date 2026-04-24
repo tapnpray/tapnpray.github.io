@@ -1049,9 +1049,28 @@ async function shareVerse() {
        DRAW BACKGROUND (MEDIUM BLUR)
     ========================= */
     if (bgLoaded) {
-      ctx.filter = `brightness(${(currentBrightness || 1) * 0.6}) blur(8px)`;
-      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-      ctx.filter = "none";
+// draw base image normally
+ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+
+// create blur layer using downscale/upscale trick (iOS SAFE)
+const blurCanvas = document.createElement("canvas");
+blurCanvas.width = canvas.width;
+blurCanvas.height = canvas.height;
+const bctx = blurCanvas.getContext("2d");
+
+// draw small version first (forces blur-like softness)
+const scale = 0.15; // key trick
+bctx.drawImage(
+  bgImg,
+  0, 0,
+  canvas.width * scale,
+  canvas.height * scale
+);
+
+// upscale back to full size (creates real blur effect on iOS)
+ctx.globalAlpha = 0.55;
+ctx.drawImage(blurCanvas, 0, 0, canvas.width, canvas.height);
+ctx.globalAlpha = 1;
     } else {
       ctx.fillStyle = "#111";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
