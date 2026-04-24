@@ -308,33 +308,27 @@ gtag('config', 'G-ELQ3E5WGCT');
   z-index: 10;
 }
 
-  /* STREAK: Positioned directly above the logo */
- #streak {
-  position: fixed;
-  top: calc(10px + env(safe-area-inset-top));
-  left: 15px;
-
-  width: 40px;
-  height: 40px;
-
+.streak-label {
+  margin-top: 15px;      /* Spacing below the share icon */
   display: flex;
   align-items: center;
   justify-content: center;
-
-  font-size: 24px;
-
-  background: transparent;
-  border: none;
-  backdrop-filter: none;
-
-  z-index: 1000;
+  gap: 8px;              /* Space between fire and number */
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffb347;        /* Nice fire-orange color */
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
   cursor: pointer;
-  opacity: 0.6;
-
-  transition: all 0.2s ease;
-
-  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
+
+/* This makes the fire icon pulse when the streak is active */
+.streak-label.active span:first-child {
+  filter: drop-shadow(0 0 10px rgba(255,80,0,0.7));
+  animation: firePulse 1.6s ease-in-out infinite;
+}
+ 
 
   #toast {
     position: fixed;
@@ -440,12 +434,6 @@ gtag('config', 'G-ELQ3E5WGCT');
 }
 
 /* 🔥 STREAK FIRE GLOW */
-#streak.active {
-  opacity: 1;
-  filter: drop-shadow(0 0 10px rgba(255,80,0,0.6))
-          drop-shadow(0 0 20px rgba(255,140,0,0.4));
-  animation: firePulse 1.6s ease-in-out infinite;
-}
 
 @keyframes firePulse {
   0%, 100% { transform: scale(1); }
@@ -510,7 +498,6 @@ gtag('config', 'G-ELQ3E5WGCT');
   <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
   <div id="ambientToggle" class="icon-btn top-right">🌿</div>
   <div id="tapHintBubble">Tap the verse to listen 🔊</div>
-  <div id="streak" class="icon-btn top-left">🔥</div>
   
   <div class="center">
     <div id="votd">
@@ -531,6 +518,10 @@ gtag('config', 'G-ELQ3E5WGCT');
       </div>
 
       <div class="share-icon" id="shareBtn">🔗</div>
+      <div id="streak" class="streak-label">
+         <span>🔥</span>
+         <span id="streakNumber">1</span>
+      </div>
 
       <div class="icon-btn bottom-left" id="helpIcon">?</div>
       <div class="icon-btn bottom-right" id="donateIcon">♥</div>
