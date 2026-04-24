@@ -1024,7 +1024,7 @@ async function shareVerse() {
     const ctx = canvas.getContext("2d");
 
 /* =========================
-       1. BACKGROUND (IOS BLUR FIX)
+       1. BACKGROUND (IOS SCRATCHPAD FIX)
     ========================= */
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous";
@@ -1042,21 +1042,25 @@ async function shareVerse() {
       const offX = (size - drawW) / 2;
       const offY = (size - drawH) / 2;
 
-      // iOS specific sequence: Filter -> Draw -> Clear Filter
-      ctx.save(); 
+      // --- THE SCRATCHPAD START ---
+      // Create a hidden canvas to "bake" the blur for iOS
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = size;
+      tempCanvas.height = size;
+      const tCtx = tempCanvas.getContext('2d');
+
+      // Apply the filter to the hidden canvas
+      tCtx.filter = "blur(30px) brightness(0.6)";
       
-      // Higher blur (30px) handles Retina displays better
-      ctx.filter = "blur(30px) brightness(0.6)"; 
-      
-      // We draw the image slightly larger than the canvas (-100, -100)
-      // to prevent "light leak" edges caused by the blur radius.
-      ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
-      
-      ctx.restore();
-      ctx.filter = "none"; 
+      // Draw the image onto the hidden canvas (with extra bleed to avoid white edges)
+      tCtx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
+
+      // Transfer the finished, blurred image to your main canvas
+      ctx.drawImage(tempCanvas, 0, 0);
+      // --- THE SCRATCHPAD END ---
       
     } else {
-      ctx.fillStyle = "#0b1a2a";
+      ctx.fillStyle = "#1a2a3a";
       ctx.fillRect(0, 0, size, size);
     }
 
@@ -1112,7 +1116,7 @@ async function shareVerse() {
     const lineHeight = fontSize * 1.4;
     const totalTextHeight = lines.length * lineHeight;
     // Calculate vertical center relative to the card's usable space
-    const startY = cardY + 180 + ((cardH - 280 - totalTextHeight) / 2);
+    const startY = cardY + 200 + ((cardH - 320 - totalTextHeight) / 2);
 
     lines.forEach((l, i) => {
       ctx.fillText(l, size / 2, startY + (i * lineHeight));
