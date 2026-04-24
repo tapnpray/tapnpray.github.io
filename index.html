@@ -40,9 +40,12 @@ html, body {
 }
 canvas {
     image-rendering: -webkit-optimize-contrast;
-    /* This hidden style helps iOS maintain canvas memory during high-res exports */
+    /* Helps iOS maintain canvas memory during high-res exports */
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
+    /* "Primes" the filter engine for iOS Safari */
+    -webkit-filter: blur(0px); 
+    filter: blur(0px);
 }
   
 #bg-layer {
@@ -1024,7 +1027,7 @@ async function shareVerse() {
     const ctx = canvas.getContext("2d");
 
 /* =========================
-       1. BACKGROUND (IOS SCRATCHPAD FIX)
+       1. BACKGROUND (FORCE-RENDER BLUR)
     ========================= */
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous";
@@ -1042,28 +1045,26 @@ async function shareVerse() {
       const offX = (size - drawW) / 2;
       const offY = (size - drawH) / 2;
 
-      // --- THE SCRATCHPAD START ---
-      // Create a hidden canvas to "bake" the blur for iOS
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = size;
-      tempCanvas.height = size;
-      const tCtx = tempCanvas.getContext('2d');
-
-      // Apply the filter to the hidden canvas
-      tCtx.filter = "blur(30px) brightness(0.6)";
+      // 1. Set the filter
+      ctx.filter = "blur(30px) brightness(0.6)";
       
-      // Draw the image onto the hidden canvas (with extra bleed to avoid white edges)
-      tCtx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
+      // 2. The "Triple Draw" Hack for iOS
+      // We draw it once to 'prime' the engine
+      ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
+      
+      // 3. Tiny delay to let the GPU catch up
+      await new Promise(r => setTimeout(r, 15));
+      
+      // 4. Draw it again to force the blur to "stick"
+      ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
 
-      // Transfer the finished, blurred image to your main canvas
-      ctx.drawImage(tempCanvas, 0, 0);
-      // --- THE SCRATCHPAD END ---
+      // 5. Reset filter so text stays sharp
+      ctx.filter = "none";
       
     } else {
-      ctx.fillStyle = "#1a2a3a";
+      ctx.fillStyle = "#0b1a2a";
       ctx.fillRect(0, 0, size, size);
     }
-
     /* =========================
        2. THE GLASS CARD
     ========================= */
