@@ -38,7 +38,11 @@ html, body {
   padding-bottom: env(safe-area-inset-bottom);
   padding-top: env(safe-area-inset-top);
 }
-
+canvas {
+    image-rendering: -webkit-optimize-contrast;
+    -webkit-filter: blur(0); /* "Primes" the filter engine for iOS */
+}
+  
 #bg-layer {
   position: fixed;
   top: 0;
@@ -1017,12 +1021,11 @@ async function shareVerse() {
     canvas.height = size;
     const ctx = canvas.getContext("2d");
 
-    /* =========================
+/* =========================
        1. BACKGROUND (CENTRAL CROP FIX)
     ========================= */
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous";
-    // Force a re-load to ensure the canvas can "see" the image data
     bgImg.src = currentBackground + "?t=" + new Date().getTime(); 
 
     await new Promise((resolve) => {
@@ -1031,17 +1034,26 @@ async function shareVerse() {
     });
 
     if (bgImg.complete && bgImg.width > 0) {
-      // Calculate scale to fill the square without stretching
       const scale = Math.max(size / bgImg.width, size / bgImg.height);
       const drawW = bgImg.width * scale;
       const drawH = bgImg.height * scale;
       const offX = (size - drawW) / 2;
       const offY = (size - drawH) / 2;
 
-      ctx.filter = "blur(15px) brightness(0.6)";
-      // Draw with 50px bleed to hide blurry white edges
-      ctx.drawImage(bgImg, offX - 50, offY - 50, drawW + 100, drawH + 100);
-      ctx.filter = "none";
+      // iOS FIX: Save the state and apply the filter before drawing
+      ctx.save(); 
+      
+      // We use a slightly higher blur for iOS to ensure it registers
+      ctx.filter = "blur(20px) brightness(0.6)"; 
+      
+      // DRAW PASS 1: The Background
+      ctx.drawImage(bgImg, offX - 60, offY - 60, drawW + 120, drawH + 120);
+      
+      // iOS FIX: We MUST restore and reset to 'none' immediately 
+      // otherwise iOS might ignore the filter entirely or blur the text too.
+      ctx.restore();
+      ctx.filter = "none"; 
+      
     } else {
       ctx.fillStyle = "#1a2a3a";
       ctx.fillRect(0, 0, size, size);
