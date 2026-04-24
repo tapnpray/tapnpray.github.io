@@ -406,22 +406,21 @@ gtag('config', 'G-ELQ3E5WGCT');
   justify-content: center;
 
   font-size: 22px;
-  line-height: 1;
-
   opacity: 0.6;
-  transition: transform 0.12s ease, opacity 0.12s ease;
-
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
 
   position: fixed;
   z-index: 1000;
 
   border-radius: 12px;
-  overflow: hidden;
 
-  /* ✨ idle float animation */
+  cursor: pointer;
+  touch-action: manipulation;
+
+  -webkit-tap-highlight-color: transparent;
+
+  will-change: transform;
+
+  /* ONLY ONE animation layer */
   animation: floatIdle 6s ease-in-out infinite;
 }
 
@@ -429,14 +428,11 @@ gtag('config', 'G-ELQ3E5WGCT');
    PRESS FEEDBACK (IOS FIX)
 ========================= */
 .icon-btn.pressed {
-  transform: scale(0.85);
   opacity: 1;
+  transition: transform 0.08s ease;
+  transform: scale(0.88) !important;
 }
 
-.icon-btn {
-  animation: floatIdle 6s ease-in-out infinite;
-  will-change: transform;
-}
 
 @keyframes floatIdle {
   0%, 100% { transform: translate3d(0, 0px, 0); }
@@ -480,6 +476,29 @@ gtag('config', 'G-ELQ3E5WGCT');
   75% { transform: scale(1.05); }
 }
 
+/* =========================
+   ICON POSITIONS (FIX LAYOUT)
+========================= */
+
+.top-left {
+  top: calc(20px + env(safe-area-inset-top));
+  left: 20px;
+}
+
+.top-right {
+  top: calc(20px + env(safe-area-inset-top));
+  right: 20px;
+}
+
+.bottom-left {
+  bottom: calc(30px + env(safe-area-inset-bottom));
+  left: 20px;
+}
+
+.bottom-right {
+  bottom: calc(30px + env(safe-area-inset-bottom));
+  right: 20px;
+}
 
   
 </style>
