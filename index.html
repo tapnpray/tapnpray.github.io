@@ -309,48 +309,33 @@ gtag('config', 'G-ELQ3E5WGCT');
 }
 
   /* STREAK: Positioned directly above the logo */
-#streak {
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
+ #streak {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  left: 15px;
 
-  display: inline-flex;
+  width: 40px;
+  height: 40px;
+
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
 
-  padding: 8px 16px;
+  font-size: 24px;
 
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(18px);
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
 
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
-
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-
+  z-index: 1000;
   cursor: pointer;
-  user-select: none;
+  opacity: 0.6;
 
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  opacity: 0.9;
+  transition: all 0.2s ease;
 
-  z-index: 10;
+  touch-action: manipulation;
 }
 
-#streak:hover {
-  transform: translateX(-50%) scale(1.05);
-  opacity: 1;
-}
-
-/* optional tap animation */
-#streak:active {
-  transform: translateX(-50%) scale(0.95);
-}
-  
   #toast {
     position: fixed;
     bottom: 100px;
@@ -412,60 +397,31 @@ gtag('config', 'G-ELQ3E5WGCT');
 /* =========================
    ICON BASE SYSTEM
 ========================= */
-#streak.icon-btn {
-  position: fixed !important;
+.icon-btn {
+  width: 44px;
+  height: 44px;
 
-  /* 🔥 bottom center placement */
-  left: 50%;
-  bottom: calc(30px + env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-
-  /* 🧼 cancel icon system sizing */
-  width: auto;
-  height: auto;
-
-  /* 🧠 layout */
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
 
-  /* 💊 pill styling */
-  padding: 10px 16px;
-  border-radius: 999px;
+  font-size: 22px;
+  opacity: 0.6;
 
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-
-  border: 1px solid rgba(255, 255, 255, 0.15);
-
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-
-  opacity: 0.9;
-
+  position: fixed;
   z-index: 1000;
 
-  /* ❌ remove floating animation */
-  animation: none !important;
+  border-radius: 12px;
 
-  /* smooth interaction */
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  cursor: pointer;
+  touch-action: manipulation;
+
+  -webkit-tap-highlight-color: transparent;
+
   will-change: transform;
-}
 
-/* 🔥 fire icon inside pill */
-#streak.icon-btn::before {
-  content: "🔥";
-  font-size: 16px;
-}
-
-/* 👆 press feedback */
-#streak.icon-btn:active {
-  transform: translateX(-50%) scale(0.96);
-  opacity: 1;
+  /* ONLY ONE animation layer */
+  animation: floatIdle 6s ease-in-out infinite;
 }
 
 /* =========================
@@ -485,9 +441,10 @@ gtag('config', 'G-ELQ3E5WGCT');
 
 /* 🔥 STREAK FIRE GLOW */
 #streak.active {
-  background: rgba(255, 120, 0, 0.15);
-  border: 1px solid rgba(255, 140, 0, 0.4);
-  box-shadow: 0 0 20px rgba(255, 120, 0, 0.25);
+  opacity: 1;
+  filter: drop-shadow(0 0 10px rgba(255,80,0,0.6))
+          drop-shadow(0 0 20px rgba(255,140,0,0.4));
+  animation: firePulse 1.6s ease-in-out infinite;
 }
 
 @keyframes firePulse {
@@ -1035,7 +992,7 @@ function updateStreak() {
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
 
-  streakEl.innerText = "🔥 " + streak + " Day Streak";
+  streakEl.innerText = "🔥";
   streakEl.classList.add("active");
   streakCount.innerText = streak + " Days";
 
