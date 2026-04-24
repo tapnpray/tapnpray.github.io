@@ -1003,7 +1003,7 @@ async function shareVerse() {
     if (isSharing) return;
     isSharing = true;
 
-    await document.fonts.load("700 48px Merriweather");
+    await document.fonts.ready;
 
     const verseText = verses?.[translation]?.[currentKey];
 
@@ -1023,6 +1023,10 @@ async function shareVerse() {
 
    const ctx = canvas.getContext("2d");
    ctx.scale(scale, scale);
+
+   // ✅ iOS render stabilization (ADD THIS HERE)
+   await new Promise(requestAnimationFrame);
+   await new Promise(requestAnimationFrame);
 
     /* =========================
        LOAD CURRENT BACKGROUND
@@ -1184,7 +1188,9 @@ ctx.fillText(currentKey, canvas.width / 2, refY);
 /* =========================
    EXPORT
 ========================= */
-const blob = await new Promise(res => canvas.toBlob(b => res(b), "image/png"));
+const blob = await new Promise((resolve) => {
+  canvas.toBlob((b) => resolve(b), "image/png");
+});
 
 if (!blob) {
   showToast("Failed to create image");
@@ -1194,19 +1200,10 @@ if (!blob) {
 
 const file = new File([blob], "tapnpray.png", { type: "image/png" });
 
-// ✅ SAFETY: ensure file exists before any UI feedback
-if (!file) {
-  showToast("Failed to create image");
-  isSharing = false;
-  return;
-}
-
 const canNativeShare =
   typeof navigator.share === "function" &&
   (!navigator.canShare || navigator.canShare({ files: [file] }));
 
-// ✅ UX FIX: only show toast AFTER validation passes
-await new Promise(r => setTimeout(r, 100));
 showToast("Opening share…");
 
 if (canNativeShare) {
@@ -1216,9 +1213,6 @@ if (canNativeShare) {
       title: "Tap N Pray",
       text: `${verseText}\n\n${currentKey}\n\nTap N Pray`
     });
-
-    // ❌ intentionally no "Shared" toast here
-
   } catch (err) {
     if (err.name !== "AbortError") {
       showToast("Share failed");
@@ -1228,7 +1222,7 @@ if (canNativeShare) {
   return;
 }
 
-// 👇 FINAL fallback (your modal)
+// fallback
 window._shareBlob = blob;
 openShareModal();
 
