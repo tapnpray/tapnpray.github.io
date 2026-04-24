@@ -310,51 +310,45 @@ gtag('config', 'G-ELQ3E5WGCT');
 
   /* STREAK: Positioned directly above the logo */
 #streak {
-  position: fixed;
+  position: absolute;
+  bottom: 14px;
   left: 50%;
   transform: translateX(-50%);
 
-  /* bottom placement (this is what you wanted) */
-  bottom: calc(30px + env(safe-area-inset-bottom));
-
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
 
-  padding: 10px 16px;
+  padding: 8px 16px;
+
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
 
-  font-size: 14px;
-  font-weight: 600;
-
   color: #fff;
+  font-size: 14px;
+  font-weight: 500;
 
-  /* 🔥 pill look restored */
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-
-  border: 1px solid rgba(255, 255, 255, 0.15);
-
-  z-index: 1000;
   cursor: pointer;
+  user-select: none;
 
-  opacity: 0.85;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0.9;
 
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  z-index: 10;
 }
 
-/* icon inside streak */
-#streak::before {
-  content: "🔥";
-  font-size: 16px;
-}
-
-/* press feedback */
-#streak:active {
-  transform: translateX(-50%) scale(0.96);
+#streak:hover {
+  transform: translateX(-50%) scale(1.05);
   opacity: 1;
+}
+
+/* optional tap animation */
+#streak:active {
+  transform: translateX(-50%) scale(0.95);
 }
   
   #toast {
@@ -1041,7 +1035,7 @@ function updateStreak() {
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
 
-  streakEl.innerText = `${streak} Day Streak`;
+  streakEl.innerText = "🔥 " + streak + " Day Streak";
   streakEl.classList.add("active");
   streakCount.innerText = streak + " Days";
 
