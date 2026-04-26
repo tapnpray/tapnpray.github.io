@@ -21,6 +21,7 @@
 <meta property="og:image:height" content="630">
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
@@ -239,12 +240,13 @@ gtag('config', 'G-ELQ3E5WGCT');
   }
 
 #helpModal {
-  display: none;
   position: fixed;
   inset: 0;
   display: none;
+
   align-items: center;
   justify-content: center;
+
   background: rgba(0,0,0,0.4);
   z-index: 9999;
 
@@ -501,7 +503,7 @@ gtag('config', 'G-ELQ3E5WGCT');
 
   
 </style>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script> 
 </head>
 <body>
   <div id="bg-layer"></div>
@@ -608,23 +610,6 @@ const helpContent = document.getElementById("helpContent");
 const shareModal = document.getElementById("shareModal");
 const saveImageBtn = document.getElementById("saveImageBtn");
 const cancelShareBtn = document.getElementById("cancelShareBtn");
-
-
-function addRipple(e) {
-  const button = e.currentTarget;
-
-  const ripple = document.createElement("span");
-  ripple.className = "icon-ripple";
-
-  const rect = button.getBoundingClientRect();
-  ripple.style.left = (e.clientX - rect.left) + "px";
-  ripple.style.top = (e.clientY - rect.top) + "px";
-
-  button.appendChild(ripple);
-
-  ripple.addEventListener("animationend", () => ripple.remove());
-}
-
   
 /* =========================
    BACKGROUNDS
@@ -653,7 +638,7 @@ function updateBackground() {
   const img = set[Math.floor(Math.random() * set.length)];
   const brightness = (block === "night" || block === "evening") ? 0.75 : 1.0;
 
-  // ✅ Prevent flicker if same image is selected
+  // Prevent unnecessary re-renders
   if (img === currentBackground && brightness === currentBrightness) return;
 
   const preload = new Image();
@@ -661,26 +646,47 @@ function updateBackground() {
 
   preload.onload = () => {
     const bg = document.getElementById("bg-layer");
-bg.style.backgroundImage = `url('${img}')`;
-bg.style.opacity = 1;
-    document.body.style.setProperty('--brightness', brightness);
-    document.body.dataset.block = block;
-    currentBackground = img;
-    currentBrightness = brightness;
+
+    const temp = new Image();
+    temp.src = img;
+
+    temp.onload = () => {
+      bg.style.backgroundImage = `url('${img}')`;
+      document.body.style.setProperty('--brightness', brightness);
+      document.body.dataset.block = block;
+
+      currentBackground = img;
+      currentBrightness = brightness;
+    };
   };
 }
 
+/* call it AFTER function definition */
 updateBackground();
+
+/* track time-based background changes */
 let lastBlock = getTimeBlock();
 
-setInterval(() => {
+function checkTimeBlock() {
   const newBlock = getTimeBlock();
 
   if (newBlock !== lastBlock) {
     updateBackground();
     lastBlock = newBlock;
   }
-}, 1000 * 60);
+}
+
+// Start interval
+let bgInterval = setInterval(checkTimeBlock, 60000);
+
+// Pause when tab is inactive (saves battery)
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    clearInterval(bgInterval);
+  } else {
+    bgInterval = setInterval(checkTimeBlock, 60000);
+  }
+});
 /* =========================
    CURATED VERSE SYSTEM
 ========================= */
@@ -825,22 +831,41 @@ function getSeasonalBoosts() {
 
   return [];
 }
-/* BUILD WEIGHTED POOL */
+/* =========================
+   BUILD WEIGHTED POOL (OPTIMIZED + SAFE CACHE)
+========================= */
+
 let cachedPool = null;
+let poolBuildTime = 0;
+
 let recentVerses = JSON.parse(localStorage.getItem("recentVerses") || "[]");
 const RECENT_LIMIT = 14; // last 14 verses remembered
+const CACHE_DURATION = 60000; // 60 seconds
+
 function buildWeightedPool() {
-  if (cachedPool) return cachedPool;
+  const now = Date.now();
+
+  // =====================
+  // CACHE CHECK (FIXED)
+  // =====================
+  if (cachedPool && (now - poolBuildTime < CACHE_DURATION)) {
+    return cachedPool;
+  }
 
   let pool = [];
 
+  // =====================
+  // BASE CURATED VERSES
+  // =====================
   curatedVerses.forEach(v => {
     for (let i = 0; i < v.weight; i++) {
       pool.push(v.ref);
     }
   });
 
-  // Add seasonal boosts with HIGH weight
+  // =====================
+  // SEASONAL BOOSTS
+  // =====================
   const seasonal = getSeasonalBoosts();
   seasonal.forEach(ref => {
     for (let i = 0; i < 6; i++) {
@@ -848,13 +873,28 @@ function buildWeightedPool() {
     }
   });
 
-  const filtered = pool.filter(v => !recentVerses.includes(v));
+  // =====================
+  // RECENT VERSE FILTERING
+  // =====================
+  let filtered = pool.filter(v => !recentVerses.includes(v));
 
+  // =====================
+  // FALLBACK SAFETY NET
+  // =====================
+  if (filtered.length < 20) {
+    recentVerses = [];
+    localStorage.setItem("recentVerses", JSON.stringify(recentVerses));
+    filtered = pool;
+  }
+
+  // =====================
+  // FINAL CACHE UPDATE
+  // =====================
   cachedPool = filtered.length ? filtered : pool;
+  poolBuildTime = now;
 
   return cachedPool;
 }
-
 
 /* =========================
    VERSES
@@ -866,11 +906,16 @@ let currentKey = "";
 
 async function loadTranslation(t) {
   try {
+    // ✅ Prevent re-loading if already in memory
+    if (verses[t] && Object.values(verses[t]).length) return;
+
     const res = await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
+    
     if (!res.ok) {
-  console.error("Failed to load:", t);
-  return;
-}
+      console.error("Failed to load:", t);
+      return;
+    }
+
     const data = await res.json();
 
     Object.entries(data).forEach(([book, chapters]) => {
@@ -880,7 +925,10 @@ async function loadTranslation(t) {
         });
       });
     });
-  } catch {}
+
+  } catch (err) {
+    console.error("Translation load error:", err);
+  }
 }
 
 function getSeed(s) {
@@ -911,15 +959,16 @@ function generateDaily() {
     }));
   }
 
-  currentKey = dailyKey;
-  updateVerse("Daily Bible Verse");
-  updateStreak();
-  addToRecent(dailyKey);
+currentKey = dailyKey;
+updateVerse("Daily Bible Verse");
+updateStreak();
+addToRecent(dailyKey);
 }
 
 function showDaily() {
   currentKey = dailyKey;
   updateVerse("Daily Bible Verse");
+
   dailyBtn.classList.add("active");
   randomBtn.classList.remove("active");
 }
@@ -942,8 +991,10 @@ function changeTranslation(t) {
   if (!verses[translation] || !Object.keys(verses[translation]).length) return;
 
   if (!verses[translation][currentKey]) {
-  currentKey = verses[translation][dailyKey] ? dailyKey : Object.keys(verses[translation])[0];
-}
+    currentKey = verses[translation][dailyKey]
+      ? dailyKey
+      : Object.keys(verses[translation])[0];
+  }
 
   updateVerse(
     dailyBtn.classList.contains("active")
@@ -952,8 +1003,12 @@ function changeTranslation(t) {
   );
 }
 
+/* =========================
+   CLEAN SINGLE updateVerse()
+========================= */
 function updateVerse(titleText) {
   const text = verses[translation][currentKey];
+
   if (!text) {
     console.warn("Missing verse:", currentKey, translation);
     return;
@@ -961,47 +1016,58 @@ function updateVerse(titleText) {
 
   titleEl.innerText = titleText;
 
-  // Wraps words in spans for the "Read Aloud" highlighting feature
-  verseEl.innerHTML = text
-    .split(" ")
-    .map(w => `<span class="word">${w}</span>`)
-    .join(" ");
+  requestAnimationFrame(() => {
+    verseEl.innerHTML = text
+      .split(" ")
+      .map(w => `<span class="word">${w}</span>`)
+      .join(" ");
+  });
 
   refEl.innerText = currentKey;
   dateEl.innerText = new Date().toDateString();
-  
-  // Reset scroll position to top (safety check for internal div)
+
   window.scrollTo(0, 0);
 }
-
 /* =========================
    STREAK
 ========================= */
 function updateStreak() {
   const today = new Date().toDateString();
   const lastVisit = localStorage.getItem("lastVisit");
-  let streak = parseInt(localStorage.getItem("streak")) || 1;
+
+  let streak = parseInt(localStorage.getItem("streak"));
+  if (isNaN(streak)) streak = 0;
 
   if (lastVisit) {
     const last = new Date(lastVisit);
     const now = new Date(today);
+
     const diff = Math.floor((now - last) / 86400000);
 
-    if (diff === 1) streak++;
-    else if (diff > 1) streak = 1;
+    if (diff === 1) {
+      streak += 1;
+    } else if (diff > 1) {
+      streak = 1;
+    }
+  } else {
+    // first ever visit
+    streak = 1;
   }
 
+  // save updates
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
-  // This updates the number inside your new pill button
+
+  // update UI safely
   const streakNum = document.getElementById("streakNumber");
   if (streakNum) {
     streakNum.innerText = streak;
   }
 
   streakEl.classList.add("active");
-  streakCount.innerText = streak + " Days";
+  streakCount.innerText = `${streak} Days`;
 
+  // messaging
   if (streak < 7) {
     streakMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
   } else if (streak < 30) {
@@ -1012,19 +1078,25 @@ function updateStreak() {
     streakMsg.innerText = "You're building something powerful 💪";
   }
 
+  // badges
   b7.classList.toggle("active", streak >= 7);
   b30.classList.toggle("active", streak >= 30);
   b100.classList.toggle("active", streak >= 100);
 
+  // progress logic
   let goal = 7;
   if (streak >= 7) goal = 30;
   if (streak >= 30) goal = 100;
 
   const progress = (streak / goal) * 100;
-  progressBar.style.width = Math.min(progress, 100) + "%";
+  progressBar.style.width = `${Math.min(progress, 100)}%`;
 }
 
 function openStreak() {
+  // prevent modal stacking
+  helpModal.style.display = "none";
+  shareModal.style.display = "none";
+
   streakModal.style.display = "flex";
   streakModal.style.alignItems = "center";
   streakModal.style.justifyContent = "center";
@@ -1033,19 +1105,20 @@ function openStreak() {
 function closeStreak() {
   streakModal.style.display = "none";
 }
-
 /* =========================
    HELP MODAL
 ========================= */
 async function openHelp() {
   helpModal.style.display = "flex";
+  helpModal.style.alignItems = "center";
+  helpModal.style.justifyContent = "center";
   helpContent.innerHTML = "Loading...";
 
   try {
     const res = await fetch("https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/refs/heads/main/README.md");
     const text = await res.text();
 
-    helpContent.innerHTML = marked.parse(text);
+    helpContent.innerHTML = DOMPurify.sanitize(marked.parse(text));
 
 // make links open in new tab (optional but recommended)
 helpContent.querySelectorAll("a").forEach(a => {
@@ -1058,6 +1131,7 @@ helpContent.querySelectorAll("a").forEach(a => {
 
 function closeHelp() {
   helpModal.style.display = "none";
+  helpContent.innerHTML = ""; // prevents stale DOM buildup
 }
 
 /* =========================
@@ -1076,15 +1150,18 @@ function goDonate() {
 /* =========================
    READ
 ========================= */
+let speaking = false;
+
 function readVerse() {
+  if (speaking) return;
+  speaking = true;
+
   // Stops any current speaking before starting the new one
   window.speechSynthesis.cancel(); 
   
-  const words = document.querySelectorAll(".word");
+  const words = verseEl.children;
   words.forEach(w => w.classList.remove("active"));
   let wordIndex = 0;
-
-  let i = 0;
 
   const text = verses?.[translation]?.[currentKey];
   if (!text) return;
@@ -1095,19 +1172,19 @@ function readVerse() {
   u.pitch = 1;
 
   u.onboundary = (event) => {
-  if (event.name === "word") {
-    if (words[wordIndex]) {
-      words[wordIndex].classList.add("active");
-      wordIndex++;
+    if (event.name === "word") {
+      if (words[wordIndex]) {
+        words[wordIndex].classList.add("active");
+        wordIndex++;
+      }
     }
-  }
-};
+  };
 
-  // tiny delay prevents clipping on mobile
-  wordIndex = 0;
   setTimeout(() => {
     speechSynthesis.speak(u);
   }, 100);
+
+  u.onend = () => speaking = false;
 }
 
 /* =========================
@@ -1116,13 +1193,22 @@ function readVerse() {
 let ambientOn = false;
 
 function toggleAmbient() {
+  // 🛡️ Safety guard (prevents iOS / undefined crashes)
+  if (!ambientAudio) return;
+
   const a = ambientAudio;
 
   if (ambientOn) {
     fadeOut(a);
   } else {
     a.volume = 0;
-    a.play().catch(()=>{});
+
+    // prevents autoplay crash spam on mobile
+    const playPromise = a.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {});
+    }
+
     fadeIn(a);
   }
 
@@ -1131,143 +1217,166 @@ function toggleAmbient() {
 }
 
 function fadeIn(a) {
+  if (!a) return;
+
   let v = 0;
   const i = setInterval(() => {
     v += 0.05;
+
     if (v >= 0.3) {
       v = 0.3;
       clearInterval(i);
     }
+
     a.volume = v;
   }, 100);
 }
 
 function fadeOut(a) {
+  if (!a) return;
+
   let v = a.volume;
+
   const i = setInterval(() => {
     v -= 0.05;
+
     if (v <= 0) {
       clearInterval(i);
+
       a.pause();
       a.currentTime = 0;
+      a.volume = 0; // 🧼 ensures no ghost audio state
     }
+
     a.volume = v;
   }, 100);
 }
 
-async function shareVerse() {
-  try {
-    if (isSharing) return;
-    isSharing = true;
-    showToast("Generating image...");
+async function renderShareBackground(ctx, size, currentBackground, verseText, currentKey) {
+  /* =========================
+     1. BACKGROUND (SAFE DRAW)
+  ========================= */
 
-    await document.fonts.ready;
-    const verseText = verses?.[translation]?.[currentKey];
-    if (!verseText) { isSharing = false; return; }
+  const bgImg = new Image();
+  bgImg.crossOrigin = "anonymous";
+  bgImg.src = currentBackground + "?t=" + Date.now();
 
-    const canvas = document.createElement("canvas");
-    const size = 1080; 
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
+  await new Promise((resolve) => {
+    bgImg.onload = resolve;
+    bgImg.onerror = resolve;
+  });
 
-/* =========================
-       1. BACKGROUND (FORCE-RENDER BLUR)
-    ========================= */
-    const bgImg = new Image();
-    bgImg.crossOrigin = "anonymous";
-    bgImg.src = currentBackground + "?t=" + new Date().getTime(); 
+  if (bgImg.complete && bgImg.width > 0) {
+    const scale = Math.max(size / bgImg.width, size / bgImg.height);
+    const drawW = bgImg.width * scale;
+    const drawH = bgImg.height * scale;
+    const offX = (size - drawW) / 2;
+    const offY = (size - drawH) / 2;
 
-    await new Promise((resolve) => {
-      bgImg.onload = resolve;
-      bgImg.onerror = resolve;
-    });
+    ctx.filter = "blur(18px) brightness(0.6)";
 
-    if (bgImg.complete && bgImg.width > 0) {
-      const scale = Math.max(size / bgImg.width, size / bgImg.height);
-      const drawW = bgImg.width * scale;
-      const drawH = bgImg.height * scale;
-      const offX = (size - drawW) / 2;
-      const offY = (size - drawH) / 2;
+    ctx.drawImage(
+      bgImg,
+      offX - 100,
+      offY - 100,
+      drawW + 200,
+      drawH + 200
+    );
 
-      // 1. Set the filter
-      ctx.filter = "blur(30px) brightness(0.6)";
-      
-      // 2. The "Triple Draw" Hack for iOS
-      // We draw it once to 'prime' the engine
-      ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
-      
-      // 3. Tiny delay to let the GPU catch up
-      await new Promise(r => setTimeout(r, 15));
-      
-      // 4. Draw it again to force the blur to "stick"
-      ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
+    await new Promise(r => setTimeout(r, 15));
 
-      // 5. Reset filter so text stays sharp
-      ctx.filter = "none";
-      
+    ctx.drawImage(
+      bgImg,
+      offX - 100,
+      offY - 100,
+      drawW + 200,
+      drawH + 200
+    );
+
+    ctx.filter = "none";
+  } else {
+    ctx.fillStyle = "#0b1a2a";
+    ctx.fillRect(0, 0, size, size);
+  }
+
+  /* =========================
+     2. GLASS CARD
+  ========================= */
+  const cardX = 80, cardY = 160, cardW = 920, cardH = 650, r = 40;
+
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
+  ctx.beginPath();
+
+  if (ctx.roundRect) {
+    ctx.roundRect(cardX, cardY, cardW, cardH, r);
+  } else {
+    ctx.rect(cardX, cardY, cardW, cardH);
+  }
+
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  /* =========================
+     3. TEXT DYNAMICS
+  ========================= */
+
+  ctx.textAlign = "center";
+
+  // Title
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "700 32px Merriweather";
+  ctx.fillText("Daily Bible Verse", size / 2, cardY + 70);
+
+  // Date
+  ctx.fillStyle = "#2fb4ff";
+  ctx.font = "400 24px Merriweather";
+  ctx.fillText(new Date().toDateString(), size / 2, cardY + 110);
+
+  // Verse text
+  let fontSize = verseText.length > 180 ? 36 : 46;
+  ctx.font = `700 ${fontSize}px Merriweather`;
+  ctx.fillStyle = "#ffffff";
+
+  const words = verseText.split(" ");
+  const lines = [];
+  let currentLine = "";
+  const maxWidth = cardW - 140;
+
+  for (const word of words) {
+    const testLine = currentLine + word + " ";
+
+    if (ctx.measureText(testLine).width > maxWidth) {
+      lines.push(currentLine.trim());
+      currentLine = word + " ";
     } else {
-      ctx.fillStyle = "#0b1a2a";
-      ctx.fillRect(0, 0, size, size);
+      currentLine = testLine;
     }
-    /* =========================
-       2. THE GLASS CARD
-    ========================= */
-    const cardX = 80, cardY = 160, cardW = 920, cardH = 650, r = 40;
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.beginPath();
-    if (ctx.roundRect) {
-        ctx.roundRect(cardX, cardY, cardW, cardH, r);
-    } else {
-        ctx.rect(cardX, cardY, cardW, cardH);
-    }
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.1)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+  }
 
-    /* =========================
-       3. TEXT DYNAMICS (PREVENT OVERFLOW)
-    ========================= */
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "700 32px Merriweather";
-    ctx.fillText("Daily Bible Verse", size / 2, cardY + 70);
-    
-    ctx.fillStyle = "#2fb4ff";
-    ctx.font = "400 24px Merriweather";
-    ctx.fillText(new Date().toDateString(), size / 2, cardY + 110);
+  lines.push(currentLine.trim());
 
-    // Dynamic sizing for long verses like Isaiah 43:2
-    let fontSize = verseText.length > 180 ? 36 : 46; 
-    ctx.font = `700 ${fontSize}px Merriweather`;
-    ctx.fillStyle = "#ffffff";
+  const lineHeight = fontSize * 1.4;
+  const totalTextHeight = lines.length * lineHeight;
+  const startY = cardY + 200 + ((cardH - 320 - totalTextHeight) / 2);
 
-    const words = verseText.split(" ");
-    const lines = [];
-    let currentLine = "";
-    const maxWidth = cardW - 140;
+  lines.forEach((l, i) => {
+    ctx.fillText(l, size / 2, startY + (i * lineHeight));
+  });
 
-    words.forEach(word => {
-      let testLine = currentLine + word + " ";
-      if (ctx.measureText(testLine).width > maxWidth) {
-        lines.push(currentLine.trim());
-        currentLine = word + " ";
-      } else {
-        currentLine = testLine;
-      }
-    });
-    lines.push(currentLine.trim());
+  /* =========================
+     4. REFERENCE
+  ========================= */
 
-    const lineHeight = fontSize * 1.4;
-    const totalTextHeight = lines.length * lineHeight;
-    // Calculate vertical center relative to the card's usable space
-    const startY = cardY + 200 + ((cardH - 320 - totalTextHeight) / 2);
+  ctx.font = "700 34px Merriweather";
+  ctx.fillStyle = "#2fb4ff";
+  ctx.fillText(currentKey, size / 2, cardY + cardH - 60);
 
-    lines.forEach((l, i) => {
-      ctx.fillText(l, size / 2, startY + (i * lineHeight));
-    });
-
+  ctx.font = "700 22px Merriweather";
+  ctx.fillStyle = "rgba(255,255,255,0.6)";
+  ctx.fillText("tapnpray.github.io", size / 2, size - 60);
+}
     /* =========================
        4. REFERENCE & BRANDING
     ========================= */
@@ -1279,39 +1388,40 @@ async function shareVerse() {
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.fillText("tapnpray.github.io", size / 2, size - 60);
 
-    /* =========================
-       5. EXPORT
-    ========================= */
-    canvas.toBlob(async (blob) => {
-      if (!blob) { isSharing = false; return; }
-      const file = new File([blob], "tapnpray.png", { type: "image/png" });
+// =========================
+// 6. EXPORT (SAFE + iOS STABLE)
+// =========================
+canvas.toBlob((blob) => {
+  (async () => {
+    try {
+      if (!blob) return;
+
+      const file = new File([blob], "tapnpray.png", {
+        type: "image/png"
+      });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
             files: [file],
             title: "Tap N Pray",
-            text: `${verseText}\n\n${currentKey}`
+            text: `${verseText}\n\n${keyText}`
           });
         } catch (err) {
-          if (err.name !== "AbortError") openShareModalWithBlob(blob);
+          if (err.name !== "AbortError") {
+            openShareModalWithBlob(blob);
+          }
         }
       } else {
         openShareModalWithBlob(blob);
       }
+
+    } finally {
+      shareBtn.style.opacity = "1";
       isSharing = false;
-    }, "image/png");
-
-  } catch (err) {
-    console.error(err);
-    isSharing = false;
-  }
-}
-
-function openShareModalWithBlob(blob) {
-  window._shareBlob = blob;
-  shareModal.style.display = "flex";
-}
+    }
+  })();
+}, "image/png");
   
 /* =========================
    SHARE MODAL FUNCTIONS
@@ -1357,87 +1467,248 @@ function showToast(msg = "Saved to device 📥") {
 // ICON PRESS FEEDBACK (iOS FIX)
 // =========================
 document.querySelectorAll(".icon-btn").forEach(btn => {
-  btn.addEventListener("touchstart", () => {
+  btn.addEventListener("pointerdown", () => {
     btn.classList.add("pressed");
   });
 
-  btn.addEventListener("touchend", () => {
+  btn.addEventListener("pointerup", () => {
     setTimeout(() => btn.classList.remove("pressed"), 120);
   });
 
-  btn.addEventListener("mousedown", () => {
-    btn.classList.add("pressed");
-  });
-
-  btn.addEventListener("mouseup", () => {
-    setTimeout(() => btn.classList.remove("pressed"), 120);
+  btn.addEventListener("pointerleave", () => {
+    btn.classList.remove("pressed");
   });
 });
   
 /* =========================
    EVENTS
 ========================= */
+
+// =====================
+// CORE APP ACTIONS
+// =====================
 verseEl.addEventListener("click", readVerse);
+
 ambientToggle.addEventListener("click", toggleAmbient);
+
 dailyBtn.addEventListener("click", showDaily);
+
 randomBtn.addEventListener("click", showRandom);
-translationSelect.addEventListener("change", e => changeTranslation(e.target.value));
-shareBtn.addEventListener("click", async () => {
-  // 👇 PRESS ANIMATION
-  shareBtn.classList.add("pressed");
 
-setTimeout(() => {
-  shareBtn.classList.remove("pressed");
-}, 120);
+translationSelect.addEventListener("change", e => {
+  changeTranslation(e.target.value);
+});
 
-  // 👇 HAPTIC (mobile)
-  if (navigator.vibrate) {
-    navigator.vibrate(10); // very subtle tap
+// =========================
+// SHARE VERSE (MAIN ENTRY)
+// =========================
+async function shareVerse() {
+  if (isSharing) return;
+  isSharing = true;
+
+  try {
+    const canvas = document.createElement("canvas");
+    const size = 1080;
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext("2d");
+
+    // Pull current verse safely
+    const verseText = verses?.[translation]?.[currentKey] || "";
+    const keyText = currentKey || "";
+
+    // =========================
+    // 1. BACKGROUND RENDER
+    // =========================
+    await renderShareBackground(
+  ctx,
+  size,
+  currentBackground,
+  verseText,
+  currentKey
+);
+
+    // =========================
+    // 2. GLASS CARD
+    // =========================
+    const cardX = 80, cardY = 160, cardW = 920, cardH = 650, r = 40;
+
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(cardX, cardY, cardW, cardH, r);
+    } else {
+      ctx.rect(cardX, cardY, cardW, cardH);
+    }
+    ctx.fill();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.1)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // =========================
+    // 3. TITLE
+    // =========================
+    ctx.textAlign = "center";
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "700 32px Merriweather";
+    ctx.fillText("Daily Bible Verse", size / 2, cardY + 70);
+
+    ctx.fillStyle = "#2fb4ff";
+    ctx.font = "400 24px Merriweather";
+    ctx.fillText(new Date().toDateString(), size / 2, cardY + 110);
+
+    // =========================
+    // 4. VERSE WRAP
+    // =========================
+    const words = verseText.split(" ");
+    const lines = [];
+    let currentLine = "";
+    const maxWidth = cardW - 140;
+
+    ctx.font = "700 44px Merriweather";
+    ctx.fillStyle = "#fff";
+
+    words.forEach(word => {
+      const test = currentLine + word + " ";
+      if (ctx.measureText(test).width > maxWidth) {
+        lines.push(currentLine.trim());
+        currentLine = word + " ";
+      } else {
+        currentLine = test;
+      }
+    });
+
+    lines.push(currentLine.trim());
+
+    const lineHeight = 54;
+    const startY = cardY + 240;
+
+    lines.forEach((l, i) => {
+      ctx.fillText(l, size / 2, startY + i * lineHeight);
+    });
+
+    // =========================
+    // 5. VERSE REF
+    // =========================
+    ctx.fillStyle = "#2fb4ff";
+    ctx.font = "700 34px Merriweather";
+    ctx.fillText(keyText, size / 2, cardY + cardH - 60);
+
+    // =========================
+    // 6. EXPORT
+    // =========================
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        isSharing = false;
+        return;
+      }
+
+      const file = new File([blob], "tapnpray.png", {
+        type: "image/png"
+      });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: "Tap N Pray",
+            text: `${verseText}\n\n${keyText}`
+          });
+        } catch (err) {
+          if (err.name !== "AbortError") {
+            openShareModalWithBlob(blob);
+          }
+        }
+      } else {
+        openShareModalWithBlob(blob);
+      }
+
+      shareBtn.style.opacity = "1";
+      isSharing = false;
+    }, "image/png");
+
+  } catch (err) {
+    console.error("shareVerse error:", err);
+    isSharing = false;
+    shareBtn.style.opacity = "1";
   }
+}
 
+
+// =====================
+// SHARE BUTTON (CLEAN PIPELINE)
+// =====================
+shareBtn.addEventListener("click", async () => {
+  shareBtn.classList.add("pressed");
+  setTimeout(() => shareBtn.classList.remove("pressed"), 120);
+
+  shareBtn.style.opacity = "1";
+
+  if (navigator.vibrate) navigator.vibrate(10);
+
+  // Single entry point only
   await shareVerse();
 });
 
-streakEl.addEventListener("click", (e) => {
-  addRipple(e);
+
+// =====================
+// SHARE FALLBACK HANDLER
+// =====================
+// MUST exist BEFORE shareVerse fallback can call it safely
+function openShareModalWithBlob(blob) {
+  window._shareBlob = blob;
+  shareModal.style.display = "flex";
+}
+
+// =====================
+// STREAK MODAL
+// =====================
+streakEl.addEventListener("click", () => {
   openStreak();
 });
 
-// only close when clicking the background, not the card
 streakModal.addEventListener("click", (e) => {
-  if (e.target === streakModal) {
-    closeStreak();
-  }
+  if (e.target === streakModal) closeStreak();
 });
 
+
+// =====================
+// HELP MODAL
+// =====================
 helpIcon?.addEventListener("click", (e) => {
-  addRipple(e);
   e.preventDefault();
   e.stopPropagation();
   openHelp();
 });
 
-donateIcon.addEventListener("click", (e) => {
-  addRipple(e);
-  goDonate();
-});
+document.getElementById("helpCloseBtn")?.addEventListener("click", closeHelp);
 
-document.getElementById("helpCloseBtn").addEventListener("click", (e) => {
-  addRipple(e);
-  closeHelp();
-});
 
-// Fix for the Fallback Share Modal
+// =====================
+// DONATE
+// =====================
+donateIcon.addEventListener("click", goDonate);
+
+
+// =====================
+// SHARE FALLBACK MODAL
+// =====================
 saveImageBtn.addEventListener("click", () => {
   const blob = window._shareBlob;
   if (!blob) return;
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
+
   a.href = url;
   a.download = "tapnpray.png";
-  document.body.appendChild(a); // Required for some iOS browsers
+
+  document.body.appendChild(a);
   a.click();
+
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
@@ -1448,51 +1719,50 @@ saveImageBtn.addEventListener("click", () => {
 cancelShareBtn.addEventListener("click", closeShareModal);
 
 shareModal.addEventListener("click", (e) => {
-if (e.target === shareModal) {
-    closeShareModal();
-  }
+  if (e.target === shareModal) closeShareModal();
 });
 
+
+// =====================
+// RECENT VERSES SYSTEM
+// =====================
 function addToRecent(key) {
   if (!key) return;
 
-  // Add to start of array
   recentVerses.unshift(key);
+  recentVerses = [...new Set(recentVerses)];
 
-  // Keep only the last 14 (RECENT_LIMIT)
   if (recentVerses.length > RECENT_LIMIT) {
-    recentVerses.pop();
+    recentVerses = recentVerses.slice(0, RECENT_LIMIT);
   }
 
   localStorage.setItem("recentVerses", JSON.stringify(recentVerses));
 }
 
-/* =========================
-   INITIALIZE
-========================= */
+
+// =====================
+// INITIALIZE
+// =====================
 async function init() {
-  // Load primary translation first
   await loadTranslation("nlt");
   generateDaily();
-  
-  // Load others in background
+
   loadTranslation("niv");
   loadTranslation("kjv");
 
-  // Show the hint bubble under the logo after a brief delay
   setTimeout(() => {
     const hint = document.getElementById("tapHintBubble");
     if (hint) {
       hint.classList.add("show");
-      // Auto-hide after 6 seconds so it doesn't clutter the screen
       setTimeout(() => hint.classList.remove("show"), 6000);
     }
   }, 2500);
 }
 
-// Ensure the app starts
-init();
-
+if (!window.__appInitialized) {
+  window.__appInitialized = true;
+  init();
+}
 </script>
 
 <div id="toast"></div>
