@@ -23,6 +23,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQ3E5WGCT"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
+document.addEventListener("DOMContentLoaded", () => {
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
@@ -610,7 +611,8 @@ const helpContent = document.getElementById("helpContent");
 const shareModal = document.getElementById("shareModal");
 const saveImageBtn = document.getElementById("saveImageBtn");
 const cancelShareBtn = document.getElementById("cancelShareBtn");
-  
+console.log("VERSE EL:", verseEl);
+console.log("SHARE BTN:", shareBtn);  
 /* =========================
    BACKGROUNDS
 ========================= */
@@ -1759,10 +1761,8 @@ async function init() {
   }, 2500);
 }
 
-if (!window.__appInitialized) {
-  window.__appInitialized = true;
-  init();
-}
+init();
+});
 </script>
 
 <div id="toast"></div>
