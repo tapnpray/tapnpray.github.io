@@ -1,106 +1,31 @@
 # Changelog
 
-## v1.4.0 - 2026-04-23 (Performance + Polish + UX Improvements)
+All notable changes to the **Tap N Pray** project will be documented in this file.
 
-### ✨ Features & Enhancements
+## [1.1.0] - 2026-04-25
 
-- Added **smart background sync system**
-  - Background now only updates when time block changes (morning/day/evening/night)
-  - Prevents unnecessary updates and improves performance
-  - Reduces redundant calls to `updateBackground()`
+### Added
+- **Elite Curated Verse System:** Integrated a weighted verse selection engine that prioritizes high-impact verses (Weight 5) over general faith verses.
+- **Seasonal Boost Logic:** Implemented a dynamic date checker for Christmas and Easter (using the Butcher-Meeus Algorithm for dynamic Easter calculation) to surface relevant scriptures.
+- **App Bootstrapper:** Added a robust `initApp()` function to handle translation fetching and event listener binding upon DOM completion.
+- **Speech Highlighting:** Integrated `onboundary` event tracking in the Web Speech API to highlight individual words in the UI as they are read aloud.
+- **Toast Notification System:** Added a non-intrusive UI feedback mechanism for status updates (e.g., "Generating image...").
 
-- Improved **background flicker prevention**
-  - Added `currentBackground` + `currentBrightness` tracking
-  - Prevents re-applying identical background images
-  - Smooth transitions between time-of-day changes
+### Fixed
+- **iOS Canvas Blur (Triple Draw):** Resolved a critical rendering bug where filters would not apply to shared images on iOS. Implemented a "Triple Draw" GPU priming hack to force-render the 30px blur.
+- **Z-Index Layering:** Fixed an issue where background elements could overlap the main content container; established a strict Z-index hierarchy.
+- **Text Contrast:** Enhanced readability by implementing multi-layered CSS text-shadows and a dynamic `--brightness` CSS variable for background images.
+- **Safe Area Insets:** Corrected layout shifting on modern mobile devices by utilizing `env(safe-area-inset-top)` for fixed headers and icons.
+- **CSS Duplication:** Removed redundant `display` properties in the `#helpModal` styles that were causing layout conflicts.
 
-- Added **sync-safe time block handling**
-  - Introduced `document.body.dataset.block` as a shared state source
-  - Ensures DOM + JS stay in sync for background logic
+### Changed
+- **Typography:** Standardized the use of the 'Merriweather' font family across the app and the canvas generation engine for brand consistency.
+- **Icon System:** Updated the `icon-btn` class to include a floating idle animation and distinct touch feedback (`pressed` state) optimized for iOS Safari.
+- **Navigation Layout:** Adjusted the positioning of the Streak pill and UI icons to prevent overlapping with the "Daily/Random" toggle buttons.
 
-- Enhanced **share button UX**
-  - Added press animation (`scale down on tap`)
-  - Added subtle haptic feedback (`navigator.vibrate(10)`)
-  - Improved feedback timing before share sheet opens
-
-- Improved **share system reliability**
-  - Added `isSharing` lock to prevent duplicate share triggers
-  - Added safe validation for `File` before invoking native share
-  - Improved fallback flow for unsupported devices
-
-- Upgraded **share image rendering**
-  - Improved reference text rendering for mobile clarity
-  - Fixed washed-out Bible reference color issue
-  - Added dual-pass rendering for better contrast on iOS
-  - Improved glass card shadow + edge glow system
-  - Optimized background blur + brightness handling in canvas export
-
-- Added **toast notification system improvements**
-  - Centralized `showToast()` usage for share feedback
-  - Improved timing and reduced UI spam
-  - Ensured toast only appears after validation passes
-
-- Improved **help modal UX**
-  - Markdown rendering via `marked.js`
-  - External links now open in new tab automatically
-  - Added click-outside-to-close behavior
-
-- Improved **streak system UI**
-  - Better milestone messaging (7 / 30 / 100 days)
-  - Improved progress bar scaling logic
-  - Enhanced badge activation animation logic
-
-- Enhanced **verse sharing animation**
-  - Added button press feedback animation
-  - Added haptic vibration on share trigger (mobile only)
-
----
-
-### ⚙️ Performance Improvements
-
-- Optimized background update loop:
-  - Replaced unconditional interval updates with **change-detection system**
-  - Now only updates every 2 minutes *if time block actually changes*
-
-- Reduced unnecessary DOM + canvas work during background rendering
-
-- Cached time-block logic for faster interval checks
-
----
-
-### 🧠 Code Quality / Architecture
-
-- Introduced reusable function:
-  - `syncBackgroundBlock()` for consistent state syncing
-
-- Improved separation of concerns:
-  - Background logic now isolated from UI rendering logic
-  - Share system now fully self-contained with validation gates
-
-- Strengthened safety checks:
-  - Blob validation before share/download
-  - Defensive null checks for modal operations
-
----
-
-### 🐛 Fixes
-
-- Fixed potential mismatch between:
-  - `getTimeBlock()` state
-  - `document.body.dataset.block`
-
-- Fixed share fallback modal appearing with invalid blob state
-
-- Fixed rare issue where share toast appeared before validation completed
-
-- Fixed reference text rendering inconsistency on mobile canvas export
-
----
-
-### 📌 Notes
-
-- No breaking changes
-- Fully backward compatible with existing saved data (streaks, preferences)
-- Performance improvements are passive (no user-facing behavior change unless background changes occur)
-
----
+## [1.0.0] - 2026-04-20
+### Initial Release
+- Core Bible engine with NLT, NIV, and KJV support.
+- Localized streak tracking via `localStorage`.
+- Ambient audio implementation.
+- Basic image sharing capabilities.
