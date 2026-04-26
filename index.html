@@ -1102,7 +1102,8 @@ async function shareVerse() {
     } else {
       shareModal.style.display = "flex";
       saveImageBtn.onclick = () => {
-        const link = document.createElement("a");
+  trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
+  const link = document.createElement("a");
         link.download = "verse.png";
         link.href = dataUrl;
         link.click();
