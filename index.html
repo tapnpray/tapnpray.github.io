@@ -807,7 +807,16 @@ function generateDaily() {
     const dateSeed = getSeed(today);
     
     // 4. Prevent immediate repeats from the last 7 days
-    let lastSeven = JSON.parse(localStorage.getItem("recentDailies") || "[]");
+    
+    // Instead of using localStorage (which is different for everyone), 
+    // we use the previous 7 days' seeds to "look back" and exclude them.
+    let lastSeven = [];
+    for (let i = 1; i <= 7; i++) {
+     let prevDate = new Date();
+     prevDate.setDate(prevDate.getDate() - i);
+     let prevSeed = getSeed(prevDate.toDateString());
+     lastSeven.push(pool[prevSeed % pool.length]);
+    }
     let availablePool = pool.filter(ref => !lastSeven.includes(ref));
     
     // If our pool got too small because of filters, fall back to the full pool
