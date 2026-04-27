@@ -789,25 +789,46 @@ function getSeed(s) {
 }
 
 function generateDaily() {
-  cachedPool = null;
   const today = new Date().toDateString();
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
+  // 1. If we already picked today's verse, just use it.
   if (stored.date === today) {
     dailyKey = stored.key;
   } else {
-    const keys = buildWeightedPool();
-    if (!keys.length) return;
-    dailyKey = keys[getSeed(today) % keys.length];
+    // 2. Build the weighted pool
+    let pool = [];
+    curatedVerses.forEach(v => {
+      for (let i = 0; i < v.weight; i++) { pool.push(v.ref); }
+    });
+
+    // 3. Use the Date as a Seed to pick a verse
+    // This ensures everyone in the world gets the same verse today.
+    const dateSeed = getSeed(today);
+    
+    // 4. Prevent immediate repeats from the last 7 days
+    let lastSeven = JSON.parse(localStorage.getItem("recentDailies") || "[]");
+    let availablePool = pool.filter(ref => !lastSeven.includes(ref));
+    
+    // If our pool got too small because of filters, fall back to the full pool
+    if (availablePool.length === 0) availablePool = pool;
+
+    dailyKey = availablePool[dateSeed % availablePool.length];
+
+    // 5. Save today's choice and update the 7-day history
+    lastSeven.unshift(dailyKey);
+    if (lastSeven.length > 7) lastSeven.pop();
+    
+    localStorage.setItem("recentDailies", JSON.stringify(lastSeven));
     localStorage.setItem("dailyVerse", JSON.stringify({
       date: today,
       key: dailyKey
     }));
   }
+
   currentKey = dailyKey;
   updateVerse("Daily Bible Verse");
   updateStreak();
-  addToRecent(dailyKey);
 }
 
 function showDaily() {
@@ -820,11 +841,18 @@ function showDaily() {
 
 function showRandom() {
   trackAppEvent('view_mode_change', { 'mode': 'random' });
-  const keys = buildWeightedPool();
-  if (!keys.length) return;
-  currentKey = keys[Math.floor(Math.random() * keys.length)];
+  
+  let pool = [];
+  curatedVerses.forEach(v => {
+    for (let i = 0; i < v.weight; i++) { pool.push(v.ref); }
+  });
+
+  // Filter out the current daily verse so it's impossible to overlap
+  const randomPool = pool.filter(ref => ref !== dailyKey);
+  
+  currentKey = randomPool[Math.floor(Math.random() * randomPool.length)];
+  
   updateVerse("Random Bible Verse");
-  addToRecent(currentKey);
   dailyBtn.classList.remove("active");
   randomBtn.classList.add("active");
 }
