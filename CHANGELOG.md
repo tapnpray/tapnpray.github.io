@@ -1,3 +1,35 @@
+# Changelog - Tap N Pray (index.html)
+
+All notable changes to the Tap N Pray web application are documented in this file.
+
+## [1.2.0] - 2026-04-26
+
+### Added
+- **GA4 Advanced Event Tracking**: Integrated a comprehensive analytics suite to monitor user engagement:
+  - `read_aloud`: Tracks when users engage with the text-to-speech feature.
+  - `change_translation`: Monitors preference shifts between NLT, NIV, and KJV.
+  - `view_mode_change`: Tracks usage of 'Daily' vs 'Random' verse modes.
+  - `ambient_toggle`: Tracks engagement with background sounds.
+  - `donation_intent`: Tracks clicks on the support/Venmo heart icon.
+- **Elite Curated Verse System**: Expanded and organized the core database into 200+ verses, categorized by theme (Anxiety, Strength, Love, Hope, Wisdom, etc.) for easier maintenance and variety.
+
+### Changed
+- **Global Synchronization Logic**: Updated the daily verse generator to use a calendar-based seed (`getSeed(today)`). This ensures all users globally see the exact same "Daily Bible Verse" simultaneously.
+- **Improved Randomization**: Re-engineered the "Random" button logic to include an anti-overlap filter, ensuring the random verse never matches the currently displayed daily verse.
+- **Calendar-Based Look-Back**: Implemented a 7-day mathematical "look-back" in the sync logic to prevent a verse from repeating as the "Daily Verse" within the same week.
+
+### Fixed
+- **Code Organization**: Cleaned up the JavaScript structure by moving verse data into categorized blocks, improving code readability and reducing logic errors during the 365-day rotation.
+
+---
+*Generated for the Tap N Pray Version 1.2.0 Release.*
+
+
+
+
+
+
+
 # Changelog
 
 All notable changes to the **Tap N Pray** project will be documented in this file.
