@@ -1,114 +1,102 @@
 <img src="icon-192.png" width="120" alt="Tap N Pray Logo" />
+
 **One Tap. One Verse. One Step Closer to Christ.**
 
-🌐 👉 [Open Tap N Pray](https://tapnpray.github.io/)
+Tap N Pray is a minimalist, immersive web application designed to bring the Word of God into your daily life with simplicity and focus. 
+Built for reflection and prayer, it delivers a curated Bible verse experience through a clean, distraction-free interface.
+
+🌐 👉 [Open Tap N Pray](https://tapnpray.com)
+---
+
+## ✨ Core Features
+
+### 📖 Immersive Verse Experience
+- **Daily & Random Modes**  
+  Start your day with a globally synchronized **Daily Bible Verse** or explore scripture freely using the **Random** toggle.
+
+- **Elite Curated System**  
+  Not just random verses — Tap N Pray uses a **weighted system** to prioritize:
+  - Cornerstone Gospel passages  
+  - Seasonal scriptures (Christmas / Easter)  
+  - Thematic verses (Anxiety, Strength, Love, Hope)
+
+- **Multiple Translations**  
+  Seamlessly switch between:
+  - NLT  
+  - NIV  
+  - KJV  
 
 ---
 
-## 📖 Overview
+### 🔊 Read Aloud & Reflection
+- **Interactive Audio**  
+  Tap any verse to hear it read aloud with high-quality text-to-speech.
 
-**Tap N Pray** is a simple, beautiful, and distraction-free web app designed to help you engage with Scripture daily.
-
-With one tap, you can:
-- 📖 Read a verse  
-- 🔊 Listen to it  
-- 🙏 Reflect on it  
-- 📤 Share it with others  
-
-Everything is designed to keep your focus on **God’s Word**.
+- **Real-Time Highlighting**  
+  Words highlight as they are spoken, helping you stay focused and meditate deeply.
 
 ---
 
-## ✨ Features
+### 🌿 Atmospheric Environment
+- **Dynamic Backgrounds**  
+  Backgrounds adapt to your local time:
+  - Morning  
+  - Day  
+  - Evening  
+  - Night  
 
-### 📅 Daily Verse (Smart + Consistent)
-- A new verse every day
-- Same verse for all users
-- Powered by a **weighted curated system**
-- Seasonal verses boosted (Christmas ✨ / Easter ✝️)
+- **Ambient Soundscape**  
+  Toggle the 🌿 button to enable calming background audio for a peaceful prayer experience.
 
----
-
-### 🔀 Random Verse Mode
-Explore Scripture freely beyond the daily selection.
-
----
-
-### 🔊 Read Aloud (Tap to Listen)
-- Tap any verse to hear it
-- Smooth word-by-word highlighting
-- Calm, natural pacing for reflection
+- **Mobile Optimized**  
+  Fully responsive and designed to feel like a native app on iOS and Android, including safe-area support.
 
 ---
 
-### 🌿 Ambient Mode
-Optional background audio for a peaceful, focused experience.
+### 🔥 Spiritual Habits
+- **Streak Tracking**  
+  Build consistency in your walk:
+  - 🌿 7 days  
+  - 🔥 30 days  
+  - 👑 100 days  
+
+- **Visual Progress**  
+  Interactive streak card displays your momentum and milestones.
 
 ---
 
-### 🔁 Streak Tracking
-Build a daily habit in Scripture:
-- Tracks your consistency
-- Encourages daily engagement
-- Stored locally for privacy
+### 🎨 Clean UI & Guidance
+- **High-Contrast Design**  
+  Built for readability with large, clear typography.
+
+- **Smart Guidance**  
+  Subtle onboarding tip:  
+  *“Tap the verse to listen 🔊”*
+
+- **Social Sharing**  
+  Share verses via:
+  - Native system share  
+  - Custom-generated images  
 
 ---
 
-### 🏆 Milestones & Badges
+## 🛠️ Technical Overview
 
-- 🌿 **7 Days**
-- 🔥 **30 Days**
-- 👑 **100 Days**
-
-Includes progress tracking and motivational messages.
-
----
-
-### 📸 Shareable Verse Cards
-Create beautiful images to share:
-
-- Blurred dynamic background  
-- Glass-style verse card  
-- Auto-formatted typography  
-- Date + verse reference  
-- App branding  
-
-Works with:
-- Native mobile sharing  
-- Image download fallback  
+- **Frontend**: Vanilla JS / HTML5 / CSS3  
+- **Bible Data**: Optimized JSON structures for fast loading  
+- **Tracking**: Google Analytics integration  
+- **PWA Ready**: Installable for a full-screen, app-like experience  
 
 ---
 
-### 🌅 Dynamic Backgrounds
-Background changes based on time of day:
+## 🙏 Mission
 
-- 🌄 Morning  
-- ☀️ Day  
-- 🌆 Evening  
-- 🌙 Night  
+The mission of **Tap N Pray** is to remove the friction between a busy life and the Word of God.
 
-Includes smooth transitions and brightness adjustments.
+Through simplicity and thoughtful design, the goal is to help you take **one step closer to Christ every single day**.
 
 ---
 
-### 🌍 Bible Translations
-Switch between:
-- NLT  
-- NIV  
-- KJV  
-
----
-
-## 🧠 Built with Intention
-
-Tap N Pray is designed to:
-
-- Remove distractions  
-- Encourage consistency  
-- Create peaceful moments with Scripture  
-- Make sharing God’s Word easy  
-
----
 
 ## 💛 Support the Project
 
@@ -129,25 +117,6 @@ These are designed to:
 
 ---
 
-## 🙏 Purpose
+## ❤️ Created For
 
-Tap N Pray exists to help people:
-
-- Build a daily habit with Scripture  
-- Experience peace through God’s Word  
-- Stay consistent in their faith journey  
-- Share encouragement with others  
-
----
-
-## 📢 Share the Word
-
-If this app has helped you, share it:
-
-👉 [Open Tap N Pray](https://tapnpray.github.io/)
-
----
-
-## ❤️ Built With Purpose
-
-Created to glorify God and help others grow closer to Christ through daily Scripture.
+Built with love for the Kingdom.
