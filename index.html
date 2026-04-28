@@ -83,6 +83,34 @@
     filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
   }
 
+#tapHintBubble {
+    position: fixed;
+    /* Adjust this to sit between the logo and the title */
+    top: calc(95px + env(safe-area-inset-top)); 
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 400;
+    width: fit-content;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 110;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  #tapHintBubble.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
   .center {
     height: 100%;
     display: flex;
@@ -571,6 +599,19 @@ async function initApp() {
   document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
   donateIcon.addEventListener("click", goDonate);
   verseEl.addEventListener("click", readVerse);
+
+  // --- HINT Bubble ---
+  setTimeout(() => {
+    const hint = document.getElementById("tapHintBubble");
+    if (hint) {
+      hint.classList.add("show");
+      // This removes the bubble after 5 seconds
+      setTimeout(() => {
+        hint.classList.remove("show");
+      }, 5000);
+    }
+  }, 1500); 
+  // --- PASTE THE CODE ABOVE THIS LINE ---
 }
 
 window.addEventListener("DOMContentLoaded", initApp);
