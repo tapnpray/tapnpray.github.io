@@ -115,6 +115,8 @@ These are designed to:
 - Serve as daily reminders  
 - Help others discover God’s Word  
 
+<img src="TapPray-NFCTag.gif" width="240"/>
+
 ---
 
 ## ❤️ Created For
