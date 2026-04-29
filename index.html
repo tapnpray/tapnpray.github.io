@@ -71,9 +71,11 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    /* We remove the scale and blur to show off your new high-res images */
-    filter: brightness(var(--brightness, 1));
+    /* Scale prevents white edges, blur adds that soft "glassy" depth */
+    transform: scale(1.05);
+    filter: brightness(var(--brightness, 1)) blur(3px);
     z-index: -1;
+    will-change: transform, filter;
     transition: filter 1s ease-in-out;
   }
 
