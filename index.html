@@ -1071,154 +1071,182 @@ function fadeOut(a) {
 }
 
 /* =========================
-    SHARE IMAGE GENERATOR
+   SHARE IMAGE GENERATOR (Minimalist Style)
 ========================= */
 function showToast(msg) {
-  const t = document.getElementById("toast");
-  if (!t) return;
-  t.innerText = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 3000);
+  const t = document.getElementById("toast");
+  if (!t) return;
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
 }
 
 async function shareVerse() {
-  try {
-    if (isSharing) return;
-    isSharing = true;
-    showToast("Generating image...");
+  try {
+    if (isSharing) return;
+    isSharing = true;
+    showToast("Generating image...");
 
-    await document.fonts.ready;
-    const verseText = verses?.[translation]?.[currentKey];
-    if (!verseText) { isSharing = false; return; }
+    await document.fonts.ready;
+    const verseText = verses?.[translation]?.[currentKey];
+    if (!verseText) { isSharing = false; return; }
 
-    const canvas = document.createElement("canvas");
-    const size = 1080; 
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
+    const canvas = document.createElement("canvas");
+    const size = 1080; 
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
 
-    // Logic for Pre-Blurred Image Path
-    const hour = new Date().getHours();
-    const isDaytime = hour >= 6 && hour < 18;
-    const blurredImgPath = isDaytime 
-      ? "/backgrounds/morning-blurred.png" 
-      : "/backgrounds/night-blurred.png";
+    // 1. Determine & Load Pre-Blurred Image Path (iOS Blur Fix)
+    const hour = new Date().getHours();
+    const isDaytime = hour >= 6 && hour < 18;
+    const blurredImgPath = isDaytime 
+      ? "/backgrounds/morning-blurred.png" 
+      : "/backgrounds/night-blurred.png";
 
-    const bgImg = new Image();
-    bgImg.crossOrigin = "anonymous";
-    // Using the pre-blurred file instead of the sharp background
-    bgImg.src = blurredImgPath + "?t=" + new Date().getTime(); 
+    const bgImg = new Image();
+    bgImg.crossOrigin = "anonymous";
+    bgImg.src = blurredImgPath + "?t=" + new Date().getTime(); 
 
-    await new Promise((resolve) => {
-      bgImg.onload = resolve;
-      bgImg.onerror = resolve;
-    });
+    await new Promise((resolve) => {
+      bgImg.onload = resolve;
+      bgImg.onerror = resolve;
+    });
 
-    if (bgImg.complete && bgImg.width > 0) {
-      const scale = Math.max(size / bgImg.width, size / bgImg.height);
-      const drawW = bgImg.width * scale;
-      const drawH = bgImg.height * scale;
-      const offX = (size - drawW) / 2;
-      const offY = (size - drawH) / 2;
+    if (bgImg.complete && bgImg.width > 0) {
+      const scale = Math.max(size / bgImg.width, size / bgImg.height);
+      const drawW = bgImg.width * scale;
+      const drawH = bgImg.height * scale;
+      const offX = (size - drawW) / 2;
+      const offY = (size - drawH) / 2;
 
-      // REMOVED iOS-breaking ctx.filter. 
-      // Drawing the pre-blurred image directly.
-      ctx.drawImage(bgImg, offX, offY, drawW, drawH);
-      
-      // Optional: Add a slight tint to ensure text contrast
-      ctx.fillStyle = isDaytime ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.4)";
-      ctx.fillRect(0, 0, size, size);
+      // Drawing the pre-blurred image directly.
+      ctx.drawImage(bgImg, offX, offY, drawW, drawH);
+      
+      // Apply a slight tint for text legibility (essential without the card)
+      ctx.fillStyle = isDaytime ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.5)";
+      ctx.fillRect(0, 0, size, size);
 
-    } else {
-      ctx.fillStyle = "#0b1a2a";
-      ctx.fillRect(0, 0, size, size);
-    }
+    } else {
+      ctx.fillStyle = "#0b1a2a";
+      ctx.fillRect(0, 0, size, size);
+    }
 
-    // Glass Card Layout
-    const cardX = 80, cardY = 160, cardW = 920, cardH = 650, r = 40;
-    ctx.fillStyle = "rgba(0,0,0,0.55)"; // Darker card for better legibility
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(cardX, cardY, cardW, cardH, r);
-    else ctx.rect(cardX, cardY, cardW, cardH);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.15)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // 2. NEW BRANDING: logo & URL at bottom left
+    const brandingMargin = 60;
+    const logoSize = 60;
+    
+    // A. Draw the Logo
+    const logoImg = new Image();
+    logoImg.crossOrigin = "anonymous";
+    logoImg.src = "/logo.svg"; // Assuming /logo.svg. Update if different.
 
-    // Headers
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "700 32px Merriweather";
-    ctx.fillText("Daily Bible Verse", size / 2, cardY + 70);
-    
-    ctx.fillStyle = "rgba(255,255,255,0.7)";
-    ctx.font = "400 24px Merriweather";
-    ctx.fillText(new Date().toDateString(), size / 2, cardY + 110);
+    await new Promise(resolve => {
+      logoImg.onload = resolve;
+      logoImg.onerror = resolve; // Continue if logo fails
+    });
 
-    // Verse Text Logic
-    let fontSize = verseText.length > 180 ? 36 : 46; 
-    ctx.font = `700 ${fontSize}px Merriweather`;
-    ctx.fillStyle = "#ffffff";
+    if (logoImg.complete && logoImg.width > 0) {
+      const logoY = size - brandingMargin - logoSize;
+      ctx.filter = "drop-shadow(0 2px 8px rgba(0,0,0,0.5))"; // Helps white logo pop
+      ctx.drawImage(logoImg, brandingMargin, logoY, logoSize, logoSize);
+      ctx.filter = "none";
+    }
 
-    const words = verseText.split(" ");
-    const lines = [];
-    let currentLine = "";
-    const maxWidth = cardW - 140;
+    // B. Draw the URL (to the right of the logo)
+    ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.font = "400 22px system-ui, -apple-system, sans-serif"; // Using clean UI font for URL
+    const urlX = brandingMargin + logoSize + 20;
+    const urlY = size - brandingMargin - (logoSize / 2) + 8; // V-centered with logo
+    ctx.fillText("www.tapnpray.com", urlX, urlY);
 
-    words.forEach(word => {
-      let testLine = currentLine + word + " ";
-      if (ctx.measureText(testLine).width > maxWidth) {
-        lines.push(currentLine.trim());
-        currentLine = word + " ";
-      } else {
-        currentLine = testLine;
-      }
-    });
-    lines.push(currentLine.trim());
+    // 3. Verse Header & Date (Now centered at top)
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    ctx.font = "700 36px Merriweather";
+    ctx.fillText("Daily Bible Verse", size / 2, 100);
+    
+    ctx.fillStyle = isDaytime ? "rgba(255,255,255,0.7)" : "#2fb4ff"; // Different color context for day/night
+    ctx.font = "400 26px Merriweather";
+    ctx.fillText(new Date().toDateString(), size / 2, 150);
 
-    const lineHeight = fontSize * 1.4;
-    const totalTextHeight = lines.length * lineHeight;
-    const startY = cardY + 220 + ((cardH - 320 - totalTextHeight) / 2);
+    // 4. Reflow Verse Text (Now using more width)
+    let fontSize = verseText.length > 200 ? 38 : 48; 
+    ctx.font = `700 ${fontSize}px Merriweather`;
+    ctx.fillStyle = "#ffffff";
+    // Text Shadow for floating text (Crucial on Morning background)
+    ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4;
 
-    lines.forEach((l, i) => {
-      ctx.fillText(l, size / 2, startY + (i * lineHeight));
-    });
+    const words = verseText.split(" ");
+    const lines = [];
+    let currentLine = "";
+    // Wider text column now that the card is gone
+    const maxWidth = size - 160; 
 
-    // Reference
-    ctx.fillStyle = "#5cc2ff";
-    ctx.font = "700 32px Merriweather";
-    ctx.fillText(currentKey, size / 2, startY + totalTextHeight + 60);
+    words.forEach(word => {
+      let testLine = currentLine + word + " ";
+      if (ctx.measureText(testLine).width > maxWidth) {
+        lines.push(currentLine.trim());
+        currentLine = word + " ";
+      } else {
+        currentLine = testLine;
+      }
+    });
+    lines.push(currentLine.trim());
 
-    // Final Generation & Share
-    const dataUrl = canvas.toDataURL("image/png");
-    trackAppEvent('share_image_generated', { 'verse_ref': currentKey });
-    
-    const blob = await (await fetch(dataUrl)).blob();
-    const file = new File([blob], "verse.png", { type: "image/png" });
+    const lineHeight = fontSize * 1.5; // Increased line spacing for readability
+    const totalTextHeight = lines.length * lineHeight;
+    // Centered vertically in the available main space
+    const startY = 220 + ((size - 360 - brandingMargin - totalTextHeight) / 2);
 
-    if (navigator.share) {
-      await navigator.share({
-        files: [file],
-        title: 'Tap N Pray',
-        text: `"${verseText}" - ${currentKey}`
-      });
-    } else {
-      shareModal.style.display = "flex";
-      saveImageBtn.onclick = () => {
-        trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
-        const link = document.createElement("a");
-        link.download = "verse.png";
-        link.href = dataUrl;
-        link.click();
-      };
-      cancelShareBtn.onclick = () => shareModal.style.display = "none";
-    }
-  } catch (err) {
-    console.error(err);
-    showToast("Share failed. Please try again.");
-  } finally {
-    isSharing = false;
-  }
+    lines.forEach((l, i) => {
+      ctx.fillText(l, size / 2, startY + (i * lineHeight));
+    });
+
+    // 5. Reference (Centered under text)
+    // IMPORTANT: Turn OFF shadows before drawing reference/branding
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    ctx.fillStyle = isDaytime ? "rgba(255,255,255,0.95)" : "#5cc2ff"; 
+    ctx.font = "700 32px Merriweather";
+    ctx.fillText(currentKey, size / 2, startY + totalTextHeight + 60);
+
+    // --- Final Generation & Share ---
+    const dataUrl = canvas.toDataURL("image/png");
+    trackAppEvent('share_image_generated', { 'verse_ref': currentKey });
+    
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], "verse.png", { type: "image/png" });
+
+    if (navigator.share) {
+      await navigator.share({
+        files: [file],
+        title: 'Tap N Pray',
+        text: `"${verseText}" - ${currentKey}`
+      });
+    } else {
+      shareModal.style.display = "flex";
+      saveImageBtn.onclick = () => {
+        trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
+        const link = document.createElement("a");
+        link.download = "verse.png";
+        link.href = dataUrl;
+        link.click();
+      };
+      cancelShareBtn.onclick = () => shareModal.style.display = "none";
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Share failed. Please try again.");
+  } finally {
+    isSharing = false;
+  }
 }
 </script>
 </body>
