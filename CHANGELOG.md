@@ -1,3 +1,30 @@
+
+# Changelog
+
+All notable changes to the Tap N Pray web application will be documented in this file.
+
+## [2026-04-28]
+
+### Added
+- **Dynamic Background System**: Implemented a localized day/night toggle switching between `morning.png` and `night.png` based on the user's local 24-hour clock.
+- **Pre-Blurred Assets**: Integrated `morning-blurred.png` and `night-blurred.png` specifically for the sharing system to bypass iOS-specific rendering bugs.
+- **Branded Share View**: Added bottom-left branding to shared images, including the logo and URL.
+- 
+### Changed
+- **OG Image Alignment**: Updated the Open Graph (`og:image`) strategy to ensure link previews across Facebook, iMessage, and X (Twitter) remain consistent with the new high-resolution nature theme.
+- **Minimalist Share UI**: Removed the "Glassmorphism" card in favor of full-bleed imagery with floating text for a more majestic feel.
+- **Typography & Legibility**: Implemented high-contrast `text-shadow` layers ($0\ 2px\ 12px\ rgba(0,0,0,0.9)$) to ensure the verse remains readable over the morning sun.
+- **Canvas Logic Refactor**: Switched from `ctx.filter` to pre-rendered assets, resolving the WebKit (iOS) failure to render blurs in shared canvases.
+
+### Fixed
+- **iOS Image Sharing**: Resolved the issue where shared images appeared un-blurred on iPhones by using static blurred backdrops.
+- **Text Clipping**: Optimized the `maxWidth` and `lineHeight` in the canvas generator to prevent verse text from hitting the screen edges on mobile shares.
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 # Changelog - Tap N Pray (index.html)
 
 All notable changes to the Tap N Pray web application are documented in this file.
