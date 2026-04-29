@@ -1071,10 +1071,11 @@ function fadeOut(a) {
 }
 
 /* =========================
-   SHARE IMAGE GENERATOR
+    SHARE IMAGE GENERATOR
 ========================= */
 function showToast(msg) {
   const t = document.getElementById("toast");
+  if (!t) return;
   t.innerText = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 3000);
@@ -1096,9 +1097,17 @@ async function shareVerse() {
     canvas.height = size;
     const ctx = canvas.getContext("2d");
 
+    // Logic for Pre-Blurred Image Path
+    const hour = new Date().getHours();
+    const isDaytime = hour >= 6 && hour < 18;
+    const blurredImgPath = isDaytime 
+      ? "/backgrounds/morning-blurred.png" 
+      : "/backgrounds/night-blurred.png";
+
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous";
-    bgImg.src = currentBackground + "?t=" + new Date().getTime(); 
+    // Using the pre-blurred file instead of the sharp background
+    bgImg.src = blurredImgPath + "?t=" + new Date().getTime(); 
 
     await new Promise((resolve) => {
       bgImg.onload = resolve;
@@ -1112,35 +1121,41 @@ async function shareVerse() {
       const offX = (size - drawW) / 2;
       const offY = (size - drawH) / 2;
 
-      ctx.filter = "blur(30px) brightness(0.6)";
-      ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
-      await new Promise(r => setTimeout(r, 15));
-      ctx.drawImage(bgImg, offX - 100, offY - 100, drawW + 200, drawH + 200);
-      ctx.filter = "none";
+      // REMOVED iOS-breaking ctx.filter. 
+      // Drawing the pre-blurred image directly.
+      ctx.drawImage(bgImg, offX, offY, drawW, drawH);
+      
+      // Optional: Add a slight tint to ensure text contrast
+      ctx.fillStyle = isDaytime ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.4)";
+      ctx.fillRect(0, 0, size, size);
+
     } else {
       ctx.fillStyle = "#0b1a2a";
       ctx.fillRect(0, 0, size, size);
     }
 
+    // Glass Card Layout
     const cardX = 80, cardY = 160, cardW = 920, cardH = 650, r = 40;
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillStyle = "rgba(0,0,0,0.55)"; // Darker card for better legibility
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(cardX, cardY, cardW, cardH, r);
     else ctx.rect(cardX, cardY, cardW, cardH);
     ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.1)";
+    ctx.strokeStyle = "rgba(255,255,255,0.15)";
     ctx.lineWidth = 2;
     ctx.stroke();
 
+    // Headers
     ctx.textAlign = "center";
     ctx.fillStyle = "#ffffff";
     ctx.font = "700 32px Merriweather";
     ctx.fillText("Daily Bible Verse", size / 2, cardY + 70);
     
-    ctx.fillStyle = "#2fb4ff";
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
     ctx.font = "400 24px Merriweather";
     ctx.fillText(new Date().toDateString(), size / 2, cardY + 110);
 
+    // Verse Text Logic
     let fontSize = verseText.length > 180 ? 36 : 46; 
     ctx.font = `700 ${fontSize}px Merriweather`;
     ctx.fillStyle = "#ffffff";
@@ -1169,14 +1184,15 @@ async function shareVerse() {
       ctx.fillText(l, size / 2, startY + (i * lineHeight));
     });
 
+    // Reference
     ctx.fillStyle = "#5cc2ff";
-    ctx.font = "700 28px Merriweather";
+    ctx.font = "700 32px Merriweather";
     ctx.fillText(currentKey, size / 2, startY + totalTextHeight + 60);
 
+    // Final Generation & Share
     const dataUrl = canvas.toDataURL("image/png");
-    trackAppEvent('share_image_generated', {
-      'verse_ref': currentKey
-    });
+    trackAppEvent('share_image_generated', { 'verse_ref': currentKey });
+    
     const blob = await (await fetch(dataUrl)).blob();
     const file = new File([blob], "verse.png", { type: "image/png" });
 
@@ -1189,8 +1205,8 @@ async function shareVerse() {
     } else {
       shareModal.style.display = "flex";
       saveImageBtn.onclick = () => {
-  trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
-  const link = document.createElement("a");
+        trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
+        const link = document.createElement("a");
         link.download = "verse.png";
         link.href = dataUrl;
         link.click();
@@ -1199,6 +1215,7 @@ async function shareVerse() {
     }
   } catch (err) {
     console.error(err);
+    showToast("Share failed. Please try again.");
   } finally {
     isSharing = false;
   }
