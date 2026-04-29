@@ -62,7 +62,7 @@
     filter: blur(0px);
   }
 
-  #bg-layer {
+#bg-layer {
     position: fixed;
     top: 0;
     left: 0;
@@ -71,10 +71,10 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    transform: scale(1.05);
-    filter: brightness(calc(var(--brightness, 1) * 0.50)) blur(3px);
+    /* We remove the scale and blur to show off your new high-res images */
+    filter: brightness(var(--brightness, 1));
     z-index: -1;
-    will-change: transform, filter;
+    transition: filter 1s ease-in-out;
   }
 
   #topLogo {
@@ -149,12 +149,12 @@
     z-index: 100;
   }
 
-  #title {
+#title {
     width: 100%;
     text-align: center;
     font-size: 15px;
     margin-bottom: 4px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9), 0 0 5px rgba(0,0,0,0.5);
     letter-spacing: 0.5px;
     opacity: 0.9;
   }
@@ -163,7 +163,7 @@
     color: rgba(255,255,255,0.8);
     font-size: 14px;
     margin-bottom: 5px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9), 0 0 5px rgba(0,0,0,0.5);
   }
 
   #verse {
@@ -174,7 +174,7 @@
     line-height: 1.5;
     cursor: pointer;
     flex: none;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9), 0 0 5px rgba(0,0,0,0.5);
   }
 
   .word {
@@ -190,7 +190,7 @@
     margin-top: 15px;
     font-size: 18px;
     color: #5cc2ff;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9), 0 0 5px rgba(0,0,0,0.5);
   }
 
   .translation-select, .mode-buttons button {
@@ -622,47 +622,44 @@ async function initApp() {
 window.addEventListener("DOMContentLoaded", initApp);
 
 /* =========================
-   BACKGROUNDS
+   BACKGROUNDS (Day/Night Toggle)
 ========================= */
-const bgSets = {
-  morning: ["/backgrounds/morning1.png","/backgrounds/morning2.png"],
-  day: ["/backgrounds/day1.png","/backgrounds/day2.png"],
-  evening: ["/backgrounds/evening1.png","/backgrounds/evening2.png"],
-  night: ["/backgrounds/night1.png","/backgrounds/night2.png"]
+// Points to your simplified folder structure
+const bgImages = {
+  morning: "/backgrounds/morning.png",
+  night: "/backgrounds/night.png"
 };
 
 let currentBackground = "";
-let currentBrightness = 1.0;
-
-function getTimeBlock() {
-  const h = new Date().getHours();
-  if (h < 11) return "morning";
-  if (h < 17) return "day";
-  if (h < 21) return "evening";
-  return "night";
-}
 
 function updateBackground() {
-  const block = getTimeBlock();
-  const set = bgSets[block];
-  const img = set[Math.floor(Math.random() * set.length)];
-  const brightness = (block === "night" || block === "evening") ? 0.75 : 1.0;
+  const hour = new Date().getHours();
+  // Day logic: 6 AM to 6 PM (adjust hours if you prefer)
+  const isDaytime = hour >= 6 && hour < 18;
+  const mode = isDaytime ? "morning" : "night";
+  const img = bgImages[mode];
 
-  if (img === currentBackground && brightness === currentBrightness) return;
+  // Only update if the background actually needs to change
+  if (img === currentBackground) return;
 
   const preload = new Image();
   preload.src = img;
   preload.onload = () => {
     const bg = document.getElementById("bg-layer");
     bg.style.backgroundImage = `url('${img}')`;
-    bg.style.opacity = 1;
+    
+    // Set brightness based on mode: Night is slightly dimmer for text legibility
+    const brightness = (mode === "night") ? 0.6 : 1.0;
     document.body.style.setProperty('--brightness', brightness);
+    
     currentBackground = img;
-    currentBrightness = brightness;
   };
 }
 
+// Run immediately
 updateBackground();
+// Check every 5 minutes in case the user leaves the tab open during sunset/sunrise
+setInterval(updateBackground, 300000);
 /* =========================
    ELITE CURATED VERSE SYSTEM
 ========================= */
