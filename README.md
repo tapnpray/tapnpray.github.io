@@ -35,16 +35,6 @@ Built for reflection and prayer, it delivers a curated Bible verse experience th
 - **Real-Time Highlighting**  
   Words highlight as they are spoken, helping you stay focused and meditate deeply.
 
----
-
-### 🌿 Atmospheric Environment
-- **Dynamic Backgrounds**  
-  Backgrounds adapt to your local time:
-  - Morning  
-  - Day  
-  - Evening  
-  - Night  
-
 - **Ambient Soundscape**  
   Toggle the 🌿 button to enable calming background audio for a peaceful prayer experience.
 
