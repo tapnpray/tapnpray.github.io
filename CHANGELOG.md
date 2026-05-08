@@ -3,7 +3,21 @@
 
 All notable changes to the Tap N Pray web application will be documented in this file.
 
-## [2026-04-28]
+
+# [1.2.2] - 2026-05-08
+
+### Enhanced
+*   **Typography Contrast:** Significantly increased text-shadow depth and spread on daily verses to ensure high-contrast readability against bright background assets.
+*   **Background Dimming:** Implemented a darker overlay tint (50% for daytime, 70% for night) on both the live site and the generated share images to prevent text "washout" on high-luminance areas.
+*   **Share Image Legibility:** Boosted canvas shadow rendering parameters (25px blur and 6px offset) to maintain sharp, clean typography in exported project assets.
+
+### Fixed
+*   **Mobile Rendering:** Refined the background filter logic to reduce processing overhead on iOS WebKit while maintaining visual depth.
+
+
+
+
+# [1.2.1] [2026-04-28]
 
 ### Added
 - **Dynamic Background System**: Implemented a localized day/night toggle switching between `morning.png` and `night.png` based on the user's local 24-hour clock.
