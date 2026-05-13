@@ -117,15 +117,16 @@ html, body {
   }
 
 .center {
-    height: 100vh; /* Uses full viewport height */
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Forces everything into the middle */
+    justify-content: center;
     padding: 20px;
     box-sizing: border-box;
     position: relative;
     z-index: 1;
+    overflow: visible; /* Ensure children like the FAB aren't clipped */
   }
 
   #votd {
@@ -484,22 +485,20 @@ CSS
 ========================= */
 #menuFab {
   position: fixed;
-  left: 50%; /* Anchor to horizontal center */
-  bottom: calc(40px + env(safe-area-inset-bottom)); 
-  transform: translateX(-50%); /* Perfectly center the button */
-  width: 60px;
-  height: 60px;
+  left: 50%;
+  bottom: 30px; /* Adjusted slightly to ensure visibility */
+  transform: translateX(-50%); 
+  width: 60px;  /* Essential: ensures the button has a physical footprint */
+  height: 60px; /* Essential: ensures the button has a physical footprint */
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #2fb4ff; /* Using a solid color temporarily to help you find it */
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 9999; /* Higher priority than everything else */
   cursor: pointer;
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
 }
 
 .bar {
