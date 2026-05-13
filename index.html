@@ -486,13 +486,18 @@ CSS
 ========================= */
 #menuFab {
   position: fixed;
-  bottom: calc(30px + env(safe-area-inset-bottom));
+  /* Resets any side-pinning */
   left: 50%;
-  transform: translateX(-50%);
+  right: auto; 
+  /* Moves it up from the very bottom to prevent cutoff */
+  bottom: calc(40px + env(safe-area-inset-bottom)); 
+  /* The magic for perfect centering */
+  transform: translateX(-50%); 
+  
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.7); /* Slightly darker for better contrast */
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -503,6 +508,7 @@ CSS
   cursor: pointer;
   z-index: 1000;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  margin: 0; 
   transition: background 0.3s, transform 0.3s;
   outline: none;
   -webkit-tap-highlight-color: transparent;
