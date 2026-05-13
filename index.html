@@ -461,25 +461,123 @@
   75% { transform: scale(1.05); }
 }
 
-.top-left {
-  top: calc(20px + env(safe-area-inset-top));
-  left: 20px;
-}
 
-.top-right {
-  top: calc(20px + env(safe-area-inset-top));
-  right: 20px;
-}
-
-.bottom-left {
-  bottom: calc(30px + env(safe-area-inset-bottom));
-  left: 20px;
-}
-
-.bottom-right {
+/* =========================
+   FLOATING MENU SYSTEM
+========================= */
+#menuFab {
+  position: fixed;
   bottom: calc(30px + env(safe-area-inset-bottom));
   right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  /* Uses your existing floating animation */
+  animation: floatIdle 6s ease-in-out infinite; 
+  transition: background 0.3s, transform 0.3s;
 }
+
+#menuFab .cross {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#menuFab.open .cross {
+  transform: rotate(45deg); /* Turns the + into an x */
+}
+
+#expandableMenu {
+  position: fixed;
+  bottom: calc(100px + env(safe-area-inset-bottom));
+  right: 20px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 20px;
+  width: 260px;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px) scale(0.95);
+  transform-origin: bottom right;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+#expandableMenu.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.menu-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.menu-btn {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.menu-btn:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Duplicating your tap hint style for the Streak hint */
+#streakHintBubble {
+  position: fixed;
+  bottom: calc(40px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  width: fit-content;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 110;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+#streakHintBubble.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
 </head>
@@ -487,8 +585,9 @@
   <div id="bg-layer"></div>
 
   <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
-  <div id="ambientToggle" class="icon-btn top-right">🌿</div>
+<!-- Added the new Streak Hint Bubble here -->
   <div id="tapHintBubble">Tap the verse to listen 🔊</div>
+  <div id="streakHintBubble">🔥 <span id="hintStreakNumber">1</span> Day Streak</div>
   
   <div class="center">
     <div id="votd">
@@ -496,7 +595,12 @@
       <div id="date"></div>
       <div id="verse"></div>
       <div id="ref"></div>
+    </div>
+  </div>
 
+  <!-- New Expandable Menu -->
+  <div id="expandableMenu">
+    <div class="menu-items">
       <select id="translationSelect" class="translation-select">
         <option value="nlt">NLT</option>
         <option value="niv">NIV</option>
@@ -508,16 +612,24 @@
         <button id="randomBtn">Random</button>
       </div>
 
-      <div class="share-icon" id="shareBtn">🔗</div>
       <button id="streak" class="streak-pill">
         <span>🔥</span>
         <span id="streakText"><span id="streakNumber">1</span> Day Streak</span>
       </button>
 
-      <div class="icon-btn bottom-left" id="helpIcon">?</div>
-      <div class="icon-btn bottom-right" id="donateIcon">♥</div>
+      <div class="menu-actions">
+        <div id="ambientToggle" class="menu-btn">🌿 Ambient</div>
+        <div id="shareBtn" class="menu-btn">🔗 Share</div>
+        <div id="helpIcon" class="menu-btn">❔ Help</div>
+        <div id="donateIcon" class="menu-btn" style="color: #FFD700;">♥ Donate</div>
+      </div>
     </div>
   </div>
+
+  <!-- The Floating Action Button (FAB) -->
+  <button id="menuFab">
+    <span class="cross">+</span>
+  </button>
 
   <div id="streakModal">
     <div class="streak-card">
@@ -605,7 +717,7 @@ async function initApp() {
   donateIcon.addEventListener("click", goDonate);
   verseEl.addEventListener("click", readVerse);
 
-  // --- HINT Bubble ---
+// --- HINT Bubble ---
   setTimeout(() => {
     const hint = document.getElementById("tapHintBubble");
     if (hint) {
@@ -615,8 +727,28 @@ async function initApp() {
         hint.classList.remove("show");
       }, 5000);
     }
-  }, 1500); 
-  // --- PASTE THE CODE ABOVE THIS LINE ---
+  }, 1500);
+
+  // --- MENU Toggle Logic ---
+  const menuFab = document.getElementById("menuFab");
+  const expandableMenu = document.getElementById("expandableMenu");
+  
+  if (menuFab && expandableMenu) {
+    menuFab.addEventListener("click", (e) => {
+      // Prevents the document click listener from firing immediately
+      e.stopPropagation(); 
+      menuFab.classList.toggle("open");
+      expandableMenu.classList.toggle("open");
+    });
+
+    // Close menu if user clicks anywhere else on the screen
+    document.addEventListener("click", (e) => {
+      if (!expandableMenu.contains(e.target) && !menuFab.contains(e.target)) {
+        menuFab.classList.remove("open");
+        expandableMenu.classList.remove("open");
+      }
+    });
+  }
 }
 
 window.addEventListener("DOMContentLoaded", initApp);
@@ -973,8 +1105,24 @@ function updateStreak() {
   b30.classList.toggle("active", streak >= 30);
   b100.classList.toggle("active", streak >= 100);
 
-  let goal = streak >= 30 ? 100 : (streak >= 7 ? 30 : 7);
+let goal = streak >= 30 ? 100 : (streak >= 7 ? 30 : 7);
   progressBar.style.width = Math.min((streak / goal) * 100, 100) + "%";
+
+  // --- Show the Streak Hint Toast ---
+  const hintStreakNum = document.getElementById("hintStreakNumber");
+  const streakHintBubble = document.getElementById("streakHintBubble");
+  
+  if (hintStreakNum && streakHintBubble) {
+    hintStreakNum.innerText = streak;
+    // Delay it slightly so it appears gracefully after load
+    setTimeout(() => {
+      streakHintBubble.classList.add("show");
+      // Hide it after 4 seconds
+      setTimeout(() => {
+        streakHintBubble.classList.remove("show");
+      }, 4000);
+    }, 1000);
+  }
 }
 
 function openStreak() { streakModal.style.display = "flex"; }
