@@ -43,16 +43,16 @@
 </script>
 
 <style>
-html, body {
-    height: auto; /* Changed from 100% to allow scrolling */
-    min-height: 100%;
+  html, body {
+    height: 100%;
     margin: 0;
-    overflow-x: hidden; /* Prevent side-to-side wiggle */
-    overflow-y: auto;   /* Restore vertical scrolling */
-    font-family: 'Merriweather', Georgia, serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
     color: #fff;
-    background: #000;
-}
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
+  }
 
   canvas {
     image-rendering: -webkit-optimize-contrast;
@@ -77,18 +77,16 @@ html, body {
     z-index: -1;
 }
 
-#topLogo {
-  position: fixed;
-  /* Added 60px to the top to clear the notifications */
-  top: calc(70px + env(safe-area-inset-top)); 
-  left: 50%;
-  transform: translateX(-50%);
-  width: 150px; /* Increased from 70px to 150px */
-  opacity: 1;   /* Increased from 0.85 for better high-contrast visibility */
-  z-index: 100;
-  filter: drop-shadow(0 4px 15px rgba(0,0,0,0.4));
-  transition: all 0.3s ease;
-}
+  #topLogo {
+    position: fixed;
+    top: calc(10px + env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    opacity: 0.85;
+    z-index: 100;
+    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
+  }
 
 #tapHintBubble {
     position: fixed;
@@ -118,17 +116,16 @@ html, body {
     transform: translateX(-50%) translateY(0);
   }
 
-.center {
-    height: 100vh;
+  .center {
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 80px 20px 20px;
     box-sizing: border-box;
     position: relative;
     z-index: 1;
-    overflow: visible; /* Ensure children like the FAB aren't clipped */
   }
 
   #votd {
@@ -142,6 +139,15 @@ html, body {
     gap: 6px;
   }
 
+  #ambientToggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    font-size: 26px;
+    padding: 8px;
+    cursor: pointer;
+    z-index: 100;
+  }
 
 #title {
     width: 100%;
@@ -340,43 +346,25 @@ html, body {
     animation: firePulse 1.6s ease-in-out infinite;
   }
 
-/* Unified Notification Hub - All toasts and hints occupy this exact space */
-#toast, 
-.hint-bubble, 
-#streakHintBubble, 
-#tapHintBubble {
-  position: fixed;
-  top: 30px; 
-  left: 50%;
-  /* Start slightly above the viewport for a slide-down effect */
-  transform: translateX(-50%) translateY(-20px); 
-  bottom: auto !important;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 999px;
-  font-size: 14px;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  z-index: 9999;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+  #toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(10px);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.4s ease;
+    z-index: 9999;
+  }
 
-/* Unified "Show" state */
-#toast.show, 
-.hint-bubble.show, 
-#streakHintBubble.show, 
-#tapHintBubble.show {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 
   #shareModal {
     position: fixed;
@@ -474,14 +462,6 @@ html, body {
 }
 
 
-Here is the full block to replace. This version unifies the styling, implements the morphing Christian cross with a slower 0.6s animation, and ensures all elements—including the streak hint—are correctly positioned and ready for the sequencing logic.
-
-Search for:
-The entire FLOATING MENU SYSTEM block from /* ========================= down to the final } of #streakHintBubble.
-
-Replace with:
-
-CSS
 /* =========================
    FLOATING MENU SYSTEM
 ========================= */
@@ -566,42 +546,29 @@ CSS
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* Unified Notifications at Top */
-#toast, 
-.hint-bubble, 
-#streakHintBubble, 
-#tapHintBubble {
+/* Duplicating your tap hint style for the Streak hint */
+#streakHintBubble {
   position: fixed;
-  top: 30px; 
+  bottom: calc(40px + env(safe-area-inset-bottom));
   left: 50%;
-  transform: translateX(-50%) translateY(-20px); 
-  bottom: auto !important;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   color: #fff;
-  padding: 10px 20px;
+  padding: 8px 20px;
   border-radius: 999px;
   font-size: 14px;
-  white-space: nowrap;
+  font-weight: 700;
+  width: fit-content;
   opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  z-index: 9999;
   pointer-events: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 110;
   border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
-#toast.show, 
-.hint-bubble.show, 
-#streakHintBubble.show, 
-#tapHintBubble.show {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
 #streakHintBubble.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
@@ -626,7 +593,8 @@ CSS
       <div id="ref"></div>
     </div>
   </div>
-  
+
+  <!-- New Expandable Menu -->
 <!-- New Expandable Menu -->
   <div id="expandableMenu">
     <div class="menu-items">
@@ -656,7 +624,8 @@ CSS
     </div>
   </div>
 
-<button id="menuFab">
+  <!-- The Floating Action Button (FAB) -->
+  <button id="menuFab">
     <span class="cross">+</span>
   </button>
 
@@ -744,13 +713,14 @@ async function initApp() {
   helpIcon.addEventListener("click", openHelp);
   document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
   donateIcon.addEventListener("click", goDonate);
-verseEl.addEventListener("click", readVerse);
+  verseEl.addEventListener("click", readVerse);
 
-// --- HINT Bubble Logic ---
+// --- HINT Bubble ---
   setTimeout(() => {
     const hint = document.getElementById("tapHintBubble");
     if (hint) {
       hint.classList.add("show");
+      // This removes the bubble after 5 seconds
       setTimeout(() => {
         hint.classList.remove("show");
       }, 5000);
@@ -763,21 +733,21 @@ verseEl.addEventListener("click", readVerse);
   
   if (menuFab && expandableMenu) {
     menuFab.addEventListener("click", (e) => {
+      // Prevents the document click listener from firing immediately
       e.stopPropagation(); 
       menuFab.classList.toggle("open");
       expandableMenu.classList.toggle("open");
     });
 
-    // Close menu if user clicks anywhere else
-    document.addEventListener("click", (e) => {
+    // Close menu if user clicks anywhere else on the screen
+document.addEventListener("click", (e) => {
+      // Check if the click was outside both the menu and the FAB
       const isClickInside = expandableMenu.contains(e.target) || menuFab.contains(e.target);
       if (!isClickInside && expandableMenu.classList.contains("open")) {
         menuFab.classList.remove("open");
         expandableMenu.classList.remove("open");
       }
     });
-  }
-} // <--- THIS BRACE CLOSES initApp
 
 window.addEventListener("DOMContentLoaded", initApp);
 
@@ -1110,7 +1080,7 @@ function updateStreak() {
   const lastVisit = localStorage.getItem("lastVisit");
   let streak = parseInt(localStorage.getItem("streak")) || 1;
 
-  if (lastVisit && lastVisit !== today) {
+  if (lastVisit) {
     const last = new Date(lastVisit);
     const now = new Date(today);
     const diff = Math.floor((now - last) / 86400000);
@@ -1120,52 +1090,39 @@ function updateStreak() {
 
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
-  
-  if (document.getElementById("streakNumber")) {
-    document.getElementById("streakNumber").innerText = streak;
-  }
+  const streakNum = document.getElementById("streakNumber");
+  if (streakNum) streakNum.innerText = streak;
 
-  // UI Updates for the Modal
-  const streakCount = document.getElementById("streakCount");
-  const streakMsg = document.getElementById("streakMsg");
-  if (streakCount && streakMsg) {
-    streakCount.innerText = streak + " Days";
-    if (streak < 7) streakMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
-    else if (streak < 30) streakMsg.innerText = "You're on fire — 30 days is next 🔥";
-    else streakMsg.innerText = "You're building something powerful 💪";
-  }
+  streakCount.innerText = streak + " Days";
+  if (streak < 7) streakMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
+  else if (streak < 30) streakMsg.innerText = "You're on fire — 30 days is next 🔥";
+  else if (streak < 100) streakMsg.innerText = "Stay strong — 100 days is next 👑";
+  else streakMsg.innerText = "You're building something powerful 💪";
 
-  // --- SEQUENCED HINT LOGIC ---
-  const streakHint = document.getElementById("streakHintBubble");
-  const tapHint = document.getElementById("tapHintBubble");
+  b7.classList.toggle("active", streak >= 7);
+  b30.classList.toggle("active", streak >= 30);
+  b100.classList.toggle("active", streak >= 100);
+
+let goal = streak >= 30 ? 100 : (streak >= 7 ? 30 : 7);
+  progressBar.style.width = Math.min((streak / goal) * 100, 100) + "%";
+
+  // --- Show the Streak Hint Toast ---
   const hintStreakNum = document.getElementById("hintStreakNumber");
-
-  if (hintStreakNum) hintStreakNum.innerText = streak;
-
-  // 1. Show Streak Hint first (1s delay)
-  setTimeout(() => {
-    if (streakHint) {
-      streakHint.classList.add("show");
-      
-      // 2. Hide Streak Hint after 4 seconds
+  const streakHintBubble = document.getElementById("streakHintBubble");
+  
+  if (hintStreakNum && streakHintBubble) {
+    hintStreakNum.innerText = streak;
+    // Delay it slightly so it appears gracefully after load
+    setTimeout(() => {
+      streakHintBubble.classList.add("show");
+      // Hide it after 4 seconds
       setTimeout(() => {
-        streakHint.classList.remove("show");
-        
-        // 3. Show Tap Hint AFTER Streak Hint is gone (0.6s buffer)
-        setTimeout(() => {
-          if (tapHint) {
-            tapHint.classList.add("show");
-            // Hide Tap Hint after 5 seconds
-            setTimeout(() => {
-              tapHint.classList.remove("show");
-            }, 5000);
-          }
-        }, 600); 
-
+        streakHintBubble.classList.remove("show");
       }, 4000);
-    }
-  }, 1000);
+    }, 1000);
+  }
 }
+
 function openStreak() { streakModal.style.display = "flex"; }
 function closeStreak() { streakModal.style.display = "none"; }
 
@@ -1258,182 +1215,182 @@ function fadeOut(a) {
 }
 
 /* =========================
-   SHARE IMAGE GENERATOR (Minimalist Style)
+   SHARE IMAGE GENERATOR (Minimalist Style)
 ========================= */
 function showToast(msg) {
-  const t = document.getElementById("toast");
-  if (!t) return;
-  t.innerText = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 3000);
+  const t = document.getElementById("toast");
+  if (!t) return;
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
 }
 
 async function shareVerse() {
-  try {
-    if (isSharing) return;
-    isSharing = true;
-    showToast("Generating image...");
+  try {
+    if (isSharing) return;
+    isSharing = true;
+    showToast("Generating image...");
 
-    await document.fonts.ready;
-    const verseText = verses?.[translation]?.[currentKey];
-    if (!verseText) { isSharing = false; return; }
+    await document.fonts.ready;
+    const verseText = verses?.[translation]?.[currentKey];
+    if (!verseText) { isSharing = false; return; }
 
-    const canvas = document.createElement("canvas");
-    const size = 1080; 
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
+    const canvas = document.createElement("canvas");
+    const size = 1080; 
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
 
-    // 1. Determine & Load Pre-Blurred Image Path (iOS Blur Fix)
-    const hour = new Date().getHours();
-    const isDaytime = hour >= 6 && hour < 18;
-    const blurredImgPath = isDaytime 
-      ? "/backgrounds/morning-blurred.png" 
-      : "/backgrounds/night-blurred.png";
+    // 1. Determine & Load Pre-Blurred Image Path (iOS Blur Fix)
+    const hour = new Date().getHours();
+    const isDaytime = hour >= 6 && hour < 18;
+    const blurredImgPath = isDaytime 
+      ? "/backgrounds/morning-blurred.png" 
+      : "/backgrounds/night-blurred.png";
 
-    const bgImg = new Image();
-    bgImg.crossOrigin = "anonymous";
-    bgImg.src = blurredImgPath + "?t=" + new Date().getTime(); 
+    const bgImg = new Image();
+    bgImg.crossOrigin = "anonymous";
+    bgImg.src = blurredImgPath + "?t=" + new Date().getTime(); 
 
-    await new Promise((resolve) => {
-      bgImg.onload = resolve;
-      bgImg.onerror = resolve;
-    });
+    await new Promise((resolve) => {
+      bgImg.onload = resolve;
+      bgImg.onerror = resolve;
+    });
 
-    if (bgImg.complete && bgImg.width > 0) {
-      const scale = Math.max(size / bgImg.width, size / bgImg.height);
-      const drawW = bgImg.width * scale;
-      const drawH = bgImg.height * scale;
-      const offX = (size - drawW) / 2;
-      const offY = (size - drawH) / 2;
+    if (bgImg.complete && bgImg.width > 0) {
+      const scale = Math.max(size / bgImg.width, size / bgImg.height);
+      const drawW = bgImg.width * scale;
+      const drawH = bgImg.height * scale;
+      const offX = (size - drawW) / 2;
+      const offY = (size - drawH) / 2;
 
-      // Drawing the pre-blurred image directly.
-      ctx.drawImage(bgImg, offX, offY, drawW, drawH);
-      
-      // Apply a slight tint for text legibility (essential without the card)
-      ctx.fillStyle = isDaytime ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.7)";
+      // Drawing the pre-blurred image directly.
+      ctx.drawImage(bgImg, offX, offY, drawW, drawH);
+      
+      // Apply a slight tint for text legibility (essential without the card)
+      ctx.fillStyle = isDaytime ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.7)";
       ctx.fillRect(0, 0, size, size);
 
-    } else {
-      ctx.fillStyle = "#0b1a2a";
-      ctx.fillRect(0, 0, size, size);
-    }
+    } else {
+      ctx.fillStyle = "#0b1a2a";
+      ctx.fillRect(0, 0, size, size);
+    }
 
-    // 2. NEW BRANDING: logo & URL at bottom left
-    const brandingMargin = 60;
-    const logoSize = 60;
-    
-    // A. Draw the Logo
-    const logoImg = new Image();
-    logoImg.crossOrigin = "anonymous";
-    logoImg.src = "/logo.svg"; // Assuming /logo.svg. Update if different.
+    // 2. NEW BRANDING: logo & URL at bottom left
+    const brandingMargin = 60;
+    const logoSize = 60;
+    
+    // A. Draw the Logo
+    const logoImg = new Image();
+    logoImg.crossOrigin = "anonymous";
+    logoImg.src = "/logo.svg"; // Assuming /logo.svg. Update if different.
 
-    await new Promise(resolve => {
-      logoImg.onload = resolve;
-      logoImg.onerror = resolve; // Continue if logo fails
-    });
+    await new Promise(resolve => {
+      logoImg.onload = resolve;
+      logoImg.onerror = resolve; // Continue if logo fails
+    });
 
-    if (logoImg.complete && logoImg.width > 0) {
-      const logoY = size - brandingMargin - logoSize;
-      ctx.filter = "drop-shadow(0 2px 8px rgba(0,0,0,0.5))"; // Helps white logo pop
-      ctx.drawImage(logoImg, brandingMargin, logoY, logoSize, logoSize);
-      ctx.filter = "none";
-    }
+    if (logoImg.complete && logoImg.width > 0) {
+      const logoY = size - brandingMargin - logoSize;
+      ctx.filter = "drop-shadow(0 2px 8px rgba(0,0,0,0.5))"; // Helps white logo pop
+      ctx.drawImage(logoImg, brandingMargin, logoY, logoSize, logoSize);
+      ctx.filter = "none";
+    }
 
-    // B. Draw the URL (to the right of the logo)
-    ctx.textAlign = "left";
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
-    ctx.font = "400 22px system-ui, -apple-system, sans-serif"; // Using clean UI font for URL
-    const urlX = brandingMargin + logoSize + 20;
-    const urlY = size - brandingMargin - (logoSize / 2) + 8; // V-centered with logo
-    ctx.fillText("www.tapnpray.com", urlX, urlY);
+    // B. Draw the URL (to the right of the logo)
+    ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.font = "400 22px system-ui, -apple-system, sans-serif"; // Using clean UI font for URL
+    const urlX = brandingMargin + logoSize + 20;
+    const urlY = size - brandingMargin - (logoSize / 2) + 8; // V-centered with logo
+    ctx.fillText("www.tapnpray.com", urlX, urlY);
 
-    // 3. Verse Header & Date (Now centered at top)
-    ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(255,255,255,0.95)";
-    ctx.font = "700 36px Merriweather";
-    ctx.fillText("Daily Bible Verse", size / 2, 100);
-    
-    ctx.fillStyle = isDaytime ? "rgba(255,255,255,0.7)" : "#2fb4ff"; // Different color context for day/night
-    ctx.font = "400 26px Merriweather";
-    ctx.fillText(new Date().toDateString(), size / 2, 150);
+    // 3. Verse Header & Date (Now centered at top)
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    ctx.font = "700 36px Merriweather";
+    ctx.fillText("Daily Bible Verse", size / 2, 100);
+    
+    ctx.fillStyle = isDaytime ? "rgba(255,255,255,0.7)" : "#2fb4ff"; // Different color context for day/night
+    ctx.font = "400 26px Merriweather";
+    ctx.fillText(new Date().toDateString(), size / 2, 150);
 
-    // 4. Reflow Verse Text (Now using more width)
-    let fontSize = verseText.length > 200 ? 38 : 48; 
-    ctx.font = `700 ${fontSize}px Merriweather`;
-    ctx.fillStyle = "#ffffff";
-    // Text Shadow for floating text (Crucial on Morning background)
-    ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-    ctx.shadowColor = "rgba(0, 0, 0, 1)"; // Fully opaque shadow
+    // 4. Reflow Verse Text (Now using more width)
+    let fontSize = verseText.length > 200 ? 38 : 48; 
+    ctx.font = `700 ${fontSize}px Merriweather`;
+    ctx.fillStyle = "#ffffff";
+    // Text Shadow for floating text (Crucial on Morning background)
+    ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+    ctx.shadowColor = "rgba(0, 0, 0, 1)"; // Fully opaque shadow
     ctx.shadowBlur = 25;                  // Spread the shadow further
     ctx.shadowOffsetY = 6;
 
-    const words = verseText.split(" ");
-    const lines = [];
-    let currentLine = "";
-    // Wider text column now that the card is gone
-    const maxWidth = size - 160; 
+    const words = verseText.split(" ");
+    const lines = [];
+    let currentLine = "";
+    // Wider text column now that the card is gone
+    const maxWidth = size - 160; 
 
-    words.forEach(word => {
-      let testLine = currentLine + word + " ";
-      if (ctx.measureText(testLine).width > maxWidth) {
-        lines.push(currentLine.trim());
-        currentLine = word + " ";
-      } else {
-        currentLine = testLine;
-      }
-    });
-    lines.push(currentLine.trim());
+    words.forEach(word => {
+      let testLine = currentLine + word + " ";
+      if (ctx.measureText(testLine).width > maxWidth) {
+        lines.push(currentLine.trim());
+        currentLine = word + " ";
+      } else {
+        currentLine = testLine;
+      }
+    });
+    lines.push(currentLine.trim());
 
-    const lineHeight = fontSize * 1.5; // Increased line spacing for readability
-    const totalTextHeight = lines.length * lineHeight;
-    // Centered vertically in the available main space
-    const startY = 220 + ((size - 360 - brandingMargin - totalTextHeight) / 2);
+    const lineHeight = fontSize * 1.5; // Increased line spacing for readability
+    const totalTextHeight = lines.length * lineHeight;
+    // Centered vertically in the available main space
+    const startY = 220 + ((size - 360 - brandingMargin - totalTextHeight) / 2);
 
-    lines.forEach((l, i) => {
-      ctx.fillText(l, size / 2, startY + (i * lineHeight));
-    });
+    lines.forEach((l, i) => {
+      ctx.fillText(l, size / 2, startY + (i * lineHeight));
+    });
 
-    // 5. Reference (Centered under text)
-    // IMPORTANT: Turn OFF shadows before drawing reference/branding
-    ctx.shadowColor = "transparent";
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
+    // 5. Reference (Centered under text)
+    // IMPORTANT: Turn OFF shadows before drawing reference/branding
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
 
-    ctx.fillStyle = isDaytime ? "rgba(255,255,255,0.95)" : "#5cc2ff"; 
-    ctx.font = "700 32px Merriweather";
-    ctx.fillText(currentKey, size / 2, startY + totalTextHeight + 60);
+    ctx.fillStyle = isDaytime ? "rgba(255,255,255,0.95)" : "#5cc2ff"; 
+    ctx.font = "700 32px Merriweather";
+    ctx.fillText(currentKey, size / 2, startY + totalTextHeight + 60);
 
-    // --- Final Generation & Share ---
-    const dataUrl = canvas.toDataURL("image/png");
-    trackAppEvent('share_image_generated', { 'verse_ref': currentKey });
-    
-    const blob = await (await fetch(dataUrl)).blob();
-    const file = new File([blob], "verse.png", { type: "image/png" });
+    // --- Final Generation & Share ---
+    const dataUrl = canvas.toDataURL("image/png");
+    trackAppEvent('share_image_generated', { 'verse_ref': currentKey });
+    
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], "verse.png", { type: "image/png" });
 
-    if (navigator.share) {
-      await navigator.share({
-        files: [file],
-        title: 'Tap N Pray',
-        text: `"${verseText}" - ${currentKey}`
-      });
-    } else {
-      shareModal.style.display = "flex";
-      saveImageBtn.onclick = () => {
-        trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
-        const link = document.createElement("a");
-        link.download = "verse.png";
-        link.href = dataUrl;
-        link.click();
-      };
-      cancelShareBtn.onclick = () => shareModal.style.display = "none";
-    }
-  } catch (err) {
-    console.error(err);
-    showToast("Share failed. Please try again.");
-  } finally {
-    isSharing = false;
-  }
+    if (navigator.share) {
+      await navigator.share({
+        files: [file],
+        title: 'Tap N Pray',
+        text: `"${verseText}" - ${currentKey}`
+      });
+    } else {
+      shareModal.style.display = "flex";
+      saveImageBtn.onclick = () => {
+        trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
+        const link = document.createElement("a");
+        link.download = "verse.png";
+        link.href = dataUrl;
+        link.click();
+      };
+      cancelShareBtn.onclick = () => shareModal.style.display = "none";
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Share failed. Please try again.");
+  } finally {
+    isSharing = false;
+  }
 }
 </script>
 </body>
