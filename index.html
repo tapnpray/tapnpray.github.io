@@ -139,15 +139,6 @@
     gap: 6px;
   }
 
-  #ambientToggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    font-size: 26px;
-    padding: 8px;
-    cursor: pointer;
-    z-index: 100;
-  }
 
 #title {
     width: 100%;
@@ -713,14 +704,13 @@ async function initApp() {
   helpIcon.addEventListener("click", openHelp);
   document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
   donateIcon.addEventListener("click", goDonate);
-  verseEl.addEventListener("click", readVerse);
+verseEl.addEventListener("click", readVerse);
 
-// --- HINT Bubble ---
+  // --- HINT Bubble Logic ---
   setTimeout(() => {
     const hint = document.getElementById("tapHintBubble");
     if (hint) {
       hint.classList.add("show");
-      // This removes the bubble after 5 seconds
       setTimeout(() => {
         hint.classList.remove("show");
       }, 5000);
@@ -733,21 +723,21 @@ async function initApp() {
   
   if (menuFab && expandableMenu) {
     menuFab.addEventListener("click", (e) => {
-      // Prevents the document click listener from firing immediately
       e.stopPropagation(); 
       menuFab.classList.toggle("open");
       expandableMenu.classList.toggle("open");
     });
 
-    // Close menu if user clicks anywhere else on the screen
-document.addEventListener("click", (e) => {
-      // Check if the click was outside both the menu and the FAB
+    // Close menu if user clicks anywhere else
+    document.addEventListener("click", (e) => {
       const isClickInside = expandableMenu.contains(e.target) || menuFab.contains(e.target);
       if (!isClickInside && expandableMenu.classList.contains("open")) {
         menuFab.classList.remove("open");
         expandableMenu.classList.remove("open");
       }
     });
+  }
+} // <--- THIS BRACE CLOSES initApp
 
 window.addEventListener("DOMContentLoaded", initApp);
 
