@@ -337,25 +337,35 @@
     animation: firePulse 1.6s ease-in-out infinite;
   }
 
-  #toast {
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(10px);
-    padding: 10px 18px;
-    border-radius: 999px;
-    font-size: 14px;
-    opacity: 0;
-    transition: all 0.4s ease;
-    z-index: 9999;
-  }
+#toast {
+  position: fixed;
+  top: 30px; /* Moved to top */
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px); /* Start slightly above screen */
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(10px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: 9999;
+}
 
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0); /* Slides down into view */
+}
+
+/* Add this to ensure your other bubbles follow the same top-positioning */
+.hint-bubble, #streakHintBubble {
+  position: fixed;
+  top: 30px; 
+  bottom: auto !important; 
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+}
 
   #shareModal {
     position: fixed;
@@ -706,16 +716,6 @@ async function initApp() {
   donateIcon.addEventListener("click", goDonate);
 verseEl.addEventListener("click", readVerse);
 
-  // --- HINT Bubble Logic ---
-  setTimeout(() => {
-    const hint = document.getElementById("tapHintBubble");
-    if (hint) {
-      hint.classList.add("show");
-      setTimeout(() => {
-        hint.classList.remove("show");
-      }, 5000);
-    }
-  }, 1500);
 
   // --- MENU Toggle Logic ---
   const menuFab = document.getElementById("menuFab");
@@ -1070,7 +1070,7 @@ function updateStreak() {
   const lastVisit = localStorage.getItem("lastVisit");
   let streak = parseInt(localStorage.getItem("streak")) || 1;
 
-  if (lastVisit) {
+  if (lastVisit && lastVisit !== today) {
     const last = new Date(lastVisit);
     const now = new Date(today);
     const diff = Math.floor((now - last) / 86400000);
@@ -1080,37 +1080,49 @@ function updateStreak() {
 
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
-  const streakNum = document.getElementById("streakNumber");
-  if (streakNum) streakNum.innerText = streak;
-
-  streakCount.innerText = streak + " Days";
-  if (streak < 7) streakMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
-  else if (streak < 30) streakMsg.innerText = "You're on fire — 30 days is next 🔥";
-  else if (streak < 100) streakMsg.innerText = "Stay strong — 100 days is next 👑";
-  else streakMsg.innerText = "You're building something powerful 💪";
-
-  b7.classList.toggle("active", streak >= 7);
-  b30.classList.toggle("active", streak >= 30);
-  b100.classList.toggle("active", streak >= 100);
-
-let goal = streak >= 30 ? 100 : (streak >= 7 ? 30 : 7);
-  progressBar.style.width = Math.min((streak / goal) * 100, 100) + "%";
-
-  // --- Show the Streak Hint Toast ---
-  const hintStreakNum = document.getElementById("hintStreakNumber");
-  const streakHintBubble = document.getElementById("streakHintBubble");
   
-  if (hintStreakNum && streakHintBubble) {
-    hintStreakNum.innerText = streak;
-    // Delay it slightly so it appears gracefully after load
-    setTimeout(() => {
-      streakHintBubble.classList.add("show");
-      // Hide it after 4 seconds
-      setTimeout(() => {
-        streakHintBubble.classList.remove("show");
-      }, 4000);
-    }, 1000);
+  if (document.getElementById("streakNumber")) {
+    document.getElementById("streakNumber").innerText = streak;
   }
+
+  // Update Modal Text
+  if (typeof streakCount !== 'undefined') {
+    streakCount.innerText = streak + " Days";
+    if (streak < 7) streakMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
+    else if (streak < 30) streakMsg.innerText = "You're on fire — 30 days is next 🔥";
+    else streakMsg.innerText = "You're building something powerful 💪";
+  }
+
+  // --- SEQUENCED HINT LOGIC ---
+  const streakHint = document.getElementById("streakHintBubble");
+  const tapHint = document.getElementById("tapHintBubble");
+  const hintStreakNum = document.getElementById("hintStreakNumber");
+
+  if (hintStreakNum) hintStreakNum.innerText = streak;
+
+  // 1. Show Streak Hint first (after 1 second)
+  setTimeout(() => {
+    if (streakHint) {
+      streakHint.classList.add("show");
+      
+      // 2. Hide Streak Hint after 4 seconds
+      setTimeout(() => {
+        streakHint.classList.remove("show");
+        
+        // 3. Show Tap Hint AFTER Streak Hint is gone (0.5s delay)
+        setTimeout(() => {
+          if (tapHint) {
+            tapHint.classList.add("show");
+            // Hide Tap Hint after 5 seconds
+            setTimeout(() => {
+              tapHint.classList.remove("show");
+            }, 5000);
+          }
+        }, 500); 
+
+      }, 4000);
+    }
+  }, 1000);
 }
 
 function openStreak() { streakModal.style.display = "flex"; }
