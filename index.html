@@ -77,16 +77,18 @@
     z-index: -1;
 }
 
-  #topLogo {
-    position: fixed;
-    top: calc(10px + env(safe-area-inset-top));
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70px;
-    opacity: 0.85;
-    z-index: 100;
-    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
-  }
+#topLogo {
+  position: fixed;
+  /* Added 60px to the top to clear the notifications */
+  top: calc(70px + env(safe-area-inset-top)); 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px; /* Increased from 70px to 150px */
+  opacity: 1;   /* Increased from 0.85 for better high-contrast visibility */
+  z-index: 100;
+  filter: drop-shadow(0 4px 15px rgba(0,0,0,0.4));
+  transition: all 0.3s ease;
+}
 
 #tapHintBubble {
     position: fixed;
@@ -337,25 +339,52 @@
     animation: firePulse 1.6s ease-in-out infinite;
   }
 
-  #toast {
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(10px);
-    padding: 10px 18px;
-    border-radius: 999px;
-    font-size: 14px;
-    opacity: 0;
-    transition: all 0.4s ease;
-    z-index: 9999;
-  }
+/* Unified Notification Hub - All toasts and hints occupy this exact space */
+#toast, 
+.hint-bubble, 
+#streakHintBubble, 
+#tapHintBubble {
+  position: fixed;
+  top: 30px; 
+  left: 50%;
+  /* Start slightly above the viewport for a slide-down effect */
+  transform: translateX(-50%) translateY(-20px); 
+  bottom: auto !important;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 9999;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+/* Unified "Show" state */
+#toast.show, 
+.hint-bubble.show, 
+#streakHintBubble.show, 
+#tapHintBubble.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+/* Add this to ensure your other bubbles follow the same top-positioning */
+.hint-bubble, #streakHintBubble {
+  position: fixed;
+  top: 30px; 
+  bottom: auto !important; 
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+}
 
   #shareModal {
     position: fixed;
@@ -706,16 +735,6 @@ async function initApp() {
   donateIcon.addEventListener("click", goDonate);
 verseEl.addEventListener("click", readVerse);
 
-  // --- HINT Bubble Logic ---
-  setTimeout(() => {
-    const hint = document.getElementById("tapHintBubble");
-    if (hint) {
-      hint.classList.add("show");
-      setTimeout(() => {
-        hint.classList.remove("show");
-      }, 5000);
-    }
-  }, 1500);
 
   // --- MENU Toggle Logic ---
   const menuFab = document.getElementById("menuFab");
@@ -1070,7 +1089,7 @@ function updateStreak() {
   const lastVisit = localStorage.getItem("lastVisit");
   let streak = parseInt(localStorage.getItem("streak")) || 1;
 
-  if (lastVisit) {
+  if (lastVisit && lastVisit !== today) {
     const last = new Date(lastVisit);
     const now = new Date(today);
     const diff = Math.floor((now - last) / 86400000);
@@ -1080,37 +1099,51 @@ function updateStreak() {
 
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
-  const streakNum = document.getElementById("streakNumber");
-  if (streakNum) streakNum.innerText = streak;
-
-  streakCount.innerText = streak + " Days";
-  if (streak < 7) streakMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
-  else if (streak < 30) streakMsg.innerText = "You're on fire — 30 days is next 🔥";
-  else if (streak < 100) streakMsg.innerText = "Stay strong — 100 days is next 👑";
-  else streakMsg.innerText = "You're building something powerful 💪";
-
-  b7.classList.toggle("active", streak >= 7);
-  b30.classList.toggle("active", streak >= 30);
-  b100.classList.toggle("active", streak >= 100);
-
-let goal = streak >= 30 ? 100 : (streak >= 7 ? 30 : 7);
-  progressBar.style.width = Math.min((streak / goal) * 100, 100) + "%";
-
-  // --- Show the Streak Hint Toast ---
-  const hintStreakNum = document.getElementById("hintStreakNumber");
-  const streakHintBubble = document.getElementById("streakHintBubble");
   
-  if (hintStreakNum && streakHintBubble) {
-    hintStreakNum.innerText = streak;
-    // Delay it slightly so it appears gracefully after load
-    setTimeout(() => {
-      streakHintBubble.classList.add("show");
-      // Hide it after 4 seconds
-      setTimeout(() => {
-        streakHintBubble.classList.remove("show");
-      }, 4000);
-    }, 1000);
+  if (document.getElementById("streakNumber")) {
+    document.getElementById("streakNumber").innerText = streak;
   }
+
+  // Update Modal Text (Safe check for elements)
+  const sCount = document.getElementById("streakCount");
+  const sMsg = document.getElementById("streakMsg");
+  if (sCount && sMsg) {
+    sCount.innerText = streak + " Days";
+    if (streak < 7) sMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
+    else if (streak < 30) sMsg.innerText = "You're on fire — 30 days is next 🔥";
+    else sMsg.innerText = "You're building something powerful 💪";
+  }
+
+  // --- SEQUENCED HINT LOGIC ---
+  const streakHint = document.getElementById("streakHintBubble");
+  const tapHint = document.getElementById("tapHintBubble");
+  const hintStreakNum = document.getElementById("hintStreakNumber");
+
+  if (hintStreakNum) hintStreakNum.innerText = streak;
+
+  // 1. Show Streak Hint (1s after load)
+  setTimeout(() => {
+    if (streakHint) {
+      streakHint.classList.add("show");
+      
+      // 2. Hide Streak Hint after 4s
+      setTimeout(() => {
+        streakHint.classList.remove("show");
+        
+        // 3. Show Tap Hint in the same spot after first one fades out
+        setTimeout(() => {
+          if (tapHint) {
+            tapHint.classList.add("show");
+            // Hide Tap Hint after 5s
+            setTimeout(() => {
+              tapHint.classList.remove("show");
+            }, 5000);
+          }
+        }, 600); // Buffer for the 0.4s CSS transition
+
+      }, 4000);
+    }
+  }, 1000);
 }
 
 function openStreak() { streakModal.style.display = "flex"; }
