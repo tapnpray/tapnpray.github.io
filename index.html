@@ -484,69 +484,51 @@ CSS
     FLOATING MENU SYSTEM
 ========================= */
 #menuFab {
-  display: flex !important;
-  position: fixed !important;
-  /* Basic centering */
-  left: 50% !important;
-  bottom: 50px !important; 
-  transform: translateX(-50%) !important;
-  
-  /* Circle dimensions */
-  width: 60px !important;
-  height: 60px !important;
-  border-radius: 50% !important;
-  
-  /* High-contrast colors */
-  background-color: #2fb4ff !important;
-  border: 2px solid #ffffff !important;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.6) !important;
-  
-  /* Ensures it sits on top of the verse and background */
-  z-index: 99999 !important;
+  display: flex;
+  position: fixed;
+  left: 50%;
+  bottom: 50px; /* High enough to clear mobile browser bars */
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #2fb4ff; /* Bright blue for visibility */
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+  z-index: 99999;
   cursor: pointer;
-  
-  /* Centers the cross inside */
-  align-items: center !important;
-  justify-content: center !important;
+  align-items: center;
+  justify-content: center;
   touch-action: manipulation;
 }
 
 .bar {
-  position: absolute !important;
-  background-color: #ffffff !important;
-  border-radius: 2px !important;
-  transition: all 0.4s ease !important;
+  position: absolute;
+  background-color: #ffffff;
+  border-radius: 2px;
+  transition: all 0.4s ease;
 }
 
-/* Vertical piece */
+/* Vertical bar */
 .bar-1 {
-  width: 4px !important;
-  height: 30px !important;
-  /* Absolute center-align */
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
+  width: 4px;
+  height: 30px;
 }
 
-/* Horizontal piece */
+/* Horizontal bar shifted up to make the Christian cross */
 .bar-2 {
-  width: 30px !important;
-  height: 4px !important;
-  /* Absolute center-align */
-  left: 50% !important;
-  top: 50% !important;
-  /* Offset -6px upward to create the Christian cross look */
-  transform: translate(-50%, calc(-50% - 6px)) !important;
+  width: 30px;
+  height: 4px;
+  transform: translateY(-6px);
 }
 
-/* Simple X Morph */
+/* Logic for when the menu opens (The X morph) */
 #menuFab.open .bar-1 {
-  transform: translate(-50%, -50%) rotate(45deg) !important;
+  transform: rotate(45deg);
 }
 
 #menuFab.open .bar-2 {
-  /* Resets the cross-offset and rotates */
-  transform: translate(-50%, -50%) rotate(-45deg) !important;
+  transform: translateY(0) rotate(-45deg);
 }
 
 #expandableMenu {
@@ -660,7 +642,12 @@ CSS
     </div>
   </div>
 
-  <!-- New Expandable Menu -->
+<!-- Place this at the very bottom of your body -->
+<div id="menuFab">
+  <div class="bar bar-1"></div>
+  <div class="bar bar-2"></div>
+</div>
+  
 <!-- New Expandable Menu -->
   <div id="expandableMenu">
     <div class="menu-items">
