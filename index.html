@@ -492,7 +492,7 @@ CSS
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: #2fb4ff; /* Bright blue for visibility */
+  background-color: #108cd7; /* Bright blue for visibility */
   border: 2px solid #ffffff;
   box-shadow: 0 4px 15px rgba(0,0,0,0.6);
   z-index: 99999;
@@ -500,6 +500,12 @@ CSS
   align-items: center;
   justify-content: center;
   touch-action: manipulation;
+}
+
+/* Optional: Add a slight hover/active effect for better feedback */
+#menuFab:active {
+  background-color: #0d72af;
+  transform: translateX(-50%) scale(0.95);
 }
 
 .bar {
