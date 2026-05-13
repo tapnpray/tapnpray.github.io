@@ -5,6 +5,12 @@
 Tap N Pray is a minimalist, immersive web application designed to bring the Word of God into your daily life with simplicity and focus. 
 Built for reflection and prayer, it delivers a curated Bible verse experience through a clean, distraction-free interface.
 
+## 🚀 Project Status
+For a detailed list of recent mobile optimizations, iOS rendering fixes, and brand-specific UI updates, please refer to the [Full Changelog](./CHANGELOG.md).
+
+**Current Version:** 1.2.3
+
+
 🌐 👉 [Open Tap N Pray](https://tapnpray.com)
 ---
 
