@@ -468,7 +468,8 @@
 #menuFab {
   position: fixed;
   bottom: calc(30px + env(safe-area-inset-bottom));
-  right: 20px;
+  left: 50%; /* Changed from 'right' to 'left 50%' */
+  transform: translateX(-50%); /* Centers the button perfectly */
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -484,35 +485,30 @@
   cursor: pointer;
   z-index: 1000;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  /* Uses your existing floating animation */
-  animation: floatIdle 6s ease-in-out infinite; 
+  /* Note: Removed floatIdle animation here to keep centering stable */
   transition: background 0.3s, transform 0.3s;
 }
 
-#menuFab .cross {
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
 #menuFab.open .cross {
-  transform: rotate(45deg); /* Turns the + into an x */
+  transform: rotate(45deg);
 }
 
 #expandableMenu {
   position: fixed;
   bottom: calc(100px + env(safe-area-inset-bottom));
-  right: 20px;
+  left: 50%; /* Center the menu as well */
+  transform: translateX(-50%) translateY(20px) scale(0.95);
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
   padding: 20px;
-  width: 260px;
+  width: 280px; /* Slightly wider for the grid */
   z-index: 999;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(20px) scale(0.95);
-  transform-origin: bottom right;
+  transform-origin: bottom center; /* Menu grows from bottom center */
   transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
@@ -520,7 +516,7 @@
 #expandableMenu.open {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(0) scale(1);
+  transform: translateX(-50%) translateY(0) scale(1);
 }
 
 .menu-items {
@@ -599,6 +595,7 @@
   </div>
 
   <!-- New Expandable Menu -->
+<!-- New Expandable Menu -->
   <div id="expandableMenu">
     <div class="menu-items">
       <select id="translationSelect" class="translation-select">
@@ -617,10 +614,11 @@
         <span id="streakText"><span id="streakNumber">1</span> Day Streak</span>
       </button>
 
+      <!-- Updated Grid: Now 2 rows of 2 buttons -->
       <div class="menu-actions">
-        <div id="ambientToggle" class="menu-btn">🌿 Ambient</div>
         <div id="shareBtn" class="menu-btn">🔗 Share</div>
         <div id="helpIcon" class="menu-btn">❔ Help</div>
+        <div id="ambientToggle" class="menu-btn">🌿 Ambient</div>
         <div id="donateIcon" class="menu-btn" style="color: #FFD700;">♥ Donate</div>
       </div>
     </div>
@@ -742,14 +740,14 @@ async function initApp() {
     });
 
     // Close menu if user clicks anywhere else on the screen
-    document.addEventListener("click", (e) => {
-      if (!expandableMenu.contains(e.target) && !menuFab.contains(e.target)) {
+document.addEventListener("click", (e) => {
+      // Check if the click was outside both the menu and the FAB
+      const isClickInside = expandableMenu.contains(e.target) || menuFab.contains(e.target);
+      if (!isClickInside && expandableMenu.classList.contains("open")) {
         menuFab.classList.remove("open");
         expandableMenu.classList.remove("open");
       }
     });
-  }
-}
 
 window.addEventListener("DOMContentLoaded", initApp);
 
