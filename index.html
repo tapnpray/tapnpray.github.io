@@ -484,35 +484,66 @@ CSS
     FLOATING MENU SYSTEM
 ========================= */
 #menuFab {
-  position: fixed;
-  left: 50%;
-  bottom: 30px; /* Adjusted slightly to ensure visibility */
-  transform: translateX(-50%); 
-  width: 60px;  /* Essential: ensures the button has a physical footprint */
-  height: 60px; /* Essential: ensures the button has a physical footprint */
-  border-radius: 50%;
-  background: #2fb4ff; /* Using a solid color temporarily to help you find it */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999; /* Higher priority than everything else */
+  display: flex !important; /* Force layout */
+  visibility: visible !important;
+  position: fixed !important;
+  
+  /* Positioning: Absolute center-bottom with high clearance */
+  left: 50% !important;
+  bottom: 80px !important; /* Moved significantly up to bypass mobile UI */
+  transform: translateX(-50%) !important;
+  
+  /* Physical Presence */
+  width: 66px !important;
+  height: 66px !important;
+  border-radius: 50% !important;
+  
+  /* High Visibility - Solid Blue */
+  background-color: #2fb4ff !important;
+  border: 3px solid #ffffff !important;
+  box-shadow: 0 0 25px rgba(0,0,0,0.9) !important;
+  
+  /* Layering */
+  z-index: 99999 !important;
   cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  -webkit-tap-highlight-color: transparent;
 }
 
+/* The Christian Cross Symbol */
 .bar {
-  position: absolute;
-  background-color: white;
-  border-radius: 2px;
+  position: absolute !important;
+  background-color: #ffffff !important;
+  border-radius: 4px !important;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  display: block !important;
 }
 
-.bar-1 { width: 4px; height: 30px; } /* Vertical bar */
-.bar-2 { width: 30px; height: 4px; transform: translateY(-4px); } /* Cross horizontal */
+/* Vertical piece */
+.bar-1 {
+  width: 6px !important;
+  height: 34px !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
 
-#menuFab.open .bar-1 { transform: rotate(45deg); }
-#menuFab.open .bar-2 { transform: rotate(-45deg) translateY(0); }
+/* Horizontal piece - offset upward to form the cross */
+.bar-2 {
+  width: 30px !important;
+  height: 6px !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -10px) !important; /* The -10px creates the cross shape */
+}
+
+/* Morph to X when open */
+#menuFab.open .bar-1 {
+  transform: translate(-50%, -50%) rotate(45deg) !important;
+}
+
+#menuFab.open .bar-2 {
+  transform: translate(-50%, -50%) rotate(-45deg) !important;
+}
 
 #expandableMenu {
   position: fixed;
