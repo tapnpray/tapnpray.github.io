@@ -77,16 +77,18 @@
     z-index: -1;
 }
 
-  #topLogo {
-    position: fixed;
-    top: calc(10px + env(safe-area-inset-top));
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70px;
-    opacity: 0.85;
-    z-index: 100;
-    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
-  }
+#topLogo {
+  position: fixed;
+  /* Added 60px to the top to clear the notifications */
+  top: calc(70px + env(safe-area-inset-top)); 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px; /* Increased from 70px to 150px */
+  opacity: 1;   /* Increased from 0.85 for better high-contrast visibility */
+  z-index: 100;
+  filter: drop-shadow(0 4px 15px rgba(0,0,0,0.4));
+  transition: all 0.3s ease;
+}
 
 #tapHintBubble {
     position: fixed;
