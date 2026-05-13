@@ -484,26 +484,22 @@ CSS
     FLOATING MENU SYSTEM
 ========================= */
 #menuFab {
-  display: flex !important; /* Force layout */
-  visibility: visible !important;
   position: fixed !important;
-  
-  /* Positioning: Absolute center-bottom with high clearance */
   left: 50% !important;
-  bottom: 80px !important; /* Moved significantly up to bypass mobile UI */
+  /* Bumps it to the bottom, clearing the verse text */
+  bottom: calc(30px + env(safe-area-inset-bottom)) !important; 
   transform: translateX(-50%) !important;
   
-  /* Physical Presence */
-  width: 66px !important;
-  height: 66px !important;
+  width: 60px !important;
+  height: 60px !important;
   border-radius: 50% !important;
-  
-  /* High Visibility - Solid Blue */
   background-color: #2fb4ff !important;
-  border: 3px solid #ffffff !important;
-  box-shadow: 0 0 25px rgba(0,0,0,0.9) !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.6) !important;
   
-  /* Layering */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   z-index: 99999 !important;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -513,36 +509,38 @@ CSS
 .bar {
   position: absolute !important;
   background-color: #ffffff !important;
-  border-radius: 4px !important;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  display: block !important;
+  border-radius: 2px !important;
+  /* Slower morph animation for clarity */
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Vertical piece */
+/* Vertical bar */
 .bar-1 {
-  width: 6px !important;
-  height: 34px !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
+  width: 4px !important;
+  height: 30px !important;
+  /* Centers the bar relative to the 60px FAB */
+  left: 28px !important; 
 }
 
-/* Horizontal piece - offset upward to form the cross */
+/* Horizontal bar - shifted up to create the Christian cross look */
 .bar-2 {
   width: 30px !important;
-  height: 6px !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -10px) !important; /* The -10px creates the cross shape */
+  height: 4px !important;
+  /* Centers the bar relative to the 60px FAB */
+  top: 22px !important; 
 }
 
-/* Morph to X when open */
+/* Morph to X when menu is open */
 #menuFab.open .bar-1 {
-  transform: translate(-50%, -50%) rotate(45deg) !important;
+  transform: rotate(45deg) !important;
+  left: 28px !important;
+  top: 15px !important;
 }
 
 #menuFab.open .bar-2 {
-  transform: translate(-50%, -50%) rotate(-45deg) !important;
+  transform: rotate(-45deg) !important;
+  top: 28px !important;
+  left: 15px !important;
 }
 
 #expandableMenu {
