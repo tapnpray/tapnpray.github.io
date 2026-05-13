@@ -1,7 +1,26 @@
 
 # Changelog
+All notable changes to this project will be documented in this file.
 
-All notable changes to the Tap N Pray web application will be documented in this file.
+
+
+## [1.2.3] - 2026-05-13
+
+### Added
+- **Floating Action Button (FAB):** Integrated a new brand-specific blue (#108cd7) button at the bottom center.
+- **Christian Cross Icon:** Implemented a custom CSS-based cross that morphs into an "X" when the menu is active.
+- **Streak Hint Bubble:** Added a floating notification to display the user's current activity streak count.
+- **Ambient Toggle:** New menu action for triggering ambient background effects.
+
+### Changed
+- **Navigation Layout:** Transitioned the menu system to a fixed, bottom-centered position for better reachability.
+- **Visual Design:** Updated the UI to prioritize clean typography and high-contrast readability over previous glassmorphism styles.
+- **Scrolling Behavior:** Restored vertical page scrolling while keeping the FAB and navigation menu in a fixed position.
+
+### Fixed
+- **Mobile Rendering:** Resolved issues where the FAB was hidden behind mobile browser navigation bars or clipped by containers.
+- **Layering Issues:** Corrected z-index conflicts that caused the menu icon to appear behind the verse text.
+- **Responsiveness:** Optimized viewport height (vh) calculations to ensure UI elements are visible across various mobile browsers.
 
 
 # [1.2.2] - 2026-05-08
