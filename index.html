@@ -44,13 +44,15 @@
 
 <style>
 html, body {
-    height: 100%;
+    height: auto; /* Changed from 100% to allow scrolling */
+    min-height: 100%;
     margin: 0;
-    overflow: hidden; /* Fixes double scrollbars and locks the view */
+    overflow-x: hidden; /* Prevent side-to-side wiggle */
+    overflow-y: auto;   /* Restore vertical scrolling */
     font-family: 'Merriweather', Georgia, serif;
     color: #fff;
     background: #000;
-  }
+}
 
   canvas {
     image-rendering: -webkit-optimize-contrast;
@@ -484,51 +486,72 @@ CSS
     FLOATING MENU SYSTEM
 ========================= */
 #menuFab {
-  position: fixed;
-  bottom: calc(30px + env(safe-area-inset-bottom));
-  left: 50%; /* Changed from 'right' to 'left 50%' */
-  transform: translateX(-50%); /* Centers the button perfectly */
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  font-size: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  position: fixed !important; 
+  left: 50% !important;
+  bottom: 40px !important; 
+  transform: translateX(-50%) !important;
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 50% !important;
+  background-color: #108cd7 !important; /* Your brand blue */
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+  z-index: 10000 !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer;
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  /* Note: Removed floatIdle animation here to keep centering stable */
+  padding: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
   transition: background 0.3s, transform 0.3s;
 }
 
-#menuFab.open .cross {
-  transform: rotate(45deg);
+.bar {
+  display: block !important;
+  position: absolute !important;
+  background-color: #ffffff !important;
+  border-radius: 2px !important;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.bar-1 {
+  width: 4px !important;
+  height: 30px !important;
+}
+
+.bar-2 {
+  width: 30px !important;
+  height: 4px !important;
+  transform: translateY(-6px) !important; /* Christian cross shape */
+}
+
+/* Morph to X when menu is open */
+#menuFab.open .bar-1 {
+  transform: rotate(45deg) !important;
+}
+
+#menuFab.open .bar-2 {
+  transform: translateY(0) rotate(-45deg) !important;
 }
 
 #expandableMenu {
   position: fixed;
-  bottom: calc(100px + env(safe-area-inset-bottom));
-  left: 50%; /* Center the menu as well */
+  bottom: calc(110px + env(safe-area-inset-bottom));
+  left: 50%;
   transform: translateX(-50%) translateY(20px) scale(0.95);
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
   padding: 20px;
-  width: 280px; /* Slightly wider for the grid */
-  z-index: 999;
+  width: 280px;
+  z-index: 9999;
   opacity: 0;
   pointer-events: none;
-  transform-origin: bottom center; /* Menu grows from bottom center */
+  transform-origin: bottom center;
   transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
 #expandableMenu.open {
@@ -626,36 +649,35 @@ CSS
     </div>
   </div>
   
-<!-- New Expandable Menu -->
-  <div id="expandableMenu">
-    <div class="menu-items">
-      <select id="translationSelect" class="translation-select">
-        <option value="nlt">NLT</option>
-        <option value="niv">NIV</option>
-        <option value="kjv">KJV</option>
-      </select>
+<!-- Expandable Menu -->
+<div id="expandableMenu">
+  <div class="menu-items">
+    <select id="translationSelect" class="translation-select">
+      <option value="nlt">NLT</option>
+      <option value="niv">NIV</option>
+      <option value="kjv">KJV</option>
+    </select>
 
-      <div class="mode-buttons">
-        <button id="dailyBtn" class="active">Daily</button>
-        <button id="randomBtn">Random</button>
-      </div>
+    <div class="mode-buttons">
+      <button id="dailyBtn" class="active">Daily</button>
+      <button id="randomBtn">Random</button>
+    </div>
 
-      <button id="streak" class="streak-pill">
-        <span>🔥</span>
-        <span id="streakText"><span id="streakNumber">1</span> Day Streak</span>
-      </button>
+    <button id="streak" class="streak-pill">
+      <span>🔥</span>
+      <span id="streakText"><span id="streakNumber">1</span> Day Streak</span>
+    </button>
 
-      <!-- Updated Grid: Now 2 rows of 2 buttons -->
-      <div class="menu-actions">
-        <div id="shareBtn" class="menu-btn">🔗 Share</div>
-        <div id="helpIcon" class="menu-btn">❔ Help</div>
-        <div id="ambientToggle" class="menu-btn">🌿 Ambient</div>
-        <div id="donateIcon" class="menu-btn" style="color: #FFD700;">♥ Donate</div>
-      </div>
+    <div class="menu-actions">
+      <div id="shareBtn" class="menu-btn">🔗 Share</div>
+      <div id="helpIcon" class="menu-btn">❔ Help</div>
+      <div id="ambientToggle" class="menu-btn">🌿 Ambient</div>
+      <div id="donateIcon" class="menu-btn" style="color: #FFD700;">♥ Donate</div>
     </div>
   </div>
+</div>
 
- <!-- The Floating Action Button (FAB) -->
+<!-- The Floating Action Button (FAB) -->
 <button id="menuFab" aria-label="Menu">
   <span class="bar bar-1"></span>
   <span class="bar bar-2"></span>
