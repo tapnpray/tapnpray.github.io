@@ -564,10 +564,6 @@ const saveImageBtn = document.getElementById("saveImageBtn");
 const cancelShareBtn = document.getElementById("cancelShareBtn");
 
 let isSharing = false;
-let verses = { nlt:{}, niv:{}, kjv:{} };
-let translation = "nlt";
-let dailyKey = "";
-let currentKey = "";
 
 /* =========================
    ELITE CURATED VERSE SYSTEM
@@ -1070,8 +1066,200 @@ function toggleAmbient() {
       fadeIn(a);
     }
   }
-  ambientOn = !ambientOn;
+ambientOn = !ambientOn;
   ambientToggle.classList.toggle("active");
+}
+
+function fadeIn(a) {
+  let v = 0;
+  const i = setInterval(() => {
+    v += 0.05;
+    if (v >= 0.3) { v = 0.3; clearInterval(i); }
+    a.volume = v;
+  }, 100);
+}
+
+function fadeOut(a) {
+  let v = a.volume;
+  const i = setInterval(() => {
+    v -= 0.05;
+    if (v <= 0) { clearInterval(i); a.pause(); a.currentTime = 0; }
+    a.volume = v;
+  }, 100);
+}
+
+/* =========================
+   SHARE IMAGE GENERATOR (Minimalist Style)
+========================= */
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  if (!t) return;
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+async function shareVerse() {
+  try {
+    if (isSharing) return;
+    isSharing = true;
+    showToast("Generating image...");
+
+    await document.fonts.ready;
+    const verseText = verses?.[translation]?.[currentKey];
+    if (!verseText) { isSharing = false; return; }
+
+    const canvas = document.createElement("canvas");
+    const size = 1080; 
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+
+    // 1. Determine & Load Pre-Blurred Image Path
+    const hour = new Date().getHours();
+    const isDaytime = hour >= 6 && hour < 18;
+    const blurredImgPath = isDaytime 
+      ? "/backgrounds/morning-blurred.png" 
+      : "/backgrounds/night-blurred.png";
+
+    const bgImg = new Image();
+    bgImg.crossOrigin = "anonymous";
+    bgImg.src = blurredImgPath + "?t=" + new Date().getTime(); 
+
+    await new Promise((resolve) => {
+      bgImg.onload = resolve;
+      bgImg.onerror = resolve;
+    });
+
+    if (bgImg.complete && bgImg.width > 0) {
+      const scale = Math.max(size / bgImg.width, size / bgImg.height);
+      const drawW = bgImg.width * scale;
+      const drawH = bgImg.height * scale;
+      const offX = (size - drawW) / 2;
+      const offY = (size - drawH) / 2;
+
+      ctx.drawImage(bgImg, offX, offY, drawW, drawH);
+      
+      // Apply a slight tint for text legibility
+      ctx.fillStyle = isDaytime ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.7)";
+      ctx.fillRect(0, 0, size, size);
+    } else {
+      ctx.fillStyle = "#0b1a2a";
+      ctx.fillRect(0, 0, size, size);
+    }
+
+    // 2. BRANDING: logo & URL at bottom left
+    const brandingMargin = 60;
+    const logoSize = 60;
+    
+    const logoImg = new Image();
+    logoImg.crossOrigin = "anonymous";
+    logoImg.src = "/logo.svg"; 
+
+    await new Promise(resolve => {
+      logoImg.onload = resolve;
+      logoImg.onerror = resolve; 
+    });
+
+    if (logoImg.complete && logoImg.width > 0) {
+      const logoY = size - brandingMargin - logoSize;
+      ctx.filter = "drop-shadow(0 2px 8px rgba(0,0,0,0.5))"; 
+      ctx.drawImage(logoImg, brandingMargin, logoY, logoSize, logoSize);
+      ctx.filter = "none";
+    }
+
+    ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.font = "400 22px system-ui, -apple-system, sans-serif"; 
+    const urlX = brandingMargin + logoSize + 20;
+    const urlY = size - brandingMargin - (logoSize / 2) + 8; 
+    ctx.fillText("www.tapnpray.com", urlX, urlY);
+
+    // 3. Verse Header & Date
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    ctx.font = "700 36px Merriweather";
+    ctx.fillText("Daily Bible Verse", size / 2, 100);
+    
+    ctx.fillStyle = isDaytime ? "rgba(255,255,255,0.7)" : "#2fb4ff"; 
+    ctx.font = "400 26px Merriweather";
+    ctx.fillText(new Date().toDateString(), size / 2, 150);
+
+    // 4. Reflow Verse Text
+    let fontSize = verseText.length > 200 ? 38 : 48; 
+    ctx.font = `700 ${fontSize}px Merriweather`;
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "rgba(0, 0, 0, 1)"; 
+    ctx.shadowBlur = 25;                  
+    ctx.shadowOffsetY = 6;
+
+    const words = verseText.split(" ");
+    const lines = [];
+    let currentLine = "";
+    const maxWidth = size - 160; 
+
+    words.forEach(word => {
+      let testLine = currentLine + word + " ";
+      if (ctx.measureText(testLine).width > maxWidth) {
+        lines.push(currentLine.trim());
+        currentLine = word + " ";
+      } else {
+        currentLine = testLine;
+      }
+    });
+    lines.push(currentLine.trim());
+
+    const lineHeight = fontSize * 1.5; 
+    const totalTextHeight = lines.length * lineHeight;
+    const startY = 220 + ((size - 360 - brandingMargin - totalTextHeight) / 2);
+
+    lines.forEach((l, i) => {
+      ctx.fillText(l, size / 2, startY + (i * lineHeight));
+    });
+
+    // 5. Reference
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    ctx.fillStyle = isDaytime ? "rgba(255,255,255,0.95)" : "#5cc2ff"; 
+    ctx.font = "700 32px Merriweather";
+    ctx.fillText(currentKey, size / 2, startY + totalTextHeight + 60);
+
+    // --- Final Generation & Share ---
+    const dataUrl = canvas.toDataURL("image/png");
+    if (typeof trackAppEvent === 'function') {
+      trackAppEvent('share_image_generated', { 'verse_ref': currentKey });
+    }
+    
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], "verse.png", { type: "image/png" });
+
+    if (navigator.share) {
+      await navigator.share({
+        files: [file],
+        title: 'Tap N Pray',
+        text: `"${verseText}" - ${currentKey}`
+      });
+    } else {
+      shareModal.style.display = "flex";
+      saveImageBtn.onclick = () => {
+        if (typeof trackAppEvent === 'function') {
+          trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
+        }
+        const link = document.createElement("a");
+        link.download = "verse.png";
+        link.href = dataUrl;
+        link.click();
+      };
+      cancelShareBtn.onclick = () => shareModal.style.display = "none";
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Share failed. Please try again.");
+  } finally {
+    isSharing = false;
+  }
 }
 </script>
 </body>
