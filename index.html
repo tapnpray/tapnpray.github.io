@@ -138,11 +138,12 @@
     transition: color 0.2s ease;
   }
 
-  .word {
+.word {
     opacity: 0.4;
     transition: opacity 0.15s ease, color 0.15s ease;
     display: inline-block;
     margin-right: 0.25em;
+    pointer-events: none; /* Allows the click to pass directly to the main verse text block */
   }
 
   .word.active {
@@ -682,8 +683,14 @@ function buildWeightedPool() {
   seasonal.forEach(ref => {
     for (let i = 0; i < 6; i++) { pool.push(ref); }
   });
-  const filtered = pool.filter(v => !recentVerses.includes(v));
-  cachedPool = filtered.length ? filtered : pool;
+const filtered = pool.filter(v => !recentVerses.includes(v));
+  if (filtered.length === 0) {
+    recentVerses = [];
+    localStorage.removeItem("recentVerses");
+    cachedPool = pool;
+  } else {
+    cachedPool = filtered;
+  }
   return cachedPool;
 }
 
@@ -732,9 +739,12 @@ async function initApp() {
       expandableMenu.classList.toggle("open");
     });
 
-    document.addEventListener("click", (e) => {
-      const isClickInside = expandableMenu.contains(e.target) || menuFab.contains(e.target);
-      if (!isClickInside && expandableMenu.classList.contains("open")) {
+document.addEventListener("click", (e) => {
+      // If the menu isn't open, ignore this global click filter completely
+      if (!expandableMenu.classList.contains("open")) return;
+      
+      // If the user clicked outside both the menu and the FAB button, close it safely
+      if (!expandableMenu.contains(e.target) && !menuFab.contains(e.target)) {
         menuFab.classList.remove("open");
         expandableMenu.classList.remove("open");
       }
@@ -779,9 +789,10 @@ function generateDaily() {
   const today = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
-  if (stored.date === today) {
+if (stored.date === today) {
     dailyKey = stored.key;
   } else {
+    cachedPool = null; // Clear cache to allow daily roll calculation
     const pool = buildWeightedPool();
     const dateSeed = getSeed(today);
     
@@ -813,6 +824,7 @@ function showRandom() {
   if (typeof trackAppEvent === 'function') {
     trackAppEvent('view_mode_change', { 'mode': 'random' });
   }
+  cachedPool = null; // Clear cache so a fresh pool calculation runs
   const pool = buildWeightedPool();
   const randomPool = pool.filter(ref => ref !== dailyKey);
   const activePool = randomPool.length ? randomPool : pool;
@@ -971,37 +983,40 @@ function readVerse() {
   const text = verses?.[translation]?.[currentKey];
   if (!text) return;
 
-  const u = new SpeechSynthesisUtterance(`${text} ... ${currentKey}`);
-  const allVoices = window.speechSynthesis.getVoices();
-  
-  let premiumVoice = allVoices.find(voice => 
-    voice.lang.includes('en') && 
-    (voice.name.includes('Premium') || voice.name.includes('Natural') || voice.name.includes('Google US English'))
-  );
-  
-  if (!premiumVoice) premiumVoice = allVoices.find(voice => voice.name.includes('Samantha') || voice.name.includes('Google'));
-  if (!premiumVoice) premiumVoice = allVoices.find(voice => voice.lang.startsWith('en'));
-  
-  if (premiumVoice) u.voice = premiumVoice;
+  // Wrap speech execution in a brief timeout to let mobile audio engines completely clear their queues
+  setTimeout(() => {
+    const u = new SpeechSynthesisUtterance(`${text} ... ${currentKey}`);
+    const allVoices = window.speechSynthesis.getVoices();
+    
+    let premiumVoice = allVoices.find(voice => 
+      voice.lang.includes('en') && 
+      (voice.name.includes('Premium') || voice.name.includes('Natural') || voice.name.includes('Google US English'))
+    );
+    
+    if (!premiumVoice) premiumVoice = allVoices.find(voice => voice.name.includes('Samantha') || voice.name.includes('Google'));
+    if (!premiumVoice) premiumVoice = allVoices.find(voice => voice.lang.startsWith('en'));
+    
+    if (premiumVoice) u.voice = premiumVoice;
 
-  u.rate = 0.90;
-  u.pitch = 1.0;
+    u.rate = 0.90;
+    u.pitch = 1.0;
 
-  let wordIndex = 0;
-  u.onboundary = (event) => {
-    if (event.name === "word") {
-      if (words[wordIndex]) {
-        words.forEach(w => w.classList.remove("active"));
-        words[wordIndex].classList.add("active");
-        wordIndex++;
+    let wordIndex = 0;
+    u.onboundary = (event) => {
+      if (event.name === "word") {
+        if (words[wordIndex]) {
+          words.forEach(w => w.classList.remove("active"));
+          words[wordIndex].classList.add("active");
+          wordIndex++;
+        }
       }
-    }
-  };
+    };
 
-  u.onend = () => { words.forEach(w => w.classList.remove("active")); };
-  u.onerror = () => { words.forEach(w => w.classList.remove("active")); };
+    u.onend = () => { words.forEach(w => w.classList.remove("active")); };
+    u.onerror = () => { words.forEach(w => w.classList.remove("active")); };
 
-  setTimeout(() => { window.speechSynthesis.speak(u); }, 150);
+    window.speechSynthesis.speak(u);
+  }, 50); // a brief 50ms pause keeps the click active and stable on iOS/Chrome
 }
 
 if (typeof window !== "undefined" && window.speechSynthesis) {
