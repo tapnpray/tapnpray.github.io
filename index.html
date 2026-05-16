@@ -556,7 +556,11 @@ let translation = "nlt";
 let dailyKey = "";
 let currentKey = "";
 
+/* =========================
+   ELITE CURATED VERSE SYSTEM
+========================= */
 const curatedVerses = [
+  // --- CORNERSTONE & GOSPEL ---
   { ref: "John 3:16", weight: 5 }, { ref: "Romans 5:8", weight: 4 },
   { ref: "John 14:6", weight: 5 }, { ref: "Romans 6:23", weight: 4 },
   { ref: "Ephesians 2:8", weight: 5 }, { ref: "Ephesians 2:9", weight: 4 },
@@ -564,24 +568,145 @@ const curatedVerses = [
   { ref: "Romans 10:9", weight: 5 }, { ref: "Romans 10:13", weight: 5 },
   { ref: "2 Corinthians 5:17", weight: 5 }, { ref: "John 3:17", weight: 4 },
   { ref: "Galatians 2:20", weight: 4 }, { ref: "1 John 1:9", weight: 5 },
+
+  // --- ANXIETY, PEACE & REST ---
   { ref: "Philippians 4:6", weight: 5 }, { ref: "Philippians 4:7", weight: 5 },
   { ref: "1 Peter 5:7", weight: 5 }, { ref: "John 14:27", weight: 5 },
-  { ref: "Matthew 11:28", weight: 5 }, { ref: "Psalm 4:8", weight: 5 },
+  { ref: "Matthew 11:28", weight: 5 }, { ref: "Matthew 11:29", weight: 4 },
+  { ref: "Matthew 11:30", weight: 4 }, { ref: "Psalm 4:8", weight: 5 },
   { ref: "Isaiah 26:3", weight: 5 }, { ref: "Psalm 46:1", weight: 5 },
+  { ref: "Psalm 62:1", weight: 4 }, { ref: "Psalm 94:19", weight: 4 },
+  { ref: "John 14:1", weight: 5 }, { ref: "Isaiah 30:15", weight: 4 },
+  { ref: "Psalm 62:5", weight: 4 }, { ref: "Psalm 121:8", weight: 5 },
+
+  // --- STRENGTH & COURAGE ---
   { ref: "Joshua 1:9", weight: 5 }, { ref: "Isaiah 41:10", weight: 5 },
   { ref: "Isaiah 40:31", weight: 5 }, { ref: "Philippians 4:13", weight: 5 },
-  { ref: "2 Timothy 1:7", weight: 5 }, { ref: "Psalm 27:1", weight: 5 },
-  { ref: "1 Corinthians 13:4", weight: 5 }, { ref: "1 John 4:19", weight: 5 },
+  { ref: "2 Timothy 1:7", weight: 5 }, { ref: "Ephesians 6:10", weight: 4 },
+  { ref: "Psalm 27:1", weight: 5 }, { ref: "Exodus 14:14", weight: 5 },
+  { ref: "Psalm 18:2", weight: 5 }, { ref: "Isaiah 40:29", weight: 4 },
+  { ref: "Deuteronomy 31:6", weight: 5 }, { ref: "Psalm 28:7", weight: 4 },
+  { ref: "2 Thessalonians 3:3", weight: 4 }, { ref: "Nehemiah 8:10", weight: 4 },
+  { ref: "Isaiah 43:1", weight: 5 }, { ref: "1 Chronicles 16:11", weight: 4 },
+
+  // --- LOVE & COMPASSION ---
+  { ref: "1 Corinthians 13:4", weight: 5 }, { ref: "1 Corinthians 13:13", weight: 5 },
+  { ref: "1 John 4:19", weight: 5 }, { ref: "1 John 4:8", weight: 5 },
+  { ref: "John 13:34", weight: 5 }, { ref: "John 15:12", weight: 4 },
+  { ref: "1 Peter 4:8", weight: 4 }, { ref: "Ephesians 4:32", weight: 4 },
+  { ref: "1 John 3:1", weight: 5 }, { ref: "1 John 4:7", weight: 4 },
+  { ref: "Romans 5:5", weight: 4 }, { ref: "John 15:13", weight: 5 },
+  { ref: "Colossians 3:14", weight: 5 }, { ref: "1 Corinthians 16:14", weight: 3 },
+
+  // --- HOPE & FUTURE ---
   { ref: "Jeremiah 29:11", weight: 5 }, { ref: "Romans 8:28", weight: 5 },
+  { ref: "Lamentations 3:22", weight: 5 }, { ref: "Lamentations 3:23", weight: 5 },
+  { ref: "Romans 15:13", weight: 5 }, { ref: "Philippians 1:6", weight: 5 },
+  { ref: "Isaiah 43:19", weight: 5 }, { ref: "Revelation 21:4", weight: 5 },
+  { ref: "Psalm 147:3", weight: 4 }, { ref: "Jeremiah 31:3", weight: 4 },
+  { ref: "Psalm 121:1", weight: 4 }, { ref: "Micah 7:7", weight: 4 },
+  { ref: "Revelation 22:20", weight: 4 }, { ref: "Romans 8:31", weight: 5 },
+
+  // --- WISDOM & GUIDANCE ---
   { ref: "Proverbs 3:5", weight: 5 }, { ref: "Proverbs 3:6", weight: 5 },
-  { ref: "Hebrews 11:1", weight: 5 }, { ref: "Psalm 23:4", weight: 5 }
+  { ref: "James 1:5", weight: 5 }, { ref: "Psalm 119:105", weight: 5 },
+  { ref: "Psalm 32:8", weight: 4 }, { ref: "Proverbs 16:3", weight: 4 },
+  { ref: "Proverbs 16:9", weight: 4 }, { ref: "Psalm 25:4", weight: 4 },
+  { ref: "James 1:22", weight: 4 }, { ref: "Micah 6:8", weight: 5 },
+  { ref: "Matthew 6:33", weight: 5 }, { ref: "Psalm 37:4", weight: 4 },
+  { ref: "Proverbs 4:23", weight: 5 }, { ref: "Psalm 90:12", weight: 4 },
+
+  // --- FAITH & TRUST ---
+  { ref: "Hebrews 11:1", weight: 5 }, { ref: "Hebrews 11:6", weight: 4 },
+  { ref: "2 Corinthians 5:7", weight: 5 }, { ref: "Mark 11:24", weight: 5 },
+  { ref: "Hebrews 12:1", weight: 4 }, { ref: "Hebrews 12:2", weight: 5 },
+  { ref: "Psalm 56:3", weight: 5 }, { ref: "Psalm 62:5", weight: 4 },
+  { ref: "Matthew 19:26", weight: 5 }, { ref: "Habakkuk 3:19", weight: 4 },
+  { ref: "Romans 1:16", weight: 5 }, { ref: "Hebrews 10:23", weight: 4 },
+
+  // --- PRAISE & ADORATION ---
+  { ref: "Psalm 118:24", weight: 5 }, { ref: "Psalm 100:5", weight: 4 },
+  { ref: "Psalm 150:6", weight: 5 }, { ref: "Psalm 19:1", weight: 4 },
+  { ref: "Psalm 103:1", weight: 5 }, { ref: "1 Thessalonians 5:16", weight: 4 },
+  { ref: "1 Thessalonians 5:17", weight: 4 }, { ref: "1 Thessalonians 5:18", weight: 5 },
+  { ref: "Psalm 34:1", weight: 4 }, { ref: "Psalm 145:9", weight: 4 },
+  { ref: "Psalm 19:14", weight: 3 }, { ref: "Psalm 107:1", weight: 4 },
+
+  // --- COMFORT IN AFFLICTION ---
+  { ref: "Psalm 34:18", weight: 5 }, { ref: "2 Corinthians 1:3", weight: 5 },
+  { ref: "2 Corinthians 12:9", weight: 5 }, { ref: "Romans 8:18", weight: 5 },
+  { ref: "Isaiah 43:2", weight: 5 }, { ref: "Psalm 23:4", weight: 5 },
+  { ref: "Matthew 5:4", weight: 5 }, { ref: "Psalm 73:26", weight: 4 },
+  { ref: "John 16:33", weight: 5 }, { ref: "Psalm 55:22", weight: 5 },
+  { ref: "Isaiah 53:5", weight: 5 }, { ref: "Psalm 139:14", weight: 5 }
 ];
 
+function getEasterDate(year) {
+  const f = Math.floor;
+  const G = year % 19;
+  const C = f(year / 100);
+  const H = (C - f(C / 4) - f((8 * C + 13) / 25) + 19 * G + 15) % 30;
+  const I = H - f(H / 28) * (1 - f(29 / (H + 1)) * f((21 - G) / 11));
+  const J = (year + f(year / 4) + I + 2 - C + f(C / 4)) % 7;
+  const L = I - J;
+  const month = 3 + f((L + 40) / 44);
+  const day = L + 28 - 31 * f(month / 4);
+  return new Date(year, month - 1, day);
+}
+
+function getSeasonalBoosts() {
+  const today = new Date();
+  const year = today.getUTCFullYear();
+  if (today.getUTCMonth() === 11 && today.getUTCDate() >= 20 && today.getUTCDate() <= 26) {
+    return ["Luke 2:10", "Isaiah 9:6", "Matthew 1:21"];
+  }
+  const easter = getEasterDate(year);
+  const diffDays = Math.floor((today - easter) / 86400000);
+  if (diffDays === 0) return ["Matthew 28:6"];
+  if (diffDays === -2) return ["Luke 23:46"];
+  if (diffDays >= -3 && diffDays <= 3) return ["John 3:16"];
+  return [];
+}
+
+let cachedPool = null;
+let recentVerses = JSON.parse(localStorage.getItem("recentVerses") || "[]");
+const RECENT_LIMIT = 14;
+
+function buildWeightedPool() {
+  if (cachedPool) return cachedPool;
+  let pool = [];
+  curatedVerses.forEach(v => {
+    for (let i = 0; i < v.weight; i++) { pool.push(v.ref); }
+  });
+  const seasonal = getSeasonalBoosts();
+  seasonal.forEach(ref => {
+    for (let i = 0; i < 6; i++) { pool.push(ref); }
+  });
+  const filtered = pool.filter(v => !recentVerses.includes(v));
+  cachedPool = filtered.length ? filtered : pool;
+  return cachedPool;
+}
+
+function addToRecent(ref) {
+  recentVerses.unshift(ref);
+  if (recentVerses.length > RECENT_LIMIT) recentVerses.pop();
+  localStorage.setItem("recentVerses", JSON.stringify(recentVerses));
+}
+
+function getSeed(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h << 5) - h + s.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+// --- APP CORE FRAMEWORK ---
 async function initApp() {
   await loadTranslation(translation);
   generateDaily();
   
-  // Schedule a page reload for the exact moment the daily UTC verse rolls over
   setAutoRefreshAtMidnight();
   
   dailyBtn.addEventListener("click", showDaily);
@@ -617,6 +742,9 @@ async function initApp() {
 
 window.addEventListener("DOMContentLoaded", initApp);
 
+/* =========================
+   BACKGROUNDS
+========================= */
 const bgImages = {
   morning: "/backgrounds/morning-blurred.png",
   night: "/backgrounds/night-blurred.png"
@@ -643,15 +771,6 @@ function updateBackground() {
 }
 updateBackground();
 setInterval(updateBackground, 300000);
-
-function getSeed(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) {
-    h = (h << 5) - h + s.charCodeAt(i);
-    h |= 0;
-  }
-  return Math.abs(h);
-}
 
 function generateDaily() {
   // Create a strict YYYY-MM-DD UTC date string so all containers match perfectly
