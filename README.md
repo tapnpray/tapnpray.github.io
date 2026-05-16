@@ -7,7 +7,7 @@ Tap N Pray is a minimalist, immersive web application designed to bring the Word
 ## 🚀 Project Status
 For a detailed breakdown of codebase development, please refer to the [Full Changelog](./CHANGELOG.md).
 
-**Current Version:** 1.2.4
+**Current Version:** 1.2.5
 
 ---
 
@@ -15,11 +15,9 @@ For a detailed breakdown of codebase development, please refer to the [Full Chan
 
 ### 📖 Immersive Verse Experience
 - **Daily & Random Modes** Start your day with a globally synchronized **Daily Bible Verse** or explore scripture dynamically using the **Random** toggle.
-- **Elite Curated System** Rather than pulling completely raw random data, Tap N Pray utilizes an internal **weighted mathematical pool system** to prioritize:
-  - Cornerstone Gospel passages  
-  - Seasonal scriptures (Christmas / Easter)  
-  - Target thematic verses (Comfort in Anxiety, Strength, Love, Hope)
-- **Immediate Overlap Prevention** The selection engine automatically cross-references the previous 7 days' globally synchronized seeds to mathematically block immediate scriptural repeats, while ensuring the Random mode never overlaps with today's chosen daily verse.
+- **Elite Curated System** Rather than pulling completely raw random data, Tap N Pray utilizes an internal **weighted mathematical pool system** to prioritize balance across custom thematic categories (Gospel, Peace, Strength, Love, Hope, Wisdom, Faith, Praise, and Comfort).
+- **Seasonal Holiday Logic** Integrated dynamic calculation utilities (including a manual tracking algorithm for Easter dates) to automatically increase the frequency of relevant scriptures during key holiday windows (Christmas, Good Friday, Easter Sunday).
+- **History Avoidance Rotation** The selection engine features an explicit `localStorage` rotation buffer tracking the last 14 unique verses (`recentVerses`) to filter out recent repeats and maintain high user engagement.
 - **Multiple Translations** Seamlessly switch on the fly between optimized database structures for:
   - **NLT** (New Living Translation)
   - **NIV** (New International Version)
@@ -36,7 +34,7 @@ For a detailed breakdown of codebase development, please refer to the [Full Chan
 ---
 
 ### 🔥 PWA Optimization & Habits
-- **Cross-Platform Global Sync** Engineered to bridge standalone PWA sandboxes. By shifting seed calculations to an explicit, time-zone agnostic UTC date string string blueprint, both standard mobile Safari/Chrome tabs and installed **Add to Home Screen** app containers display the exact same synchronized verse worldwide.
+- **Cross-Platform Global Sync** Engineered to bridge standalone PWA sandboxes. By shifting seed calculations to an explicit, time-zone agnostic UTC date string blueprint, both standard mobile Safari/Chrome tabs and installed **Add to Home Screen** app containers display the exact same synchronized verse worldwide.
 - **Automated Midnight Refresh** Includes an integrated, ultra-lightweight midnight timer loop. It calculates the exact milliseconds remaining until the next global UTC rollover and triggers an automated silent page update, ensuring open apps update without requiring a manual app relaunch.
 - **Timezone-Agnostic Streak Tracking** Build consistency in your quiet time with streak metrics that parse strict date objects, preventing accidental local timezone offset resets at midnight.
   - 🌿 7 days — *Initial Habit Milestone*
@@ -54,8 +52,9 @@ For a detailed breakdown of codebase development, please refer to the [Full Chan
 
 ## 🛠️ Technical Overview
 
-- **Frontend Architecture**: Vanilla ECMAScript 6 / HTML5 Canvas / CSS3 (Variables & Custom Properties)
+- **Frontend Architecture**: Vanilla ECMAScript 6 / HTML5 Canvas / CSS3 (Variables & Custom Properties).
 - **Data Hydration**: Highly optimized, decoupled JSON book-chapter translation trees for instantaneous asset loads.
+- **Runtime Reference Safeguards**: Global utility hooks and external script parameters are wrapped in explicit type-checks to guarantee runtime application stability across distinct mobile and web environments.
 - **Analytics Pipeline**: Integrated Google Analytics tracking layer (`gtag`) mapping application engagement triggers like view modes, translation adaptations, and generation intents.
 - **PWA Architecture**: Standalone web app manifest ready with native mobile environment safe-area padding layouts (`env(safe-area-inset)`).
 
