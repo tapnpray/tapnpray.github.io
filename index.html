@@ -651,7 +651,10 @@ function getSeed(s) {
 }
 
 function generateDaily() {
-  const today = new Date().toDateString();
+  // Create a strict YYYY-MM-DD UTC date string so all containers match perfectly
+  const d = new Date();
+  const today = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
+  
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
   if (stored.date === today) {
@@ -739,14 +742,19 @@ function updateStreak() {
   const lastVisit = localStorage.getItem("lastVisit");
   let streak = parseInt(localStorage.getItem("streak")) || 1;
 
-  if (lastVisit && lastVisit !== today) {
-    const last = new Date(lastVisit);
-    const now = new Date(today);
-    const diff = Math.floor((now - last) / 86400000);
+if (lastVisit && lastVisit !== today) {
+    // Parse the YYYY-M-D string chunks manually to ensure timezone consistency
+    const [lastY, lastM, lastD] = lastVisit.split('-').map(Number);
+    const [nowY, nowM, nowD] = today.split('-').map(Number);
+    
+    // Create pure UTC timestamps for an exact millisecond comparison
+    const lastDateObj = Date.UTC(lastY, lastM - 1, lastD);
+    const nowDateObj = Date.UTC(nowY, nowM - 1, nowD);
+    
+    const diff = Math.floor((nowDateObj - lastDateObj) / 86400000);
     if (diff === 1) streak++;
     else if (diff > 1) streak = 1;
   }
-
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
   
