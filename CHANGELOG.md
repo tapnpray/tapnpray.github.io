@@ -2,7 +2,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.4] - 2026-05-16
 
+### Added
+- Implemented an automated background midnight refresh scheduler via lightweight UTC millisecond offsets, synchronizing active browser tabs and standalone PWA installations globally when the verse rolls over.
+- Embedded asynchronous browser voice engine pre-fetching logic using `onvoiceschanged` initialization handlers to gracefully cache natural native devices profiles on boot.
+
+### Fixed
+- Fixed critical isolated state variances in standalone iOS "Add to Home Screen" PWA sandboxes by migrating all date-seeding and calculation logic to a strict time-zone agnostic UTC format.
+- Resolved page execution freezing by restructuring closing bracket scope boundaries around core framework listeners and eliminating unhandled elements within the help modal binding routines.
+- Corrected synchronized speech boundary rendering inside the audio narration tracking sequence, ensuring precise character-by-character text highlight extraction and full tracking resets on completion.
+- Remediated local timezone offset shifts across midnight thresholds in sub-container tracking fields, securing uninterrupted sequential user streak calculation metrics.
 
 ## [1.2.3] - 2026-05-13
 
