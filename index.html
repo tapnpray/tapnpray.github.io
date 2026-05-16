@@ -1197,69 +1197,80 @@ function goDonate() {
    READ ALOUD & AUDIO
 ========================= */
 function readVerse() {
-  trackAppEvent('read_aloud', {
-    'verse_ref': currentKey,
-    'translation': translation
-  });
+  if (typeof trackAppEvent === "function") {
+    trackAppEvent('read_aloud', {
+      'verse_ref': currentKey,
+      'translation': translation
+    });
+  }
+  
+  // Instantly cancel any active background voice queues
   window.speechSynthesis.cancel(); 
+  
   const words = document.querySelectorAll(".word");
   words.forEach(w => w.classList.remove("active"));
   
   const text = verses?.[translation]?.[currentKey];
   if (!text) return;
 
-  const u = new SpeechSynthesisUtterance(text + " " + currentKey);
-  u.rate = 0.95;
-  u.pitch = 1;
+  // We read the text and cleanly transition to the citation reference
+  const u = new SpeechSynthesisUtterance(`${text} ... ${currentKey}`);
+  
+  // 1. SELECT THE PREMIUM NATURAL VOICE CONTEXT
+  const allVoices = window.speechSynthesis.getVoices();
+  
+  // Filter for highly realistic English voices on local device platforms
+  let premiumVoice = allVoices.find(voice => 
+    voice.lang.includes('en') && 
+    (voice.name.includes('Premium') || voice.name.includes('Natural') || voice.name.includes('Google US English'))
+  );
+  
+  // Fallbacks if high-fidelity custom sets aren't loaded or available
+  if (!premiumVoice) premiumVoice = allVoices.find(voice => voice.name.includes('Samantha') || voice.name.includes('Google'));
+  if (!premiumVoice) premiumVoice = allVoices.find(voice => voice.lang.startsWith('en'));
+  
+  if (premiumVoice) {
+    u.voice = premiumVoice;
+  }
 
+  // 2. SPEED TUNING FOR COMMUNICATIVE IMPACT
+  u.rate = 0.90; // Slid down slightly from 0.95 for a warm, intentional pacing
+  u.pitch = 1.0;
+
+  // 3. ENHANCED SYNCHRONIZED BOUNDARY HIGHLIGHTING
   let wordIndex = 0;
   u.onboundary = (event) => {
     if (event.name === "word") {
+      // Clean up punctuation discrepancies between the reader data and raw script lengths
       if (words[wordIndex]) {
+        // Clear old highlights dynamically so it acts as a smooth flowing single tracking light
+        words.forEach(w => w.classList.remove("active"));
         words[wordIndex].classList.add("active");
         wordIndex++;
       }
     }
   };
 
+  // Reset highlight states on exit or manual mid-stream cancellation
+  u.onend = () => {
+    words.forEach(w => w.classList.remove("active"));
+  };
+  u.onerror = () => {
+    words.forEach(w => w.classList.remove("active"));
+  };
+
+  // Small delay gives mobile rendering systems a breath to fetch assets smoothly
   setTimeout(() => {
-    speechSynthesis.speak(u);
-  }, 100);
+    window.speechSynthesis.speak(u);
+  }, 150);
 }
 
-let ambientOn = false;
-function toggleAmbient() {
-  trackAppEvent('ambient_toggle', { 'is_on': !ambientOn });
-  const a = ambientAudio;
-  if (ambientOn) {
-    fadeOut(a);
-  } else {
-    a.volume = 0;
-    a.play().catch(()=>{});
-    fadeIn(a);
+// Ensure the device browser populates its internal voice systems ahead of the click event
+if (typeof window !== "undefined" && window.speechSynthesis) {
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
   }
-  ambientOn = !ambientOn;
-  ambientToggle.classList.toggle("active");
 }
-
-function fadeIn(a) {
-  let v = 0;
-  const i = setInterval(() => {
-    v += 0.05;
-    if (v >= 0.3) { v = 0.3; clearInterval(i); }
-    a.volume = v;
-  }, 100);
-}
-
-function fadeOut(a) {
-  let v = a.volume;
-  const i = setInterval(() => {
-    v -= 0.05;
-    if (v <= 0) { clearInterval(i); a.pause(); a.currentTime = 0; }
-    a.volume = v;
-  }, 100);
-}
-
 /* =========================
    SHARE IMAGE GENERATOR (Minimalist Style)
 ========================= */
