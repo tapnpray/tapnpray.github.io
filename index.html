@@ -533,6 +533,14 @@
   <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
 
 <script>
+/* =========================
+   VERSES & TRANSLATIONS
+========================= */
+let verses = { nlt:{}, niv:{}, kjv:{} };
+let translation = "nlt";
+let dailyKey = "";
+let currentKey = "";
+
 const titleEl = document.getElementById("title");
 const dateEl = document.getElementById("date");
 const verseEl = document.getElementById("verse");
@@ -849,7 +857,9 @@ function changeTranslation(t) {
   }
   translation = t;
   if (!verses[translation] || !Object.keys(verses[translation]).length) {
-    loadTranslation(t).then(() => changeTranslation(t));
+    loadTranslation(t).then(() => {
+      updateVerse(dailyBtn.classList.contains("active") ? "Daily Bible Verse" : "Random Bible Verse");
+    });
     return;
   }
   if (!verses[translation][currentKey]) {
@@ -1024,14 +1034,18 @@ function readVerse() {
       }
     };
 
-    u.onend = () => { words.forEach(w => w.classList.remove("active")); };
+u.onend = () => { words.forEach(w => w.classList.remove("active")); };
     u.onerror = () => { words.forEach(w => w.classList.remove("active")); };
 
-    window.speechSynthesis.speak(u);
-  }, 50); // a brief 50ms pause keeps the click active and stable on iOS/Chrome
+    setTimeout(() => {
+      window.speechSynthesis.speak(u);
+    }, 100);
+  }, 50);
 }
 
+// Clean cross-browser engine initialization listener
 if (typeof window !== "undefined" && window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
   if (window.speechSynthesis.onvoiceschanged !== undefined) {
     window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
   }
