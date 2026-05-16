@@ -715,9 +715,14 @@ function getSeed(s) {
 
 // --- APP CORE FRAMEWORK ---
 async function initApp() {
+  // Setup background tracking first
+  updateBackground();
+  setInterval(updateBackground, 300000);
+
+  // Load files and parse verses safely
   await loadTranslation(translation);
   generateDaily();
-  
+
   if (typeof setAutoRefreshAtMidnight === 'function') {
     setAutoRefreshAtMidnight();
   }
@@ -785,9 +790,6 @@ function updateBackground() {
     currentBackground = img;
   };
 }
-updateBackground();
-setInterval(updateBackground, 300000);
-
 function generateDaily() {
   const d = new Date();
   const today = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
