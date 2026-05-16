@@ -756,8 +756,7 @@ async function initApp() {
   helpIcon.addEventListener("click", openHelp);
   document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
   donateIcon.addEventListener("click", goDonate);
-verseEl.addEventListener("click", readVerse);
-
+  verseEl.addEventListener("click", readVerse);
 
   // --- MENU Toggle Logic ---
   const menuFab = document.getElementById("menuFab");
@@ -779,14 +778,13 @@ verseEl.addEventListener("click", readVerse);
       }
     });
   }
-} // <--- THIS BRACE CLOSES initApp
+} // <--- THIS CLOSES initApp
 
 window.addEventListener("DOMContentLoaded", initApp);
 
 /* =========================
    BACKGROUNDS (Day/Night Toggle)
 ========================= */
-// Points to your simplified folder structure
 const bgImages = {
   morning: "/backgrounds/morning-blurred.png",
   night: "/backgrounds/night-blurred.png"
@@ -796,12 +794,10 @@ let currentBackground = "";
 
 function updateBackground() {
   const hour = new Date().getHours();
-  // Day logic: 6 AM to 6 PM (adjust hours if you prefer)
   const isDaytime = hour >= 6 && hour < 18;
   const mode = isDaytime ? "morning" : "night";
   const img = bgImages[mode];
 
-  // Only update if the background actually needs to change
   if (img === currentBackground) return;
 
   const preload = new Image();
@@ -810,7 +806,6 @@ function updateBackground() {
     const bg = document.getElementById("bg-layer");
     bg.style.backgroundImage = `url('${img}')`;
     
-    // Set brightness based on mode: Night is slightly dimmer for text legibility
     const brightness = (mode === "night") ? 0.6 : 1.0;
     document.body.style.setProperty('--brightness', brightness);
     
@@ -818,9 +813,9 @@ function updateBackground() {
   };
 }
 
-// Run immediately
+// Run immediately to establish initial state
 updateBackground();
-// Check every 5 minutes in case the user leaves the tab open during sunset/sunrise
+// Check every 5 minutes
 setInterval(updateBackground, 300000);
 /* =========================
    ELITE CURATED VERSE SYSTEM
