@@ -581,6 +581,9 @@ async function initApp() {
   await loadTranslation(translation);
   generateDaily();
   
+  // Schedule a page reload for the exact moment the daily UTC verse rolls over
+  setAutoRefreshAtMidnight();
+  
   dailyBtn.addEventListener("click", showDaily);
   randomBtn.addEventListener("click", showRandom);
   translationSelect.addEventListener("change", (e) => changeTranslation(e.target.value));
@@ -1081,6 +1084,32 @@ async function shareVerse() {
     isSharing = false;
   }
 }
+
+/* =========================
+   AUTO-REFRESH AT MIDNIGHT
+========================= */
+function setAutoRefreshAtMidnight() {
+  const now = new Date();
+  
+  // Calculate the exact millisecond timestamp for the next UTC midnight
+  const nextMidnightUTC = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1, // Tomorrow
+    0, 0, 0, 0            // 00:00:00.000
+  );
+  
+  const msUntilMidnight = nextMidnightUTC - now.getTime();
+  
+  // Set a safe maximum timeout threshold (JavaScript setTimeout handles up to ~24.8 days)
+  if (msUntilMidnight > 0) {
+    setTimeout(() => {
+      // Force reload from server cache to sync the brand new daily verse
+      window.location.reload(true);
+    }, msUntilMidnight + 1000); // 1-second buffer ensures the system clock has fully ticked over
+  }
+}
+
 </script>
 </body>
 </html>
