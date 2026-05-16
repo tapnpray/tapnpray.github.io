@@ -2,6 +2,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.5] - 2026-05-16
+
+### Added
+- **Elite Curated Verse System Engine:** Fully wired the advanced weighting engine to the front-end display, enabling smart distribution across custom categories (Gospel, Peace, Strength, Hope, etc.).
+- **Seasonal Holiday Boost System:** Integrated dynamic calculation utilities (including a tracking algorithm for Easter dates) to automatically increase the frequency of relevant scriptures during key holiday windows.
+- **History Avoidance Rotation:** Implemented a `localStorage` loop tracking the last 14 unique verses (`recentVerses`) to filter out recent repeats and keep user engagement high.
+
+### Fixed
+- **Engine Hook Synchronizations:** Rewrote `generateDaily()` and `showRandom()` to accurately reference and pull from the active weighted pool rather than old fallback arrays.
+- **Runtime Reference Safeguards:** Wrapped external script references (`setAutoRefreshAtMidnight`, `fadeIn`, `fadeOut`) in type-checks to prevent uncaught runtime exceptions and lock down script stability.
+- **Syntax Validation:** Resolved unclosed code structures and formatted nested object properties inside the script container for error-free deployment.
+
+
 ## [1.2.4] - 2026-05-16
 
 ### Added
