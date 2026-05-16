@@ -734,15 +734,15 @@ async function initApp() {
   ambientToggle.addEventListener("click", toggleAmbient);
   streakEl.addEventListener("click", openStreak);
   helpIcon.addEventListener("click", openHelp);
-  document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
+document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
   donateIcon.addEventListener("click", goDonate);
-  verseEl.addEventListener("click", readVerse);
 
   const menuFab = document.getElementById("menuFab");
   const expandableMenu = document.getElementById("expandableMenu");
   
-  if (menuFab && expandableMenu) {
+if (menuFab && expandableMenu) {
     menuFab.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation(); 
       menuFab.classList.toggle("open");
       expandableMenu.classList.toggle("open");
@@ -866,6 +866,12 @@ function updateVerse(titleText) {
   }
   titleEl.innerText = titleText;
   verseEl.innerHTML = text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
+  
+  // SECURE CLICK RE-BIND: Re-attach the handler cleanly to the freshly rendered layout
+  verseEl.onclick = () => {
+    readVerse();
+  };
+
   refEl.innerText = currentKey;
   dateEl.innerText = new Date().toDateString();
   window.scrollTo(0, 0);
