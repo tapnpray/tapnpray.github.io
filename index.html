@@ -707,7 +707,9 @@ async function initApp() {
   await loadTranslation(translation);
   generateDaily();
   
-  setAutoRefreshAtMidnight();
+  if (typeof setAutoRefreshAtMidnight === 'function') {
+    setAutoRefreshAtMidnight();
+  }
   
   dailyBtn.addEventListener("click", showDaily);
   randomBtn.addEventListener("click", showRandom);
@@ -773,32 +775,17 @@ updateBackground();
 setInterval(updateBackground, 300000);
 
 function generateDaily() {
-  // Create a strict YYYY-MM-DD UTC date string so all containers match perfectly
   const d = new Date();
   const today = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
-  
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
   if (stored.date === today) {
     dailyKey = stored.key;
   } else {
-    let pool = [];
-    curatedVerses.forEach(v => {
-      for (let i = 0; i < v.weight; i++) { pool.push(v.ref); }
-    });
-
+    const pool = buildWeightedPool();
     const dateSeed = getSeed(today);
-    let lastSeven = [];
-    for (let i = 1; i <= 7; i++) {
-       let prevDate = new Date();
-       prevDate.setDate(prevDate.getDate() - i);
-       let prevSeed = getSeed(prevDate.toDateString());
-       lastSeven.push(pool[prevSeed % pool.length]);
-    }
-    let availablePool = pool.filter(ref => !lastSeven.includes(ref));
-    if (availablePool.length === 0) availablePool = pool;
-
-    dailyKey = availablePool[dateSeed % availablePool.length];
+    
+    dailyKey = pool[dateSeed % pool.length];
 
     localStorage.setItem("dailyVerse", JSON.stringify({
       date: today,
@@ -807,12 +794,15 @@ function generateDaily() {
   }
 
   currentKey = dailyKey;
+  addToRecent(dailyKey);
   updateVerse("Daily Bible Verse");
   updateStreak();
 }
 
 function showDaily() {
-  trackAppEvent('view_mode_change', { 'mode': 'daily' });
+  if (typeof trackAppEvent === 'function') {
+    trackAppEvent('view_mode_change', { 'mode': 'daily' });
+  }
   currentKey = dailyKey;
   updateVerse("Daily Bible Verse");
   dailyBtn.classList.add("active");
@@ -820,21 +810,25 @@ function showDaily() {
 }
 
 function showRandom() {
-  trackAppEvent('view_mode_change', { 'mode': 'random' });
-  let pool = [];
-  curatedVerses.forEach(v => {
-    for (let i = 0; i < v.weight; i++) { pool.push(v.ref); }
-  });
-
+  if (typeof trackAppEvent === 'function') {
+    trackAppEvent('view_mode_change', { 'mode': 'random' });
+  }
+  const pool = buildWeightedPool();
   const randomPool = pool.filter(ref => ref !== dailyKey);
-  currentKey = randomPool[Math.floor(Math.random() * randomPool.length)];
+  const activePool = randomPool.length ? randomPool : pool;
+
+  currentKey = activePool[Math.floor(Math.random() * activePool.length)];
+  addToRecent(currentKey);
+  
   updateVerse("Random Bible Verse");
   dailyBtn.classList.remove("active");
   randomBtn.classList.add("active");
 }
 
 function changeTranslation(t) {
-  trackAppEvent('change_translation', { 'to_translation': t });
+  if (typeof trackAppEvent === 'function') {
+    trackAppEvent('change_translation', { 'to_translation': t });
+  }
   translation = t;
   if (!verses[translation] || !Object.keys(verses[translation]).length) {
     loadTranslation(t).then(() => changeTranslation(t));
@@ -864,12 +858,10 @@ function updateStreak() {
   const lastVisit = localStorage.getItem("lastVisit");
   let streak = parseInt(localStorage.getItem("streak")) || 1;
 
-if (lastVisit && lastVisit !== today) {
-    // Parse the YYYY-M-D string chunks manually to ensure timezone consistency
+  if (lastVisit && lastVisit !== today) {
     const [lastY, lastM, lastD] = lastVisit.split('-').map(Number);
     const [nowY, nowM, nowD] = today.split('-').map(Number);
     
-    // Create pure UTC timestamps for an exact millisecond comparison
     const lastDateObj = Date.UTC(lastY, lastM - 1, lastD);
     const nowDateObj = Date.UTC(nowY, nowM - 1, nowD);
     
@@ -935,7 +927,9 @@ async function openHelp() {
 function closeHelp() { helpModal.style.display = "none"; }
 
 function goDonate() {
-  trackAppEvent('donation_intent');
+  if (typeof trackAppEvent === 'function') {
+    trackAppEvent('donation_intent');
+  }
   donateIcon.classList.add("pulse");
   setTimeout(() => donateIcon.classList.remove("pulse"), 2000);
   window.open("https://venmo.com/u/tapnpray", "_blank");
@@ -1018,217 +1012,26 @@ if (typeof window !== "undefined" && window.speechSynthesis) {
 
 let ambientOn = false;
 function toggleAmbient() {
-  trackAppEvent('ambient_toggle', { 'is_on': !ambientOn });
+  if (typeof trackAppEvent === 'function') {
+    trackAppEvent('ambient_toggle', { 'is_on': !ambientOn });
+  }
   const a = ambientAudio;
   if (ambientOn) {
-    fadeOut(a);
+    if (typeof fadeOut === 'function') {
+      fadeOut(a);
+    } else {
+      a.pause();
+    }
   } else {
-    a.volume = 0;
+    a.volume = 0.5;
     a.play().catch(()=>{});
-    fadeIn(a);
+    if (typeof fadeIn === 'function') {
+      fadeIn(a);
+    }
   }
   ambientOn = !ambientOn;
   ambientToggle.classList.toggle("active");
 }
-
-function fadeIn(a) {
-  let v = 0;
-  const i = setInterval(() => {
-    v += 0.05;
-    if (v >= 0.3) { v = 0.3; clearInterval(i); }
-    a.volume = v;
-  }, 100);
-}
-
-function fadeOut(a) {
-  let v = a.volume;
-  const i = setInterval(() => {
-    v -= 0.05;
-    if (v <= 0) { clearInterval(i); a.pause(); a.currentTime = 0; }
-    a.volume = v;
-  }, 100);
-}
-
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  if (!t) return;
-  t.innerText = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 3000);
-}
-
-async function shareVerse() {
-  try {
-    if (isSharing) return;
-    isSharing = true;
-    showToast("Generating image...");
-
-    await document.fonts.ready;
-    const verseText = verses?.[translation]?.[currentKey];
-    if (!verseText) { isSharing = false; return; }
-
-    const canvas = document.createElement("canvas");
-    const size = 1080; 
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
-
-    const hour = new Date().getHours();
-    const isDaytime = hour >= 6 && hour < 18;
-    const blurredImgPath = isDaytime ? "/backgrounds/morning-blurred.png" : "/backgrounds/night-blurred.png";
-
-    const bgImg = new Image();
-    bgImg.crossOrigin = "anonymous";
-    bgImg.src = blurredImgPath + "?t=" + new Date().getTime(); 
-
-    await new Promise((resolve) => {
-      bgImg.onload = resolve;
-      bgImg.onerror = resolve;
-    });
-
-    if (bgImg.complete && bgImg.width > 0) {
-      const scale = Math.max(size / bgImg.width, size / bgImg.height);
-      const drawW = bgImg.width * scale;
-      const drawH = bgImg.height * scale;
-      const offX = (size - drawW) / 2;
-      const offY = (size - drawH) / 2;
-      ctx.drawImage(bgImg, offX, offY, drawW, drawH);
-      ctx.fillStyle = isDaytime ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.7)";
-      ctx.fillRect(0, 0, size, size);
-    } else {
-      ctx.fillStyle = "#0b1a2a";
-      ctx.fillRect(0, 0, size, size);
-    }
-
-    const brandingMargin = 60;
-    const logoSize = 60;
-    const logoImg = new Image();
-    logoImg.crossOrigin = "anonymous";
-    logoImg.src = "/logo.svg";
-
-    await new Promise(resolve => {
-      logoImg.onload = resolve;
-      logoImg.onerror = resolve;
-    });
-
-    if (logoImg.complete && logoImg.width > 0) {
-      const logoY = size - brandingMargin - logoSize;
-      ctx.filter = "drop-shadow(0 2px 8px rgba(0,0,0,0.5))";
-      ctx.drawImage(logoImg, brandingMargin, logoY, logoSize, logoSize);
-      ctx.filter = "none";
-    }
-
-    ctx.textAlign = "left";
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
-    ctx.font = "400 22px system-ui, -apple-system, sans-serif";
-    const urlX = brandingMargin + logoSize + 20;
-    const urlY = size - brandingMargin - (logoSize / 2) + 8;
-    ctx.fillText("www.tapnpray.com", urlX, urlY);
-
-    ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(255,255,255,0.95)";
-    ctx.font = "700 36px Merriweather";
-    ctx.fillText("Daily Bible Verse", size / 2, 100);
-    
-    ctx.fillStyle = isDaytime ? "rgba(255,255,255,0.7)" : "#2fb4ff";
-    ctx.font = "400 26px Merriweather";
-    ctx.fillText(new Date().toDateString(), size / 2, 150);
-
-    let fontSize = verseText.length > 200 ? 38 : 48; 
-    ctx.font = `700 ${fontSize}px Merriweather`;
-    ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = "rgba(0, 0, 0, 1)";
-    ctx.shadowBlur = 25;                  
-    ctx.shadowOffsetY = 6;
-
-    const words = verseText.split(" ");
-    const lines = [];
-    let currentLine = "";
-    const maxWidth = size - 160; 
-
-    words.forEach(word => {
-      let testLine = currentLine + word + " ";
-      if (ctx.measureText(testLine).width > maxWidth) {
-        lines.push(currentLine.trim());
-        currentLine = word + " ";
-      } else {
-        currentLine = testLine;
-      }
-    });
-    lines.push(currentLine.trim());
-
-    const lineHeight = fontSize * 1.5;
-    const totalTextHeight = lines.length * lineHeight;
-    const startY = 220 + ((size - 360 - brandingMargin - totalTextHeight) / 2);
-
-    lines.forEach((l, i) => {
-      ctx.fillText(l, size / 2, startY + (i * lineHeight));
-    });
-
-    ctx.shadowColor = "transparent";
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
-
-    ctx.fillStyle = isDaytime ? "rgba(255,255,255,0.95)" : "#5cc2ff"; 
-    ctx.font = "700 32px Merriweather";
-    ctx.fillText(currentKey, size / 2, startY + totalTextHeight + 60);
-
-    const dataUrl = canvas.toDataURL("image/png");
-    trackAppEvent('share_image_generated', { 'verse_ref': currentKey });
-    
-    const blob = await (await fetch(dataUrl)).blob();
-    const file = new File([blob], "verse.png", { type: "image/png" });
-
-    if (navigator.share) {
-      await navigator.share({
-        files: [file],
-        title: 'Tap N Pray',
-        text: `"${verseText}" - ${currentKey}`
-      });
-    } else {
-      shareModal.style.display = "flex";
-      saveImageBtn.onclick = () => {
-        trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
-        const link = document.createElement("a");
-        link.download = "verse.png";
-        link.href = dataUrl;
-        link.click();
-      };
-      cancelShareBtn.onclick = () => shareModal.style.display = "none";
-    }
-  } catch (err) {
-    console.error(err);
-    showToast("Share failed. Please try again.");
-  } finally {
-    isSharing = false;
-  }
-}
-
-/* =========================
-   AUTO-REFRESH AT MIDNIGHT
-========================= */
-function setAutoRefreshAtMidnight() {
-  const now = new Date();
-  
-  // Calculate the exact millisecond timestamp for the next UTC midnight
-  const nextMidnightUTC = Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate() + 1, // Tomorrow
-    0, 0, 0, 0            // 00:00:00.000
-  );
-  
-  const msUntilMidnight = nextMidnightUTC - now.getTime();
-  
-  // Set a safe maximum timeout threshold (JavaScript setTimeout handles up to ~24.8 days)
-  if (msUntilMidnight > 0) {
-    setTimeout(() => {
-      // Force reload from server cache to sync the brand new daily verse
-      window.location.reload(true);
-    }, msUntilMidnight + 1000); // 1-second buffer ensures the system clock has fully ticked over
-  }
-}
-
 </script>
 </body>
 </html>
