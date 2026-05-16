@@ -2,6 +2,27 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.6] - 2026-05-16
+
+### Added
+- **Elite Curated Verse System:** Integrated a structured script-side collection of cornerstone scriptural references organized by emotional and spiritual themes (Anxiety, Strength, Comfort, etc.).
+- **Global Synchronization Roll:** Added a custom deterministic mathematical date-seeding engine (`getSeed`) ensuring all global users receive the exact same "Daily Verse" seamlessly without server-side dependencies.
+- **Seasonal Event Engine:** Added smart utility hooks to dynamically compute complex variable holidays (like Easter via astronomical algorithms) and trigger target content boosts during key calendar ranges (Christmas, Good Friday, Resurrection Sunday).
+- **Recent Verse Cache:** Implemented a rolling `localStorage` sliding-window mechanism (`recentVerses`) to block chosen references from immediately repeating within a 14-day cycle.
+
+### Changed
+- **Minimalist Share Architecture:** Completely overhauled the `shareVerse` canvas generator, shifting from heavy structural UI cards to a sleek, modern, background-bleeding floating typography design.
+- **Brand Identity Layout:** Reworked image compilation layouts to anchor an official brand logo and the site domain (`www.tapnpray.com`) cleanly into the bottom-left quadrant of shared graphics.
+- **Responsive Text Scaling:** Implemented dynamic width reflow boundaries (`maxWidth = size - 160`) and contextual font resizing rules inside the HTML5 Canvas layout loop to maximize legibility.
+
+### Fixed
+- **Mobile Menu Startup Halt:** Resolved a critical out-of-order `ReferenceError` during top-down asset parsing by hoisting core app tracking parameters and variables to the top of the instantiation script, ensuring the floating navigation FAB (`#menuFab`) initializes flawlessly.
+- **WebKit Audio Playback Hangs:** Fixed a WebKit/Safari speech-queue limitation by implementing a cross-browser voice allocation engine hook (`onvoiceschanged`) to prevent text-to-speech rendering routines from dropping on iOS devices.
+- **Infinite File Load Inversion Loop:** Refactored error handling boundaries inside the `changeTranslation` router to block recursive infinite layout update loops if localized resources are delayed or missing.
+- **Typography Readability:** Added strong, multi-pass opaque drop shadows (`shadowBlur = 25`) to canvas text render layers to enforce high-contrast legibility over bright background imagery.
+
+
+
 ## [1.2.5] - 2026-05-16
 
 ### Added
