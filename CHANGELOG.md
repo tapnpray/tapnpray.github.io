@@ -2,6 +2,22 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+
+
+## [1.2.7] - 2026-05-22
+
+### Fixed
+- **Mobile Layout Overlap:** Fixed an issue where long Bible verses would vertically overflow and overlap with the top logo or the bottom menu button (FAB) on mobile devices.
+- **Daily Verse Synchronization:** Resolved a bug causing different devices (e.g., desktop vs. mobile) to display different "Daily Verses" on the same day. The Daily Verse is now generated from a globally synchronized static pool, ensuring a unified experience across all platforms.
+
+### Changed
+- **UI Optimization:** Reduced the size of the top logo and shifted it higher up the screen to maximize readable space for longer verses.
+- **Dynamic Padding:** Updated the main content container to use dynamic safe-area padding (`env(safe-area-inset-top/bottom)`) and `min-height`. This allows natural scrolling for massive verses while keeping short verses perfectly centered.
+- **Verse Generation Logic:** Refactored the core verse pool generation logic (`buildWeightedPool` and `getStaticPool`). The global Daily Verse now ignores local history to stay synced, while the "Random" button retains its local anti-repeat protection.
+
+
+
+
 ## [1.2.6] - 2026-05-16
 
 ### Added
