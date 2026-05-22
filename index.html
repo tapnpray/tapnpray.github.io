@@ -682,8 +682,8 @@ let cachedPool = null;
 let recentVerses = JSON.parse(localStorage.getItem("recentVerses") || "[]");
 const RECENT_LIMIT = 14;
 
-function buildWeightedPool() {
-  if (cachedPool) return cachedPool;
+// NEW: A pure, mathematical pool that is identical on every single device
+function getStaticPool() {
   let pool = [];
   curatedVerses.forEach(v => {
     for (let i = 0; i < v.weight; i++) { pool.push(v.ref); }
@@ -692,7 +692,18 @@ function buildWeightedPool() {
   seasonal.forEach(ref => {
     for (let i = 0; i < 6; i++) { pool.push(ref); }
   });
-const filtered = pool.filter(v => !recentVerses.includes(v));
+  pool.sort(); // Guarantees the exact same order across all browsers
+  return pool;
+}
+
+// UPDATED: Only used for the Random button now
+function buildWeightedPool() {
+  if (cachedPool) return cachedPool;
+  
+  let pool = getStaticPool(); 
+  
+  const filtered = pool.filter(v => !recentVerses.includes(v));
+  
   if (filtered.length === 0) {
     recentVerses = [];
     localStorage.removeItem("recentVerses");
@@ -800,11 +811,13 @@ function generateDaily() {
   const today = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
-if (stored.date === today) {
+  if (stored.date === today) {
     dailyKey = stored.key;
   } else {
-    cachedPool = null; // Clear cache to allow daily roll calculation
-    const pool = buildWeightedPool();
+    cachedPool = null; 
+    
+    // THE FIX: Use the identical static pool for everyone, ignoring local history!
+    const pool = getStaticPool(); 
     const dateSeed = getSeed(today);
     
     dailyKey = pool[dateSeed % pool.length];
