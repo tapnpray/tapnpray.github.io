@@ -75,12 +75,12 @@
   pointer-events: none; /* Prevents the background from blocking button taps */
 }
 
-  #topLogo {
+#topLogo {
     position: fixed;
-    top: calc(70px + env(safe-area-inset-top)); 
+    top: calc(15px + env(safe-area-inset-top)); 
     left: 50%;
     transform: translateX(-50%);
-    width: 150px;
+    width: 110px;
     opacity: 1;  
     z-index: 100;
     filter: drop-shadow(0 4px 15px rgba(0,0,0,0.4));
@@ -93,7 +93,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: calc(240px + env(safe-area-inset-top)) 20px calc(110px + env(safe-area-inset-bottom));
+    /* Shifting top padding from 240px down to 150px to pull the text up */
+    padding: calc(150px + env(safe-area-inset-top)) 20px calc(110px + env(safe-area-inset-bottom));
     box-sizing: border-box;
     position: relative;
     z-index: 1;
