@@ -537,6 +537,7 @@
 /* =========================
    VERSES & TRANSLATIONS
 ========================= */
+const APP_VERSION = "1.2.8";
 let verses = { nlt:{}, niv:{}, kjv:{} };
 let translation = "nlt";
 let dailyKey = "";
@@ -731,6 +732,7 @@ function getSeed(s) {
 
 // --- APP CORE FRAMEWORK ---
 async function initApp() {
+  console.log("Tap N Pray Version: " + APP_VERSION); // Add this for verification
   // Setup background tracking first
   updateBackground();
   setInterval(updateBackground, 300000);
