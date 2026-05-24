@@ -808,7 +808,8 @@ function updateBackground() {
 }
 function generateDaily() {
   const d = new Date();
-  const today = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
+  // Use the local date string to match the displayed date and prevent offset issues
+  const today = d.toLocaleDateString('en-CA'); 
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
   if (stored.date === today) {
@@ -892,8 +893,9 @@ function updateVerse(titleText) {
     readVerse();
   };
 
-  refEl.innerText = currentKey;
-  dateEl.innerText = new Date().toDateString();
+refEl.innerText = currentKey;
+  // Match the display date to the same logic used for the daily seed
+  dateEl.innerText = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   window.scrollTo(0, 0);
 }
 
