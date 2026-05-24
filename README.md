@@ -7,7 +7,7 @@ Tap N Pray is a minimalist, immersive web application designed to bring the Word
 ## 🚀 Project Status
 For a detailed breakdown of codebase development, please refer to the [Full Changelog](./CHANGELOG.md).
 
-**Current Version:** 1.2.7
+**Current Version:** 1.2.8: Optimized daily verse synchronization and standardized date-based seed logic.
 
 ---
 
