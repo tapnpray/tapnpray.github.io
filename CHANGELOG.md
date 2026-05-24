@@ -2,7 +2,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.8] - 2026-05-24
 
+### Fixed
+- **Daily Verse Synchronization**: Resolved an issue where the verse failed to update at midnight. Standardized date calculations using `en-CA` locale formatting for seed generation, ensuring consistent daily triggers across all devices and browsers.
+- **UI Date Consistency**: Synchronized the displayed date format with the backend seed-generation logic to eliminate "off-by-one" day discrepancies caused by time zone offsets.
+- **Storage Reliability**: Improved the `dailyVerse` caching mechanism to prevent local storage conflicts during daily resets.
+
+### Optimized
+- **Codebase Stability**: Refactored `generateDaily` and `updateVerse` to use unified date handling.
+- **Version Tracking**: Formalized internal versioning structure to align with repository releases.
 
 ## [1.2.7] - 2026-05-22
 
