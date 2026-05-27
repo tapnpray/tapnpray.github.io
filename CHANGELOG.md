@@ -2,6 +2,101 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# Version 1.2.9
+
+### ✅ Daily Verse System Overhaul
+Fixed an issue where the Verse of the Day could become stuck on the same verse across multiple days.
+
+#### Changes
+- Rebuilt daily verse generation using a true UTC-based date key.
+- Daily verse now changes exactly at midnight UTC worldwide.
+- All users now receive the exact same daily verse globally.
+- Removed browser locale dependency from verse generation.
+- Stabilized deterministic verse selection logic.
+
+#### Technical Improvements
+- Replaced local date generation with:
+  ```js
+  YYYY-MM-DD (UTC)
+  ```
+- Added automatic midnight UTC refresh scheduling.
+- Fixed stale `localStorage` reuse issues.
+
+---
+
+### ✅ Auto Midnight Refresh
+Added a live rollover system so the app updates automatically at midnight UTC without requiring a page refresh.
+
+#### Added
+- `setAutoRefreshAtMidnight()`
+
+#### Result
+- Daily verse updates automatically while the app remains open.
+
+---
+
+### ✅ Date Display Upgrade
+Updated verse date formatting to include the weekday.
+
+#### Before
+```text
+May 27, 2026
+```
+
+#### After
+```text
+Wed May 27 2026
+```
+
+---
+
+### ✅ Verse Engine Improvements
+Enhanced deterministic verse selection architecture.
+
+#### Improvements
+- Preserved globally identical verse pool ordering.
+- Maintained weighted curation system.
+- Preserved recent verse filtering for random mode.
+- Preserved seasonal verse boosting system.
+
+---
+
+### ✅ Easter Seasonal Logic Fix
+Fixed a UTC inconsistency inside the Easter seasonal calculation.
+
+#### Fix
+- Converted Easter date generation to UTC-safe handling.
+
+#### Result
+- Seasonal verse boosts now behave consistently worldwide.
+
+---
+
+### ✅ Seed Hash Upgrade
+Improved deterministic seed distribution logic.
+
+#### Benefits
+- Better long-term verse distribution
+- Reduced clustering/repetition patterns
+- Improved randomness quality while remaining deterministic
+
+---
+
+# Result
+
+The Verse of the Day system is now:
+
+- UTC synchronized
+- Globally consistent
+- Deterministic
+- Auto-refreshing
+- Season-aware
+- Weighted and curated
+- Frontend-only
+- Backend-free
+- Mobile-safe
+
+
 ## [1.2.8] - 2026-05-24
 
 ### Fixed
