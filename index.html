@@ -662,7 +662,7 @@ function getEasterDate(year) {
   const L = I - J;
   const month = 3 + f((L + 40) / 44);
   const day = L + 28 - 31 * f(month / 4);
-  return new Date(year, month - 1, day);
+  return new Date(Date.UTC(year, month - 1, day));
 }
 
 function getSeasonalBoosts() {
@@ -721,13 +721,20 @@ function addToRecent(ref) {
   localStorage.setItem("recentVerses", JSON.stringify(recentVerses));
 }
 
-function getSeed(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) {
-    h = (h << 5) - h + s.charCodeAt(i);
-    h |= 0;
+function getSeed(str) {
+  let h1 = 1779033703;
+  let h2 = 3144134277;
+
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 3432918353);
+    h2 = Math.imul(h2 ^ ch, 2246822507);
   }
-  return Math.abs(h);
+
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+  h2 = Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+
+  return Math.abs((h1 ^ h2) >>> 0);
 }
 
 // --- APP CORE FRAMEWORK ---
