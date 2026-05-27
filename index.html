@@ -779,6 +779,28 @@ document.addEventListener("click", (e) => {
   }
 }
 
+function setAutoRefreshAtMidnight() {
+  const now = new Date();
+
+  // Next UTC midnight
+  const nextMidnightUTC = new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1,
+    0, 0, 0, 0
+  ));
+
+  const msUntilMidnight = nextMidnightUTC.getTime() - now.getTime();
+
+  setTimeout(() => {
+    generateDaily();
+
+    // Continue refreshing every 24h
+    setInterval(generateDaily, 86400000);
+
+  }, msUntilMidnight);
+}  
+  
 window.addEventListener("DOMContentLoaded", initApp);
 
 /* =========================
@@ -809,31 +831,43 @@ function updateBackground() {
   };
 }
 function generateDaily() {
-  const d = new Date();
-  // Use the local date string to match the displayed date and prevent offset issues
-  const today = d.toLocaleDateString('en-CA'); 
+  // TRUE UTC DATE KEY (same worldwide)
+  const now = new Date();
+
+  const utcYear = now.getUTCFullYear();
+  const utcMonth = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const utcDay = String(now.getUTCDate()).padStart(2, "0");
+
+  const todayUTC = `${utcYear}-${utcMonth}-${utcDay}`;
+
   const stored = JSON.parse(localStorage.getItem("dailyVerse") || "{}");
 
-  if (stored.date === today) {
+  // Reuse today's verse if already generated
+  if (stored.date === todayUTC && stored.key) {
     dailyKey = stored.key;
   } else {
-    cachedPool = null; 
-    
-    // THE FIX: Use the identical static pool for everyone, ignoring local history!
-    const pool = getStaticPool(); 
-    const dateSeed = getSeed(today);
-    
+    cachedPool = null;
+
+    // Identical pool for all users/devices
+    const pool = getStaticPool();
+
+    // Stable deterministic seed
+    const dateSeed = getSeed(todayUTC);
+
     dailyKey = pool[dateSeed % pool.length];
 
     localStorage.setItem("dailyVerse", JSON.stringify({
-      date: today,
+      date: todayUTC,
       key: dailyKey
     }));
   }
 
   currentKey = dailyKey;
+
   addToRecent(dailyKey);
+
   updateVerse("Daily Bible Verse");
+
   updateStreak();
 }
 
@@ -897,7 +931,12 @@ function updateVerse(titleText) {
 
 refEl.innerText = currentKey;
   // Match the display date to the same logic used for the daily seed
-  dateEl.innerText = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const d = new Date();
+
+const weekday = d.toLocaleDateString('en-US', { weekday: 'short' });
+const month = d.toLocaleDateString('en-US', { month: 'short' });
+
+dateEl.innerText = `${weekday} ${month} ${d.getDate()} ${d.getFullYear()}`;
   window.scrollTo(0, 0);
 }
 
