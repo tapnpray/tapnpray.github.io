@@ -948,51 +948,78 @@ dateEl.innerText = `${weekday} ${month} ${d.getDate()} ${d.getFullYear()}`;
 }
 
 function updateStreak() {
-  const today = new Date().toDateString();
+  // Use stable UTC date format
+  const now = new Date();
+
+  const today =
+    now.getUTCFullYear() + "-" +
+    String(now.getUTCMonth() + 1).padStart(2, "0") + "-" +
+    String(now.getUTCDate()).padStart(2, "0");
+
   const lastVisit = localStorage.getItem("lastVisit");
   let streak = parseInt(localStorage.getItem("streak")) || 1;
 
   if (lastVisit && lastVisit !== today) {
-    const [lastY, lastM, lastD] = lastVisit.split('-').map(Number);
-    const [nowY, nowM, nowD] = today.split('-').map(Number);
-    
-    const lastDateObj = Date.UTC(lastY, lastM - 1, lastD);
-    const nowDateObj = Date.UTC(nowY, nowM - 1, nowD);
-    
-    const diff = Math.floor((nowDateObj - lastDateObj) / 86400000);
-    if (diff === 1) streak++;
-    else if (diff > 1) streak = 1;
+    const [lastY, lastM, lastD] = lastVisit.split("-").map(Number);
+
+    const lastDateUTC = Date.UTC(lastY, lastM - 1, lastD);
+
+    const todayUTC = Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate()
+    );
+
+    const diff = Math.floor((todayUTC - lastDateUTC) / 86400000);
+
+    if (diff === 1) {
+      streak++;
+    } else if (diff > 1) {
+      streak = 1;
+    }
   }
+
   localStorage.setItem("streak", streak);
   localStorage.setItem("lastVisit", today);
-  
+
   if (document.getElementById("streakNumber")) {
     document.getElementById("streakNumber").innerText = streak;
   }
 
   const sCount = document.getElementById("streakCount");
   const sMsg = document.getElementById("streakMsg");
+
   if (sCount && sMsg) {
     sCount.innerText = streak + " Days";
-    if (streak < 7) sMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
-    else if (streak < 30) sMsg.innerText = "You're on fire — 30 days is next 🔥";
-    else sMsg.innerText = "You're building something powerful 💪";
+
+    if (streak < 7) {
+      sMsg.innerText = "Keep going — 7 days is your next milestone 🌿";
+    } else if (streak < 30) {
+      sMsg.innerText = "You're on fire — 30 days is next 🔥";
+    } else {
+      sMsg.innerText = "You're building something powerful 💪";
+    }
   }
 
   const streakHint = document.getElementById("streakHintBubble");
   const tapHint = document.getElementById("tapHintBubble");
   const hintStreakNum = document.getElementById("hintStreakNumber");
 
-  if (hintStreakNum) hintStreakNum.innerText = streak;
+  if (hintStreakNum) {
+    hintStreakNum.innerText = streak;
+  }
 
   setTimeout(() => {
     if (streakHint) {
       streakHint.classList.add("show");
+
       setTimeout(() => {
         streakHint.classList.remove("show");
+
         setTimeout(() => {
           if (tapHint) {
             tapHint.classList.add("show");
+
             setTimeout(() => {
               tapHint.classList.remove("show");
             }, 5000);
