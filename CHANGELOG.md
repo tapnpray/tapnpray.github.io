@@ -2,6 +2,28 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+
+
+## Version 1.3.0 — Streak System Fix
+
+### Fixed
+- Fixed streak tracking logic not incrementing correctly across days
+- Rebuilt streak date comparison system using stable UTC formatting
+- Fixed incompatible date parsing issue caused by mixed date formats
+- Improved cross-device and timezone consistency for streak tracking
+
+### Improved
+- Daily streaks now update reliably at day rollover
+- Streak persistence is now synchronized with the app’s UTC daily verse system
+
+### Technical
+- Replaced `toDateString()` streak storage with standardized `YYYY-MM-DD` UTC format
+- Corrected day-difference calculations using `Date.UTC()`
+- Prevented invalid date parsing from freezing streak progression
+
+
+
+
 # Version 1.2.9
 
 ### ✅ Daily Verse System Overhaul
