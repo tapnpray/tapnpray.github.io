@@ -2,6 +2,32 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Version 1.3.1 — Stability & Streak Improvements
+
+### Fixed
+- Fixed streak tracking not incrementing correctly across consecutive days.
+- Corrected date handling logic that could prevent streak progression.
+- Standardized streak calculations using UTC-based dates for improved consistency across devices and time zones.
+
+### Improved
+- Daily streaks now update reliably alongside the Daily Verse system.
+- Improved long-term streak persistence and rollover behavior.
+- Added safer share handling for browsers that do not fully support file sharing.
+- Share image modal now closes automatically after saving an image.
+- Improved voice-loading reliability for text-to-speech playback on supported browsers.
+- Simplified Random Verse pool handling by removing unnecessary cache resets.
+
+### Technical
+- Replaced legacy date string storage with standardized `YYYY-MM-DD` UTC format.
+- Updated streak comparison calculations to use `Date.UTC()` for accurate day-to-day tracking.
+- Added modern Web Share API compatibility checks using `navigator.canShare()`.
+- Cleaned up internal Random Verse selection logic for improved efficiency.
+
+### Notes
+- Mobile verse highlighting remains unchanged and optimized for the primary Tap N Pray experience.
+- Desktop browser word-highlighting behavior may vary depending on the browser's Web Speech API implementation.
+
+
 
 
 ## Version 1.3.0 — Streak System Fix
