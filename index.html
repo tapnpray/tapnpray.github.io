@@ -382,7 +382,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 99999; /* Boosted high above all view components */
+    z-index: 2000; /* Boosted high above all view components */
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     transition: background 0.3s, transform 0.3s;
     -webkit-tap-highlight-color: transparent;
@@ -453,7 +453,7 @@
 
   .menu-btn:active { background: rgba(255, 255, 255, 0.25); }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  
+<script src="/js/marked.min.js"></script>  
 </head>
 <body>
   <div id="bg-layer"></div>
@@ -892,7 +892,6 @@ function showRandom() {
   if (typeof trackAppEvent === 'function') {
     trackAppEvent('view_mode_change', { 'mode': 'random' });
   }
-  cachedPool = null; // Clear cache so a fresh pool calculation runs
   const pool = buildWeightedPool();
   const randomPool = pool.filter(ref => ref !== dailyKey);
   const activePool = randomPool.length ? randomPool : pool;
@@ -1095,7 +1094,12 @@ function readVerse() {
   // Wrap speech execution in a brief timeout to let mobile audio engines completely clear their queues
   setTimeout(() => {
     const u = new SpeechSynthesisUtterance(`${text} ... ${currentKey}`);
-    const allVoices = window.speechSynthesis.getVoices();
+    let allVoices = window.speechSynthesis.getVoices();
+
+if (!allVoices.length) {
+  window.speechSynthesis.getVoices();
+  allVoices = window.speechSynthesis.getVoices();
+}
     
     let premiumVoice = allVoices.find(voice => 
       voice.lang.includes('en') && 
@@ -1326,7 +1330,7 @@ async function shareVerse() {
     const blob = await (await fetch(dataUrl)).blob();
     const file = new File([blob], "verse.png", { type: "image/png" });
 
-    if (navigator.share) {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
         title: 'Tap N Pray',
@@ -1342,6 +1346,7 @@ async function shareVerse() {
         link.download = "verse.png";
         link.href = dataUrl;
         link.click();
+        shareModal.style.display = "none";
       };
       cancelShareBtn.onclick = () => shareModal.style.display = "none";
     }
