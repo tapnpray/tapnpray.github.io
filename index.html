@@ -737,9 +737,25 @@ function getSeed(str) {
   return Math.abs((h1 ^ h2) >>> 0);
 }
 
+/* =========================
+   NFC TRACKING
+========================= */
+function trackNfcVisit() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get("src") === "nfc") {
+    trackAppEvent("nfc_tag_tap");
+    console.log("NFC Tag Tap Tracked");
+  }
+}
+  
 // --- APP CORE FRAMEWORK ---
 async function initApp() {
-  console.log("Tap N Pray Version: " + APP_VERSION); // Add this for verification
+
+  trackNfcVisit();
+
+  console.log("Tap N Pray Version: " + APP_VERSION);
+
   // Setup background tracking first
   updateBackground();
   setInterval(updateBackground, 300000);
