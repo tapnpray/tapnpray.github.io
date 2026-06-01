@@ -7,8 +7,7 @@ Tap N Pray is a minimalist, immersive web application designed to bring the Word
 ## 🚀 Project Status
 For a detailed breakdown of codebase development, please refer to the [Full Changelog](./CHANGELOG.md).
 
-**Current Version:** 1.3.1 — Fixed streak tracking issues, improved sharing compatibility across browsers, enhanced text-to-speech reliability, and optimized Random Verse selection.
-
+**Current Version:** 1.3.2 — Added NFC tag analytics, completed verse listening metrics, enhanced engagement tracking, and improved HTTPS support for custom domains.
 ---
 
 ## ✨ Core Features
