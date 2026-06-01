@@ -2,6 +2,43 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.2] - 2026-05-31
+
+### Added
+
+* Added NFC tag analytics tracking using Google Analytics.
+* Added `nfc_tag_tap` event for visits originating from NFC keytags (`?src=nfc`).
+* Added `verse_heard` event to track completed Text-to-Speech verse playback.
+* Added verse reference and translation metadata to completed listen analytics.
+
+### Improved
+
+* Expanded engagement analytics to better measure user interaction.
+* Added visibility into:
+
+  * NFC keytag scans
+  * Verse audio starts (`read_aloud`)
+  * Verse audio completions (`verse_heard`)
+  * Verse share generation
+  * Donation intent clicks
+  * Translation changes
+
+### Fixed
+
+* Resolved GitHub Pages SSL certificate issues affecting the root domain.
+* Corrected HTTPS support for NFC URLs and direct access to `https://tapnpray.com`.
+* Updated custom domain configuration to support both root and www domains securely.
+
+### Analytics Events
+
+* `nfc_tag_tap`
+* `read_aloud`
+* `verse_heard`
+* `share_image_generated`
+* `donation_intent`
+* `change_translation`
+
+
 ## Version 1.3.1 — Stability & Streak Improvements
 
 ### Fixed
