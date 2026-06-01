@@ -1141,8 +1141,17 @@ if (!allVoices.length) {
       }
     };
 
-u.onend = () => { words.forEach(w => w.classList.remove("active")); };
-    u.onerror = () => { words.forEach(w => w.classList.remove("active")); };
+u.onend = () => {
+
+  if (typeof trackAppEvent === "function") {
+    trackAppEvent("verse_heard", {
+      verse_ref: currentKey,
+      translation: translation
+    });
+  }
+
+  words.forEach(w => w.classList.remove("active"));
+};    u.onerror = () => { words.forEach(w => w.classList.remove("active")); };
 
     setTimeout(() => {
       window.speechSynthesis.speak(u);
