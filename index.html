@@ -796,7 +796,11 @@ async function initApp() {
   // Load files and parse verses safely
   await loadTranslation(translation);
   generateDaily();
-
+// ADD THIS: A small delay to ensure hints trigger reliably after load
+  setTimeout(() => {
+    updateStreak();
+  }, 500);
+  
   if (typeof setAutoRefreshAtMidnight === 'function') {
     setAutoRefreshAtMidnight();
   }
@@ -1248,6 +1252,8 @@ function showToast(msg) {
   const t = document.getElementById("toast");
   if (!t) return;
   t.innerText = msg;
+  t.classList.remove("show"); // Force reset
+  void t.offsetWidth;         // Trigger reflow
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 3000);
 }
