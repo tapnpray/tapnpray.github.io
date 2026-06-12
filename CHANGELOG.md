@@ -2,6 +2,41 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.3] - 2026-06-12
+### Fixed
+- **Facebook Share Reliability:** Resolved the "grayed out" button issue by optimizing the Web Share API data handling and UI stacking, ensuring the generated image `Blob` is correctly passed to the OS share sheet.
+- **UI Stacking:** Resolved a rendering conflict where the "Toast" notification was blocked by other components due to incorrect z-index layering.
+- **Notification Triggers:** Fixed a bug where "Streak" and "Tap" hint bubbles were failing to appear on the initial page load by improving initialization logic.
+
+### Improved
+- **CSS Architecture:** Consolidated popup and notification styles into a unified stacking system to ensure consistent visibility across mobile browsers.
+- **Initialization:** Added a page-load delay to guarantee that notification animations trigger reliably after the DOM is fully ready.
+
+---
+
+## [1.3.2] - 2026-06-05
+### Added
+- Implemented NFC tag interaction tracking.
+- Added ambient audio toggle with smooth fade-in/out transitions.
+
+### Changed
+- Refactored verse selection to use a stable deterministic seed, ensuring all users see the same daily verse.
+- Optimized image generation for social sharing with a minimalist layout.
+
+---
+
+## [1.3.2] - 2026-06-05
+### Added
+- Implemented NFC tag interaction tracking.
+- Added ambient audio toggle with smooth fade-in/out transitions.
+
+### Changed
+- Refactored verse selection to use a stable deterministic seed, ensuring all users see the same daily verse.
+- Optimized image generation for social sharing with a minimalist layout.
+
+---
+
+
 ## [1.3.2] - 2026-05-31
 
 ### Added
