@@ -1347,15 +1347,44 @@ async function shareVerse() {
     ctx.fillText(currentKey, size / 2, startY + totalTextHeight + 60);
 
     // --- Final Generation & Share ---
-    const dataUrl = canvas.toDataURL("image/png");
+// --- Final Generation & Share ---
     if (typeof trackAppEvent === 'function') {
       trackAppEvent('share_image_generated', { 'verse_ref': currentKey });
     }
-    
-    const blob = await (await fetch(dataUrl)).blob();
-    const file = new File([blob], "verse.png", { type: "image/png" });
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    // Convert canvas directly to Blob for better compatibility
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+
+      const file = new File([blob], "verse.png", { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'Tap N Pray',
+            text: `"${verseText}" - ${currentKey}`
+          });
+        } catch (err) {
+          console.error("Share failed", err);
+        }
+      } else {
+        // Fallback for devices that don't support sharing files
+        shareModal.style.display = "flex";
+        saveImageBtn.onclick = () => {
+          if (typeof trackAppEvent === 'function') {
+            trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
+          }
+          const link = document.createElement("a");
+          link.download = "verse.png";
+          // Create URL from blob instead of dataURL
+          link.href = URL.createObjectURL(blob);
+          link.click();
+          shareModal.style.display = "none";
+        };
+        cancelShareBtn.onclick = () => shareModal.style.display = "none";
+      }
+    }, "image/png");
       await navigator.share({
         files: [file],
         title: 'Tap N Pray',
