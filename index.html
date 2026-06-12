@@ -273,7 +273,8 @@
     animation: firePulse 1.6s ease-in-out infinite;
   }
 
-#toast {
+/* Combined styles for all pop-ups */
+  #toast, .hint-bubble, #streakHintBubble, #tapHintBubble {
     position: fixed;
     top: 30px; 
     left: 50%;
@@ -288,14 +289,20 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.4s ease, transform 0.4s ease;
-    z-index: 10000; 
     pointer-events: none;
     display: flex;
     align-items: center;
     gap: 8px;
+    z-index: 9999;
   }
 
-  #toast.show {
+  /* Specifically ensure the Toast sits above the shareModal */
+  #toast {
+    z-index: 10000;
+  }
+
+  /* Activation classes */
+  #toast.show, .hint-bubble.show, #streakHintBubble.show, #tapHintBubble.show {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
@@ -322,7 +329,12 @@
     align-items: center;
     gap: 8px;
   }
-
+/* Add this part immediately after the .hint-bubble block */
+  .hint-bubble.show, #streakHintBubble.show, #tapHintBubble.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
   .share-actions {
     margin-top: 16px;
     display: flex;
