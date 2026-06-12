@@ -273,12 +273,39 @@
     animation: firePulse 1.6s ease-in-out infinite;
   }
 
-  #toast, .hint-bubble, #streakHintBubble, #tapHintBubble {
+#toast {
     position: fixed;
     top: 30px; 
     left: 50%;
     transform: translateX(-50%) translateY(-20px); 
-    bottom: auto !important;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    z-index: 10000; 
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .hint-bubble, #streakHintBubble, #tapHintBubble {
+    position: fixed;
+    top: 30px; 
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px); 
     background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(10px);
     color: #fff;
@@ -294,12 +321,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-  }
-
-  #toast.show, .hint-bubble.show, #streakHintBubble.show, #tapHintBubble.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
   }
 
   .share-actions {
@@ -530,10 +551,8 @@
   </div>
 </div>
 
-  <div id="toast"></div>
-
   <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
-
+  <div id="toast"></div>
 <script>
 /* =========================
    VERSES & TRANSLATIONS
@@ -1374,18 +1393,18 @@ async function shareVerse() {
           console.log("Share cancelled or failed", err);
         }
       } else {
-        // Fallback for devices that don't support sharing files
-shareModal.style.display = "flex";
+// Fallback for devices that don't support sharing files
+        shareModal.style.display = "flex";
 
-    copyVerseBtn.onclick = async () => {
+        copyVerseBtn.onclick = async () => {
+          console.log("Copy button clicked!"); // Check the console for this!
           const textToCopy = `"${verseText}" - ${currentKey}`;
           try {
             await navigator.clipboard.writeText(textToCopy);
             showToast("Verse copied to clipboard!");
-            shareModal.style.display = "none"; // Optional: close modal after copy
           } catch (err) {
-            console.error("Clipboard failed:", err);
-            showToast("Copy failed. Please select text manually.");
+            console.error("Clipboard error:", err);
+            showToast("Copy failed: Permission denied.");
           }
         };
         saveImageBtn.onclick = () => {
