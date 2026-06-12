@@ -7,8 +7,10 @@ Tap N Pray is a minimalist, immersive web application designed to bring the Word
 ## 🚀 Project Status
 For a detailed breakdown of codebase development, please refer to the [Full Changelog](./CHANGELOG.md).
 
-**Current Version:** 1.3.2 — Added NFC tag analytics, completed verse listening metrics, enhanced engagement tracking, and improved HTTPS support for custom domains.
----
+**Current Version: 1.3.3**
+- **Facebook Share Reliability:** Resolved the "grayed out" button issue, ensuring native sharing correctly recognizes and processes generated images.
+- **UI/UX Enhancements:** Fixed rendering conflicts with "Toast" notifications and optimized stacking context for a smoother, more reliable interface.
+- **Notification Fixes:** Resolved an issue where "Streak" and "Tap" hint bubbles were failing to trigger on initial app load.
 
 ## ✨ Core Features
 
