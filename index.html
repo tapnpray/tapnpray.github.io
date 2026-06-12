@@ -518,16 +518,17 @@
     </div>
   </div>
 
-  <div id="shareModal">
-    <div class="share-card">
-      <h2>Almost there 🙌</h2>
-      <p>Your device doesn't support direct sharing, but you can still save and share the image manually.</p>
-      <div class="share-actions">
-        <button id="saveImageBtn">Save Image 📥</button>
-        <button id="cancelShareBtn">Cancel</button>
-      </div>
+<div id="shareModal">
+  <div class="share-card">
+    <h2>Almost there 🙌</h2>
+    <p>Your device might struggle to post the image directly. You can save it to your photos, and we've added a button to copy the verse for your caption!</p>
+    <div class="share-actions" style="flex-direction: column;">
+      <button id="copyVerseBtn">Copy Verse to Clipboard 📋</button>
+      <button id="saveImageBtn">Save Image 📥</button>
+      <button id="cancelShareBtn">Cancel</button>
     </div>
   </div>
+</div>
 
   <div id="toast"></div>
 
@@ -564,6 +565,7 @@ const helpContent = document.getElementById("helpContent");
 const shareModal = document.getElementById("shareModal");
 const saveImageBtn = document.getElementById("saveImageBtn");
 const cancelShareBtn = document.getElementById("cancelShareBtn");
+const copyVerseBtn = document.getElementById("copyVerseBtn"); //
 
 let isSharing = false;
 
@@ -1373,7 +1375,15 @@ async function shareVerse() {
         }
       } else {
         // Fallback for devices that don't support sharing files
-        shareModal.style.display = "flex";
+shareModal.style.display = "flex";
+
+        copyVerseBtn.onclick = () => {
+          const textToCopy = `"${verseText}" - ${currentKey}`;
+          navigator.clipboard.writeText(textToCopy).then(() => {
+            showToast("Verse copied to clipboard!");
+          });
+        };
+
         saveImageBtn.onclick = () => {
           if (typeof trackAppEvent === 'function') {
             trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
@@ -1386,7 +1396,7 @@ async function shareVerse() {
         };
         cancelShareBtn.onclick = () => shareModal.style.display = "none";
       }
-      isSharing = false; 
+      isSharing = false;
     }, "image/png");
 
   } catch (err) {
