@@ -1377,13 +1377,17 @@ async function shareVerse() {
         // Fallback for devices that don't support sharing files
 shareModal.style.display = "flex";
 
-        copyVerseBtn.onclick = () => {
+    copyVerseBtn.onclick = async () => {
           const textToCopy = `"${verseText}" - ${currentKey}`;
-          navigator.clipboard.writeText(textToCopy).then(() => {
+          try {
+            await navigator.clipboard.writeText(textToCopy);
             showToast("Verse copied to clipboard!");
-          });
+            shareModal.style.display = "none"; // Optional: close modal after copy
+          } catch (err) {
+            console.error("Clipboard failed:", err);
+            showToast("Copy failed. Please select text manually.");
+          }
         };
-
         saveImageBtn.onclick = () => {
           if (typeof trackAppEvent === 'function') {
             trackAppEvent('manual_image_save', { 'verse_ref': currentKey });
