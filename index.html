@@ -473,18 +473,26 @@
     margin-top: 5px;
   }
 
-  .menu-btn {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 10px;
-    border-radius: 12px;
-    text-align: center;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.2s;
-    color: white;
-  }
-
-  .menu-btn:active { background: rgba(255, 255, 255, 0.25); }
+.menu-btn {
+background: rgba(255, 255, 255, 0.1);
+padding: 10px;
+border-radius: 12px;
+text-align: center;
+font-size: 14px;
+cursor: pointer;
+transition: background 0.2s;
+color: white;
+border: none;
+font-family: system-ui, sans-serif;
+}
+ 
+.menu-btn:active {
+background: rgba(255, 255, 255, 0.25);
+}
+ 
+.donate-btn {
+color: #FFD700;
+}
 </style>
 <script src="/js/marked.min.js"></script>  
 </head>
@@ -522,12 +530,12 @@
         <span id="streakText"><span id="streakNumber">1</span> Day Streak</span>
       </button>
 
-      <div class="menu-actions">
-        <div id="shareBtn" class="menu-btn">🔗 Share</div>
-        <div id="helpIcon" class="menu-btn">❔ Help</div>
-        <div id="ambientToggle" class="menu-btn">🌿 Ambient</div>
-        <div id="donateIcon" class="menu-btn" style="color: #FFD700;">♥ Donate</div>
-      </div>
+<div class="menu-actions">
+<button id="shareBtn" class="menu-btn" type="button">🔗 Share</button>
+<button id="helpIcon" class="menu-btn" type="button">❔ Help</button>
+<button id="ambientToggle" class="menu-btn" type="button">🌿 Ambient</button>
+<button id="donateIcon" class="menu-btn donate-btn" type="button">♥ Donate</button>
+</div>
     </div>
   </div>
 
@@ -796,11 +804,7 @@ async function initApp() {
   // Load files and parse verses safely
   await loadTranslation(translation);
   generateDaily();
-// ADD THIS: A small delay to ensure hints trigger reliably after load
-  setTimeout(() => {
-    updateStreak();
-  }, 500);
-  
+
   if (typeof setAutoRefreshAtMidnight === 'function') {
     setAutoRefreshAtMidnight();
   }
@@ -813,6 +817,14 @@ async function initApp() {
   streakEl.addEventListener("click", openStreak);
   helpIcon.addEventListener("click", openHelp);
 document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
+ 
+[helpModal, streakModal, shareModal].forEach(modal => {
+modal.addEventListener("click", e => {
+if (e.target === modal) {
+modal.style.display = "none";
+}
+});
+});
   donateIcon.addEventListener("click", goDonate);
 
   const menuFab = document.getElementById("menuFab");
@@ -976,10 +988,7 @@ function changeTranslation(t) {
 
 function updateVerse(titleText) {
   const text = verses[translation][currentKey];
-  if (!text) {
-    console.warn("Missing verse:", currentKey, translation);
-    return;
-  }
+console.warn("Missing verse:", currentKey, translation);
   titleEl.innerText = titleText;
   verseEl.innerHTML = text.split(" ").map(w => `<span class="word">${w}</span>`).join(" ");
   
