@@ -2,6 +2,29 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# Changelog
+ 
+## [1.3.4] - 2026-07-23
+ 
+### Changed
+- Replaced menu action elements from `<div>` tags to semantic `<button>` elements.
+- Improved accessibility and keyboard navigation for menu controls.
+- Moved Donate button color styling from inline HTML to CSS (`.donate-btn`).
+ 
+### Fixed
+- Removed duplicate `updateStreak()` execution during application startup.
+- Prevented streak hint notifications from being triggered twice during initial page load.
+- Added fallback handling for missing verse content to prevent blank verse displays.
+ 
+### Improved
+- Enhanced `.menu-btn` styling for native button compatibility.
+- Added `border: none` and standardized font styling for menu buttons.
+- Added support for closing modals by tapping outside the modal content area.
+ 
+### Internal
+- Simplified application initialization flow.
+- Reduced unnecessary startup events and duplicate streak calculations.
+
 ## [1.3.3] - 2026-06-12
 ### Fixed
 - **Facebook Share Reliability:** Resolved the "grayed out" button issue by optimizing the Web Share API data handling and UI stacking, ensuring the generated image `Blob` is correctly passed to the OS share sheet.
