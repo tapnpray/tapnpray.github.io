@@ -4,26 +4,19 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
  
-## [1.3.4] - 2026-07-23
+**Current Version: 1.3.4**
  
-### Changed
-- Replaced menu action elements from `<div>` tags to semantic `<button>` elements.
-- Improved accessibility and keyboard navigation for menu controls.
-- Moved Donate button color styling from inline HTML to CSS (`.donate-btn`).
+- **Improved Navigation:** Updated menu controls for better accessibility, responsiveness, and a more consistent mobile experience.
  
-### Fixed
-- Removed duplicate `updateStreak()` execution during application startup.
-- Prevented streak hint notifications from being triggered twice during initial page load.
-- Added fallback handling for missing verse content to prevent blank verse displays.
+- **Streak Fixes:** Eliminated duplicate streak processing during startup to ensure streak tracking and notifications behave consistently. 【1-4dfc03】
  
-### Improved
-- Enhanced `.menu-btn` styling for native button compatibility.
-- Added `border: none` and standardized font styling for menu buttons.
-- Added support for closing modals by tapping outside the modal content area.
+- **Verse Layout Improvements:** Refined verse rendering to improve line wrapping and maintain proper centered alignment for longer passages while preserving word-by-word highlighting during audio playback.
  
-### Internal
-- Simplified application initialization flow.
-- Reduced unnecessary startup events and duplicate streak calculations.
+- **Verse Loading Protection:** Added safeguards to prevent blank verse displays if content is temporarily unavailable. 【1-4dfc03】
+ 
+- **Better Popup Experience:** Help, Share, and Streak windows can now be dismissed by tapping outside the popup area. 【1-4dfc03】
+ 
+- **Code Optimization:** Performed code cleanup, standardized button styling, and improved maintainability to support future feature development. 【1-4dfc03】
 
 ## [1.3.3] - 2026-06-12
 ### Fixed
