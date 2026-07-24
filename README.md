@@ -9,15 +9,17 @@ For a detailed breakdown of codebase development, please refer to the [Full Chan
 
 **Current Version: 1.3.4**
  
-- **Improved Navigation:** Updated menu controls for better accessibility, responsiveness, and a more consistent mobile experience.
+- **Menu Accessibility Improvements:** Upgraded menu controls from clickable `<div>` elements to semantic `<button>` elements, improving accessibility, keyboard navigation, and overall mobile compatibility.
  
-- **Streak Fixes:** Eliminated duplicate streak processing during startup to ensure streak tracking and notifications behave consistently.
+- **Streak System Optimization:** Removed duplicate streak processing during application startup, preventing streak calculations and hint notifications from triggering multiple times.
  
-- **Verse Loading Protection:** Added safeguards to prevent blank verse displays if content is temporarily unavailable.
+- **Verse Layout Improvements:** Enhanced verse rendering to maintain proper centered alignment and improve line wrapping for longer passages while preserving word-by-word highlighting during audio playback.
  
-- **Better Popup Experience:** Help, Share, and Streak windows can now be dismissed by tapping outside the popup area.
+- **Verse Loading Protection:** Added fallback handling for missing verse content to prevent blank screens and provide a more reliable user experience.
  
-- **General Optimization:** Performed code cleanup and UI refinements to improve stability and support future feature development.
+- **Improved Popup Experience:** Help, Share, and Streak dialogs can now be dismissed by tapping outside the popup area for faster and more intuitive navigation.
+ 
+- **Code Cleanup & Maintainability:** Moved Donate button styling into CSS, standardized menu button styling, and performed general code cleanup to simplify future development.
 
 ## ✨ Core Features
 
