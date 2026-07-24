@@ -130,6 +130,10 @@
 
   #verse {
     margin-top: 6px;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
     font-size: clamp(24px, 5.8vw, 40px);
     font-family: 'Merriweather', serif;
     font-weight: 400;
@@ -145,11 +149,9 @@
 }
 
 .word {
-    opacity: 0.4;
-    transition: opacity 0.15s ease, color 0.15s ease;
-    display: inline-block;
-    margin-right: 0.25em;
-  }
+opacity: 0.4;
+transition: opacity 0.15s ease, color 0.15s ease;
+}
 
   .word.active {
     opacity: 1;
