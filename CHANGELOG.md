@@ -5,13 +5,18 @@ All notable changes to this project will be documented in this file.
 # Changelog
 
 
+**Current Version: 1.4.1**
+- **The entire Interactive Bible Reader build (drag/edge-tap page turns, full Genesis→Revelation navigation, Jump to Passage modal, verse styling/highlighting)
+- **The smart Read Aloud behavior (single verse vs. whole-chapter modes, auto-stop on navigation)
+- **The new "📖 Open Bible" FAB button
+- **The translation selector relocation + live in-reader translation switching
+- **The paper-fold removal and animation timing slowdown (430ms→700ms / 260ms→380ms)
+
 **Current Version: 1.3.5**
  
 - **Added new Morning and Night backgrounds with a subtle blur effect for an improved reading experience.
 
 
-
- 
 **Current Version: 1.3.4**
  
 - **Improved Navigation:** Updated menu controls for better accessibility, responsiveness, and a more consistent mobile experience.
