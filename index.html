@@ -495,6 +495,199 @@ background: rgba(255, 255, 255, 0.25);
 .donate-btn {
 color: #FFD700;
 }
+
+/* =========================
+   BIBLE READER (interactive page-flip)
+========================= */
+#bibleReader {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: none;
+  flex-direction: column;
+  background: radial-gradient(circle at 50% 30%, #241a10 0%, #0a0704 75%);
+  touch-action: none;
+}
+#bibleReader.open { display: flex; }
+.reader-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: calc(14px + env(safe-area-inset-top)) 16px 8px;
+  color: #f2e8d4;
+}
+.reader-icon-btn {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  color: #f2e8d4;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.reader-icon-btn:active { background: rgba(255,255,255,0.2); }
+#readerRef {
+  flex: 1;
+  text-align: center;
+  font-family: 'Merriweather', serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+}
+.page-stage {
+  position: relative;
+  flex: 1;
+  margin: 4px 14px calc(14px + env(safe-area-inset-bottom));
+  perspective: 2400px;
+}
+.paper-page {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px 16px 16px 6px;
+  background: linear-gradient(135deg, #fbf6e8 0%, #f4ead0 55%, #ecdfbe 100%);
+  box-shadow: 0 25px 55px rgba(0,0,0,0.6), inset 0 0 50px rgba(120,90,40,0.10);
+  overflow: hidden;
+}
+#pageBase { z-index: 1; }
+#pageFlip {
+  z-index: 2;
+  transform-origin: left center;
+  transform: rotateY(0deg);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+}
+.page-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,0,0,0) 45%);
+  opacity: 0;
+  pointer-events: none;
+}
+.page-content {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  padding: 30px 22px 44px;
+  color: #2b2116;
+  font-family: 'Merriweather', serif;
+}
+.chapter-heading {
+  text-align: center;
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 16px;
+  color: #5c3b1e;
+  letter-spacing: 0.4px;
+}
+.verse-block {
+  line-height: 1.8;
+  font-size: 17px;
+}
+.verse-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0086D6;
+  margin-right: 3px;
+  vertical-align: super;
+}
+.verse-highlight {
+  background: linear-gradient(100deg, rgba(255,224,89,0) 0%, rgba(255,224,89,0.55) 8%, rgba(255,224,89,0.55) 92%, rgba(255,224,89,0) 100%);
+  border-radius: 4px;
+  padding: 1px 2px;
+  scroll-margin: 40vh;
+}
+.page-footer {
+  margin-top: 26px;
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.chapter-end {
+  text-align: center;
+  margin-top: 45%;
+  font-size: 16px;
+  opacity: 0.65;
+}
+.reader-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 22%;
+  z-index: 3;
+  cursor: pointer;
+}
+.reader-edge.left { left: 0; }
+.reader-edge.right { right: 0; }
+.reader-hint {
+  position: absolute;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(242,232,212,0.65);
+  font-size: 12px;
+  font-family: system-ui, sans-serif;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  white-space: nowrap;
+}
+#jumpModal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+  z-index: 6000;
+  padding: 20px;
+}
+.jump-card {
+  background: rgba(20,14,8,0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  color: #f2e8d4;
+  font-family: 'Merriweather', serif;
+}
+.jump-card h2 { margin: 0 0 4px; font-size: 18px; }
+.jump-card select {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+.jump-card button {
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  background: #108cd7;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+}
 </style>
 <script src="/js/marked.min.js"></script>  
 </head>
@@ -502,7 +695,7 @@ color: #FFD700;
   <div id="bg-layer"></div>
 
   <img id="topLogo" src="logo.svg" alt="Tap N Pray Logo">
-  <div id="tapHintBubble">Tap the verse to listen 🔊</div>
+  <div id="tapHintBubble">Tap the verse to open the Bible 📖</div>
   <div id="streakHintBubble">🔥 <span id="hintStreakNumber">1</span> Day Streak</div>
   
   <div class="center">
@@ -575,12 +768,41 @@ color: #FFD700;
 
   <audio id="ambientAudio" loop src="/sounds/calm.mp3"></audio>
   <div id="toast"></div>
+
+  <!-- Interactive Bible Reader -->
+  <div id="bibleReader">
+    <div class="reader-topbar">
+      <button id="readerCloseBtn" class="reader-icon-btn" type="button" aria-label="Close">✕</button>
+      <div id="readerRef"></div>
+      <button id="readerListenBtn" class="reader-icon-btn" type="button" aria-label="Listen">🔊</button>
+      <button id="readerJumpBtn" class="reader-icon-btn" type="button" aria-label="Jump to passage">📖</button>
+    </div>
+    <div class="page-stage" id="pageStage">
+      <div class="paper-page" id="pageBase"><div class="page-content"></div></div>
+      <div class="paper-page" id="pageFlip"><div class="page-content"></div><div class="page-shade"></div></div>
+      <div class="reader-edge left" id="edgeLeft"></div>
+      <div class="reader-edge right" id="edgeRight"></div>
+      <div class="reader-hint" id="readerHint">‹ Swipe or tap the edges to turn pages ›</div>
+    </div>
+  </div>
+
+  <div id="jumpModal">
+    <div class="jump-card">
+      <div class="close-btn" id="jumpCloseBtn">✕</div>
+      <h2>Jump to a Passage</h2>
+      <select id="jumpBookSelect"></select>
+      <select id="jumpChapterSelect"></select>
+      <button id="jumpGoBtn" type="button">Go</button>
+    </div>
+  </div>
 <script>
 /* =========================
    VERSES & TRANSLATIONS
 ========================= */
 const APP_VERSION = "1.3.5";
 let verses = { nlt:{}, niv:{}, kjv:{} };
+let rawBible = { nlt:null, niv:null, kjv:null }; // full nested Book -> Chapter -> Verse text, used by the Bible Reader
+let chapterIndexCache = {};
 let translation = "nlt";
 let dailyKey = "";
 let currentKey = "";
@@ -607,6 +829,25 @@ const shareModal = document.getElementById("shareModal");
 const saveImageBtn = document.getElementById("saveImageBtn");
 const cancelShareBtn = document.getElementById("cancelShareBtn");
 const copyVerseBtn = document.getElementById("copyVerseBtn"); //
+// Bible Reader elements
+const bibleReaderEl = document.getElementById("bibleReader");
+const pageStageEl = document.getElementById("pageStage");
+const pageBaseEl = document.getElementById("pageBase");
+const pageFlipEl = document.getElementById("pageFlip");
+const pageShadeEl = pageFlipEl.querySelector(".page-shade");
+const edgeLeftEl = document.getElementById("edgeLeft");
+const edgeRightEl = document.getElementById("edgeRight");
+const readerHintEl = document.getElementById("readerHint");
+const readerRefEl = document.getElementById("readerRef");
+const readerCloseBtn = document.getElementById("readerCloseBtn");
+const readerListenBtn = document.getElementById("readerListenBtn");
+const readerJumpBtn = document.getElementById("readerJumpBtn");
+const jumpModalEl = document.getElementById("jumpModal");
+const jumpCloseBtn = document.getElementById("jumpCloseBtn");
+const jumpBookSelect = document.getElementById("jumpBookSelect");
+const jumpChapterSelect = document.getElementById("jumpChapterSelect");
+const jumpGoBtn = document.getElementById("jumpGoBtn");
+const readerState = { translation: null, chapters: [], currentIndex: 0, isAnimating: false, pendingHighlight: null };
 
 let isSharing = false;
 
@@ -828,6 +1069,7 @@ modal.style.display = "none";
 });
 });
   donateIcon.addEventListener("click", goDonate);
+  initBibleReader();
 
   const menuFab = document.getElementById("menuFab");
   const expandableMenu = document.getElementById("expandableMenu");
@@ -996,7 +1238,7 @@ console.warn("Missing verse:", currentKey, translation);
   
   // SECURE CLICK RE-BIND: Re-attach the handler cleanly to the freshly rendered layout
   verseEl.onclick = () => {
-    readVerse();
+    openBibleReader(currentKey);
   };
 
 refEl.innerText = currentKey;
@@ -1124,6 +1366,8 @@ async function loadTranslation(t) {
     const res = await fetch(`/BIBLE/${t.toUpperCase()}/${t.toUpperCase()}_bible.json`);
     if (!res.ok) return;
     const data = await res.json();
+    rawBible[t] = data;
+    chapterIndexCache[t] = null; // invalidate cache so the Bible Reader rebuilds its chapter index
     Object.entries(data).forEach(([book, chapters]) => {
       Object.entries(chapters).forEach(([chapter, versesObj]) => {
         Object.entries(versesObj).forEach(([v, text]) => {
@@ -1134,6 +1378,238 @@ async function loadTranslation(t) {
   } catch (err) {
     console.error("Error loading translation:", err);
   }
+}
+
+/* =========================
+   INTERACTIVE BIBLE READER
+   (tap the verse -> flip through the whole Bible like real paper)
+========================= */
+function parseRef(key) {
+  const m = key && key.match(/^(.*)\s(\d+):(\d+)$/);
+  if (!m) return null;
+  return { book: m[1], chapter: m[2], verse: m[3] };
+}
+function getChapterIndex(t) {
+  if (chapterIndexCache[t]) return chapterIndexCache[t];
+  const data = rawBible[t];
+  if (!data) return [];
+  const list = [];
+  Object.keys(data).forEach(book => {
+    Object.keys(data[book]).forEach(chapter => {
+      list.push({ book, chapter });
+    });
+  });
+  chapterIndexCache[t] = list;
+  return list;
+}
+function buildChapterHTML(idx, highlightVerse) {
+  const chaps = readerState.chapters;
+  if (!chaps.length) return "";
+  if (idx < 0) return `<div class="chapter-end">📜<br>Beginning of Genesis</div>`;
+  if (idx >= chaps.length) return `<div class="chapter-end">📜<br>End of Revelation</div>`;
+  const { book, chapter } = chaps[idx];
+  const versesObj = (rawBible[readerState.translation] && rawBible[readerState.translation][book] && rawBible[readerState.translation][book][chapter]) || {};
+  let html = `<div class="chapter-heading">${book} ${chapter}</div>`;
+  Object.entries(versesObj).forEach(([v, text]) => {
+    const hl = (highlightVerse != null && String(v) === String(highlightVerse)) ? " verse-highlight" : "";
+    html += `<span class="verse-block${hl}" data-verse="${v}"><sup class="verse-num">${v}</sup>${text} </span>`;
+  });
+  html += `<div class="page-footer">${book} ${chapter} &middot; ${readerState.translation.toUpperCase()}</div>`;
+  return html;
+}
+function renderChapterInto(pageEl, idx, highlightVerse) {
+  const content = pageEl.querySelector(".page-content");
+  content.innerHTML = buildChapterHTML(idx, highlightVerse);
+  content.scrollTop = 0;
+}
+function updateReaderHeader() {
+  const c = readerState.chapters[readerState.currentIndex];
+  if (c) readerRefEl.textContent = `${c.book} ${c.chapter}`;
+}
+function scrollHighlightIntoView() {
+  const el = pageFlipEl.querySelector(".verse-highlight");
+  if (el) el.scrollIntoView({ block: "center", behavior: "smooth" });
+}
+function setShade(progress) {
+  pageShadeEl.style.opacity = Math.max(0, Math.min(0.6, progress * 0.6));
+}
+async function openBibleReader(key) {
+  if (!key) return;
+  if (typeof trackAppEvent === "function") {
+    trackAppEvent("bible_reader_open", { verse_ref: key, translation });
+  }
+  const parsed = parseRef(key);
+  if (!parsed) return;
+  if (!rawBible[translation]) {
+    showToast("Loading the Bible...");
+    await loadTranslation(translation);
+  }
+  if (!rawBible[translation]) { showToast("Unable to load Bible text."); return; }
+  const chapters = getChapterIndex(translation);
+  let idx = chapters.findIndex(c => c.book === parsed.book && String(c.chapter) === String(parsed.chapter));
+  if (idx === -1) idx = 0;
+  readerState.translation = translation;
+  readerState.chapters = chapters;
+  readerState.currentIndex = idx;
+  bibleReaderEl.classList.add("open");
+  document.body.style.overflow = "hidden";
+  pageFlipEl.style.transition = "none";
+  pageFlipEl.style.transform = "rotateY(0deg)";
+  pageFlipEl.style.transformOrigin = "left center";
+  setShade(0);
+  renderChapterInto(pageFlipEl, idx, parsed.verse);
+  renderChapterInto(pageBaseEl, idx, null);
+  updateReaderHeader();
+  readerHintEl.style.opacity = "1";
+  setTimeout(scrollHighlightIntoView, 80);
+  setTimeout(() => { readerHintEl.style.opacity = "0"; }, 4500);
+}
+function closeBibleReader() {
+  bibleReaderEl.classList.remove("open");
+  document.body.style.overflow = "";
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+}
+function prepareBaseForDirection(dir) {
+  const targetIdx = readerState.currentIndex + dir;
+  if (targetIdx < 0 || targetIdx >= readerState.chapters.length) return null;
+  pageFlipEl.style.transformOrigin = dir === 1 ? "left center" : "right center";
+  renderChapterInto(pageBaseEl, targetIdx, null);
+  return targetIdx;
+}
+function completeFlip(targetIdx) {
+  readerState.currentIndex = targetIdx;
+  pageFlipEl.style.transition = "none";
+  pageFlipEl.style.transform = "rotateY(0deg)";
+  renderChapterInto(pageFlipEl, targetIdx, null);
+  setShade(0);
+  void pageFlipEl.offsetWidth;
+  readerState.isAnimating = false;
+  updateReaderHeader();
+}
+const FLIP_EASE = "transform 0.45s cubic-bezier(.4,0,.2,1)";
+function pulseEdge() { /* no more pages in that direction */ }
+function tapFlip(dir) {
+  if (readerState.isAnimating || dragState.dragging) return;
+  const targetIdx = prepareBaseForDirection(dir);
+  if (targetIdx === null) { pulseEdge(); return; }
+  readerState.isAnimating = true;
+  pageFlipEl.style.transition = FLIP_EASE;
+  requestAnimationFrame(() => {
+    pageFlipEl.style.transform = `rotateY(${dir === 1 ? -180 : 180}deg)`;
+    setShade(1);
+  });
+  pageFlipEl.addEventListener("transitionend", function handler() {
+    pageFlipEl.removeEventListener("transitionend", handler);
+    completeFlip(targetIdx);
+  });
+}
+// Drag-to-flip (mouse + touch via Pointer Events) for a real paper feel
+const dragState = { dragging: false, dir: 0, startX: 0, lastDelta: 0 };
+function onStagePointerDown(e) {
+  if (readerState.isAnimating) return;
+  dragState.dragging = true;
+  dragState.dir = 0;
+  dragState.startX = e.clientX;
+  dragState.lastDelta = 0;
+  pageFlipEl.style.transition = "none";
+  try { pageStageEl.setPointerCapture(e.pointerId); } catch (err) {}
+}
+function onStagePointerMove(e) {
+  if (!dragState.dragging) return;
+  const delta = e.clientX - dragState.startX;
+  if (dragState.dir === 0) {
+    if (Math.abs(delta) < 6) return;
+    const dir = delta < 0 ? 1 : -1;
+    const targetIdx = prepareBaseForDirection(dir);
+    if (targetIdx === null) { dragState.dir = null; return; }
+    dragState.dir = dir;
+  }
+  if (!dragState.dir) return;
+  dragState.lastDelta = delta;
+  const width = pageStageEl.clientWidth || 320;
+  const progress = Math.min(1, Math.abs(delta) / width);
+  const angle = dragState.dir === 1 ? -180 * progress : 180 * progress;
+  pageFlipEl.style.transform = `rotateY(${angle}deg)`;
+  setShade(progress);
+  readerHintEl.style.opacity = "0";
+}
+function onStagePointerUp() {
+  if (!dragState.dragging) return;
+  dragState.dragging = false;
+  if (!dragState.dir) return;
+  const width = pageStageEl.clientWidth || 320;
+  const progress = Math.min(1, Math.abs(dragState.lastDelta) / width);
+  pageFlipEl.style.transition = FLIP_EASE;
+  if (progress > 0.28) {
+    const targetIdx = readerState.currentIndex + dragState.dir;
+    readerState.isAnimating = true;
+    requestAnimationFrame(() => {
+      pageFlipEl.style.transform = `rotateY(${dragState.dir === 1 ? -180 : 180}deg)`;
+      setShade(1);
+    });
+    pageFlipEl.addEventListener("transitionend", function handler() {
+      pageFlipEl.removeEventListener("transitionend", handler);
+      completeFlip(targetIdx);
+    });
+  } else {
+    requestAnimationFrame(() => {
+      pageFlipEl.style.transform = "rotateY(0deg)";
+      setShade(0);
+    });
+  }
+  dragState.dir = 0;
+}
+function populateJumpBooks() {
+  const chapters = readerState.chapters.length ? readerState.chapters : getChapterIndex(translation);
+  const books = [...new Set(chapters.map(c => c.book))];
+  jumpBookSelect.innerHTML = books.map(b => `<option value="${b}">${b}</option>`).join("");
+  const current = readerState.chapters[readerState.currentIndex];
+  if (current) jumpBookSelect.value = current.book;
+  populateJumpChapters();
+}
+function populateJumpChapters() {
+  const book = jumpBookSelect.value;
+  const chaptersForBook = readerState.chapters.filter(c => c.book === book).map(c => c.chapter);
+  jumpChapterSelect.innerHTML = chaptersForBook.map(ch => `<option value="${ch}">${ch}</option>`).join("");
+  const current = readerState.chapters[readerState.currentIndex];
+  if (current && current.book === book) jumpChapterSelect.value = current.chapter;
+}
+function initBibleReader() {
+  pageStageEl.addEventListener("pointerdown", onStagePointerDown);
+  document.addEventListener("pointermove", onStagePointerMove);
+  document.addEventListener("pointerup", onStagePointerUp);
+  document.addEventListener("pointercancel", onStagePointerUp);
+  edgeLeftEl.addEventListener("click", () => tapFlip(-1));
+  edgeRightEl.addEventListener("click", () => tapFlip(1));
+  readerCloseBtn.addEventListener("click", closeBibleReader);
+  readerListenBtn.addEventListener("click", () => readVerse());
+  readerJumpBtn.addEventListener("click", () => { populateJumpBooks(); jumpModalEl.style.display = "flex"; });
+  jumpCloseBtn.addEventListener("click", () => jumpModalEl.style.display = "none");
+  jumpModalEl.addEventListener("click", e => { if (e.target === jumpModalEl) jumpModalEl.style.display = "none"; });
+  jumpBookSelect.addEventListener("change", populateJumpChapters);
+  jumpGoBtn.addEventListener("click", () => {
+    const book = jumpBookSelect.value, chapter = jumpChapterSelect.value;
+    const idx = readerState.chapters.findIndex(c => c.book === book && String(c.chapter) === String(chapter));
+    if (idx > -1) {
+      readerState.currentIndex = idx;
+      pageFlipEl.style.transition = "opacity 0.25s ease";
+      pageFlipEl.style.opacity = "0";
+      setTimeout(() => {
+        renderChapterInto(pageFlipEl, idx, null);
+        pageFlipEl.style.transition = "none";
+        pageFlipEl.style.transform = "rotateY(0deg)";
+        pageFlipEl.style.opacity = "1";
+        updateReaderHeader();
+      }, 250);
+    }
+    jumpModalEl.style.display = "none";
+  });
+  document.addEventListener("keydown", e => {
+    if (!bibleReaderEl.classList.contains("open")) return;
+    if (e.key === "ArrowRight") tapFlip(1);
+    if (e.key === "ArrowLeft") tapFlip(-1);
+    if (e.key === "Escape") closeBibleReader();
+  });
 }
 
 /* =========================
