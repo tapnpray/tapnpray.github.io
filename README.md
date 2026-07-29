@@ -7,8 +7,8 @@ Tap N Pray is a minimalist, immersive web application designed to bring the Word
 ## 🚀 Project Status
 For a detailed breakdown of codebase development, please refer to the [Full Changelog](./CHANGELOG.md).
 
-**Current Version: 1.3.5**
-- **Added new Morning and Night backgrounds with a subtle blur effect for an improved reading experience.
+**Current Version: 1.4.1**
+- **Added Interactive Bible.
 
 
 ## ✨ Core Features
