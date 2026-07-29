@@ -2,88 +2,83 @@
 
 **One Tap. One Verse. One Step Closer to Christ.**
 
-Tap N Pray is a minimalist, immersive web application designed to bring the Word of God into your daily life with simplicity and focus. Built for deep reflection, meditation, and prayer, it delivers a meticulously curated Bible verse experience through a high-contrast, distraction-free typography interface.
+Tap N Pray is a minimalist, immersive web app designed to bring the Word of God into your daily life with simplicity and focus. Built for quiet reflection, meditation, and prayer, it delivers a beautifully simple Bible verse experience with a clean, distraction-free design.
 
 ## 🚀 Project Status
-For a detailed breakdown of codebase development, please refer to the [Full Changelog](./CHANGELOG.md).
+For a detailed history of every update, see the [Full Changelog](./CHANGELOG.md).
 
 **Current Version: 1.4.1**
-- **Added Interactive Bible.
+- **Added an Interactive Bible Reader** — tap any verse to open a full, book-like Bible you can flip through page by page, jump to any passage, and listen to as you read.
 
+---
 
 ## ✨ Core Features
 
-### 📖 Immersive Verse Experience
-- **Daily & Random Modes** Start your day with a globally synchronized **Daily Bible Verse** or explore scripture dynamically using the **Random** toggle.
-- **Elite Curated System** Rather than pulling completely raw random data, Tap N Pray utilizes an internal **weighted mathematical pool system** to prioritize balance across custom thematic categories (Gospel, Peace, Strength, Love, Hope, Wisdom, Faith, Praise, and Comfort).
-- **Seasonal Holiday Logic** Integrated dynamic calculation utilities (including a manual tracking algorithm for Easter dates) to automatically increase the frequency of relevant scriptures during key holiday windows (Christmas, Good Friday, Easter Sunday).
-- **History Avoidance Rotation** The selection engine features an explicit `localStorage` rotation buffer tracking the last 14 unique verses (`recentVerses`) to filter out recent repeats and maintain high user engagement.
-- **Multiple Translations** Seamlessly switch on the fly between optimized database structures for:
-  - **NLT** (New Living Translation)
-  - **NIV** (New International Version)
-  - **KJV** (King James Version)
+### 📖 Daily & Random Verses
+- **Daily Bible Verse** A new verse is chosen every day, and it's the same verse for everyone around the world — a shared moment of scripture each morning.
+- **Random Mode** Want something different? Switch to Random for a fresh verse anytime.
+- **Thoughtfully Curated** Verses are pulled from a hand-picked collection covering themes like Peace, Strength, Love, Hope, Wisdom, Faith, and Comfort — so you're never far from the encouragement you need.
+- **Seasonal Verses** During Christmas and Easter, the app naturally surfaces verses that match the season.
+- **No Repeats** The app remembers your recent verses so you won't see the same one again too soon.
+- **Multiple Translations** Choose between **NLT**, **NIV**, and **KJV** right from inside the Bible Reader.
 
 ---
 
-### 🔊 Premium Narration & Soundscapes
-- **High-Fidelity Neural TTS** Tap any verse to hear it read aloud. The engine automatically targets and hooks into premium, natural-sounding neural audio profiles natively installed on the user's local operating system (such as iOS Premium/Natural layers or Google US English).
-- **Asynchronous Voice Pre-Fetching** Utilizes native `onvoiceschanged` lifecycle listeners to cache system audio modules immediately on boot, eliminating mobile interface delay during tap interactions.
-- **Real-Time Word Highlighting** Words smoothly illuminate individually as they are spoken, functioning as a clean tracking cursor that auto-resets on completion to help you focus and meditate deeply.
-- **Ambient Soundscape** Toggle the 🌿 button to crossfade a calming, low-volume background loop (`calm.mp3`) for a peaceful, undistracted prayer environment.
+### 📖 Interactive Bible Reader *(New!)*
+- **Tap Any Verse to Open the Bible** Tapping the verse on the home screen — or using the **📖 Open Bible** button in the menu — opens a full-screen reader turned directly to that verse's chapter.
+- **Flip Through the Whole Bible** Swipe or drag the page to turn it, just like a real book, or simply tap the left/right edge of the screen for a quick page turn. Keep flipping and you can move seamlessly from Genesis all the way to Revelation.
+- **Jump to Any Passage** Use the 📖 jump button inside the reader to pick any book and chapter and go there instantly — no need to flip through hundreds of pages.
+- **Listen As You Read** Tap 🔊 inside the reader to hear the verse read aloud. If you tapped a specific verse, it reads just that one, highlighting it as it speaks. If you've flipped to a new page, it automatically reads the whole chapter in front of you instead.
+- **Switch Translations Anytime** Change between NLT, NIV, and KJV right from the reader's toolbar — it will stay on the same chapter you're reading.
 
 ---
 
-### 🔥 PWA Optimization & Habits
-- **Cross-Platform Global Sync** Engineered to bridge standalone PWA sandboxes. By shifting seed calculations to an explicit, time-zone agnostic UTC date string blueprint, both standard mobile Safari/Chrome tabs and installed **Add to Home Screen** app containers display the exact same synchronized verse worldwide.
-- **Automated Midnight Refresh** Includes an integrated, ultra-lightweight midnight timer loop. It calculates the exact milliseconds remaining until the next global UTC rollover and triggers an automated silent page update, ensuring open apps update without requiring a manual app relaunch.
-- **Timezone-Agnostic Streak Tracking** Build consistency in your quiet time with streak metrics that parse strict date objects, preventing accidental local timezone offset resets at midnight.
-  - 🌿 7 days — *Initial Habit Milestone*
-  - 🔥 30 days — *Consistency Milestone*
-  - 👑 100 days — *Spiritual Momentum*
+### 🔥 Daily Habits & Streaks
+- **Build a Daily Habit** Keep your streak alive by opening the app each day.
+- **Milestones to Celebrate**
+  - 🌿 7 days — *Your first milestone*
+  - 🔥 30+ days — *Building real consistency*
+- **Fair & Accurate Tracking** Your streak is tracked using a consistent global clock, so it won't accidentally reset just because of your timezone.
 
 ---
 
-### 🎨 Clean UI & Social Canvas Sharing
-- **High-Contrast Readability** Intentionally completely clean layout optimized for legibility, removing heavy visual decoration in favor of elegant font weights, adaptive scale margins, and premium typography.
-- **Sequenced Micro-Onboarding** Subtle, timed interface hint bubbles that glide into position sequentially to guide user engagement smoothly without cluttering the screen.
-- **Dynamic Image Generator Canvas** Generates high-resolution $1080 \times 1080$ sharing graphics on demand. Features text shadow protections for readability over beautiful pre-blurred daytime/nighttime environmental visual assets, custom automatic text-wrapping algorithms, and embedded **Tap N Pray** branding footprints.
+### 🌿 Peaceful Atmosphere
+- **Ambient Sound** Tap the 🌿 button to play a calm, gentle background sound — great for quiet time and prayer.
+- **Day & Night Backgrounds** The background automatically shifts between a morning and evening look depending on the time of day.
+- **Clean, Calming Design** No clutter, no distractions — just elegant typography and soft visuals designed to help you focus on the Word.
 
 ---
 
-## 🛠️ Technical Overview
-
-- **Frontend Architecture**: Vanilla ECMAScript 6 / HTML5 Canvas / CSS3 (Variables & Custom Properties).
-- **Data Hydration**: Highly optimized, decoupled JSON book-chapter translation trees for instantaneous asset loads.
-- **Runtime Reference Safeguards**: Global utility hooks and external script parameters are wrapped in explicit type-checks to guarantee runtime application stability across distinct mobile and web environments.
-- **Analytics Pipeline**: Integrated Google Analytics tracking layer (`gtag`) mapping application engagement triggers like view modes, translation adaptations, and generation intents.
-- **PWA Architecture**: Standalone web app manifest ready with native mobile environment safe-area padding layouts (`env(safe-area-inset)`).
+### 🔗 Share What Inspires You
+- **Share a Verse** Turn today's verse into a beautiful shareable image with one tap, complete with Tap N Pray branding — perfect for social media or sending to a friend.
+- **Copy or Save** If your device can't share the image directly, you can copy the verse text or save the image to your photos instead.
 
 ---
 
 ## 🙏 Mission
 
-The mission of **Tap N Pray** is to completely remove the digital friction between a busy, fast-paced life and the grounding presence of the Word of God. 
+The mission of **Tap N Pray** is to remove the friction between a busy, fast-paced life and the grounding presence of God's Word.
 
-Through minimalist design and thoughtful front-end engineering, the goal is to provide a clean space to help you take **one step closer to Christ every single day**.
+Through simple design and a focus on what matters, our goal is to give you a clean space to help you take **one step closer to Christ every single day**.
 
 ---
 
 ## 💛 Support the Project
 
-If Tap N Pray has encouraged your daily walk, you can directly support the development mission:
+If Tap N Pray has encouraged your daily walk, you can directly support the mission:
 
 👉 [Support on Venmo](https://venmo.com/u/tapnpray)
 
 ### What your support helps fund:
 - Production of physical **Tap N Pray NFC keytags**
-- Deployment tools to share Scripture easily
+- Tools to share Scripture easily with others
 - Continued, ad-free app speed and stability improvements
 
 ### Why keytags?
-These custom integration tag tools are designed to:
-- Be shared easily in modern ministry settings  
-- Serve as prompt physical touchpoints in daily life  
-- Help others discover God’s Word with a simple tap  
+These custom NFC keytags are designed to:
+- Be shared easily in everyday ministry settings
+- Serve as a simple physical reminder in daily life
+- Help others discover God's Word with a simple tap
 
 <img src="TapPray-NFCTag.gif" width="240" alt="NFC Keytag Demo" />
 
