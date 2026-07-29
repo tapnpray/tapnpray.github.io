@@ -881,8 +881,8 @@ window.addEventListener("DOMContentLoaded", initApp);
    BACKGROUNDS
 ========================= */
 const bgImages = {
-  morning: "/backgrounds/morning-blurred.png",
-  night: "/backgrounds/night-blurred.png"
+  morning: "/backgrounds/Morning.png",
+  night: "/backgrounds/Night.png"
 };
 let currentBackground = "";
 
@@ -1289,8 +1289,8 @@ async function shareVerse() {
     const hour = new Date().getHours();
     const isDaytime = hour >= 6 && hour < 18;
     const blurredImgPath = isDaytime 
-      ? "/backgrounds/morning-blurred.png" 
-      : "/backgrounds/night-blurred.png";
+      ? "/backgrounds/Morning.png" 
+      : "/backgrounds/Night.png";
 
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous";
