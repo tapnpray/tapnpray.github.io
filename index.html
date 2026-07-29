@@ -572,6 +572,7 @@ color: #FFD700;
   background: linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,0,0,0) 45%);
   opacity: 0;
   pointer-events: none;
+  z-index: 4;
 }
 .page-content {
   position: absolute;
@@ -608,6 +609,12 @@ color: #FFD700;
   padding: 1px 2px;
   scroll-margin: 40vh;
 }
+.verse-block.reading-now {
+  background: rgba(0, 134, 214, 0.20);
+  border-radius: 4px;
+  transition: background 0.15s ease;
+  scroll-margin: 40vh;
+}
 .page-footer {
   margin-top: 26px;
   text-align: center;
@@ -622,12 +629,41 @@ color: #FFD700;
   font-size: 16px;
   opacity: 0.65;
 }
+/* Curling "lip" near the leading edge of the turning page, for a realistic paper fold */
+.page-lip {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  overflow: hidden;
+  transform-origin: left center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  pointer-events: none;
+  z-index: 3;
+  background: linear-gradient(135deg, #fbf6e8 0%, #f4ead0 55%, #ecdfbe 100%);
+  box-shadow: inset 10px 0 22px rgba(90,60,20,0.28), -12px 0 25px rgba(0,0,0,0.4);
+  opacity: 0;
+  will-change: transform;
+}
+.page-lip .page-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.page-lip-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0) 100%);
+  opacity: 0;
+  pointer-events: none;
+}
 .reader-edge {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 22%;
-  z-index: 3;
+  z-index: 5;
   cursor: pointer;
 }
 .reader-edge.left { left: 0; }
@@ -643,6 +679,7 @@ color: #FFD700;
   pointer-events: none;
   transition: opacity 0.6s ease;
   white-space: nowrap;
+  z-index: 6;
 }
 #jumpModal {
   position: fixed;
@@ -779,7 +816,14 @@ color: #FFD700;
     </div>
     <div class="page-stage" id="pageStage">
       <div class="paper-page" id="pageBase"><div class="page-content"></div></div>
-      <div class="paper-page" id="pageFlip"><div class="page-content"></div><div class="page-shade"></div></div>
+      <div class="paper-page" id="pageFlip">
+        <div class="page-content"></div>
+        <div class="page-lip" id="pageLip">
+          <div class="page-content" id="pageLipContent"></div>
+          <div class="page-lip-sheen" id="pageLipSheen"></div>
+        </div>
+        <div class="page-shade" id="pageShade"></div>
+      </div>
       <div class="reader-edge left" id="edgeLeft"></div>
       <div class="reader-edge right" id="edgeRight"></div>
       <div class="reader-hint" id="readerHint">‹ Swipe or tap the edges to turn pages ›</div>
@@ -799,7 +843,7 @@ color: #FFD700;
 /* =========================
    VERSES & TRANSLATIONS
 ========================= */
-const APP_VERSION = "1.3.5";
+const APP_VERSION = "1.4.0";
 let verses = { nlt:{}, niv:{}, kjv:{} };
 let rawBible = { nlt:null, niv:null, kjv:null }; // full nested Book -> Chapter -> Verse text, used by the Bible Reader
 let chapterIndexCache = {};
@@ -834,7 +878,10 @@ const bibleReaderEl = document.getElementById("bibleReader");
 const pageStageEl = document.getElementById("pageStage");
 const pageBaseEl = document.getElementById("pageBase");
 const pageFlipEl = document.getElementById("pageFlip");
-const pageShadeEl = pageFlipEl.querySelector(".page-shade");
+const pageShadeEl = document.getElementById("pageShade");
+const pageLipEl = document.getElementById("pageLip");
+const pageLipContentEl = document.getElementById("pageLipContent");
+const pageLipSheenEl = document.getElementById("pageLipSheen");
 const edgeLeftEl = document.getElementById("edgeLeft");
 const edgeRightEl = document.getElementById("edgeRight");
 const readerHintEl = document.getElementById("readerHint");
@@ -847,7 +894,10 @@ const jumpCloseBtn = document.getElementById("jumpCloseBtn");
 const jumpBookSelect = document.getElementById("jumpBookSelect");
 const jumpChapterSelect = document.getElementById("jumpChapterSelect");
 const jumpGoBtn = document.getElementById("jumpGoBtn");
-const readerState = { translation: null, chapters: [], currentIndex: 0, isAnimating: false, pendingHighlight: null };
+const readerState = { translation: null, chapters: [], currentIndex: 0, isAnimating: false, highlightVerse: null };
+const LIP_WIDTH_PCT = 0.32;   // portion of the page width that curls near the leading edge
+const LIP_MAX_ANGLE = 42;     // degrees of extra "fold" at the peak of the turn
+let readerSpeaking = false;
 
 let isSharing = false;
 
@@ -1382,7 +1432,7 @@ async function loadTranslation(t) {
 
 /* =========================
    INTERACTIVE BIBLE READER
-   (tap the verse -> flip through the whole Bible like real paper)
+   (tap the verse -> flip through the whole Bible like real, folding paper)
 ========================= */
 function parseRef(key) {
   const m = key && key.match(/^(.*)\s(\d+):(\d+)$/);
@@ -1433,6 +1483,138 @@ function scrollHighlightIntoView() {
 function setShade(progress) {
   pageShadeEl.style.opacity = Math.max(0, Math.min(0.6, progress * 0.6));
 }
+
+/* ---- Paper-fold visuals ---- */
+// Builds a "curling lip" near the leading edge of the page that is about to turn,
+// by cloning the current page content into an overlapping strip that gets its own
+// extra rotation. Because #pageFlip uses transform-style:preserve-3d, the lip's
+// rotation compounds with the page's main rotation, producing a believable fold/curl.
+function buildLip() {
+  const stageWidth = pageStageEl.clientWidth || 320;
+  const lipWidthPx = Math.round(stageWidth * LIP_WIDTH_PCT);
+  pageLipEl.style.width = lipWidthPx + "px";
+  const srcContent = pageFlipEl.querySelector(".page-content");
+  pageLipContentEl.innerHTML = srcContent.innerHTML;
+  pageLipContentEl.style.width = stageWidth + "px";
+  pageLipContentEl.style.transform = `translateY(${-srcContent.scrollTop}px)`;
+  pageLipEl.style.opacity = "1";
+}
+function teardownLip() {
+  pageLipEl.style.opacity = "0";
+  pageLipEl.style.transform = "rotateY(0deg)";
+  pageLipSheenEl.style.opacity = "0";
+}
+// Applies both the main page rotation and the extra curling-lip rotation for a given
+// signed progress (0..1 magnitude) and direction (1 = forward, -1 = backward).
+function applyFlipVisual(progress, dir) {
+  const mainAngle = dir === 1 ? -180 * progress : 180 * progress;
+  pageFlipEl.style.transform = `rotateY(${mainAngle}deg)`;
+  const lipExtra = -dir * Math.sin(Math.min(1, progress) * Math.PI) * LIP_MAX_ANGLE;
+  pageLipEl.style.transform = `rotateY(${lipExtra}deg)`;
+  pageLipSheenEl.style.opacity = String(Math.sin(Math.min(1, progress) * Math.PI) * 0.55);
+  setShade(progress);
+}
+function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+// Commits a page turn: animates from startProgress to 1, then swaps content.
+function animateFlip(dir, targetIdx, startProgress) {
+  readerState.isAnimating = true;
+  const duration = 430;
+  const start = performance.now();
+  const startP = startProgress || 0;
+  function frame(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const progress = startP + (1 - startP) * easeInOutQuad(t);
+    applyFlipVisual(progress, dir);
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      completeFlip(targetIdx);
+      teardownLip();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+// Cancels a page turn: springs back from startProgress to 0 (paper relaxing flat).
+function animateCancel(dir, startProgress) {
+  readerState.isAnimating = true;
+  const duration = 260;
+  const start = performance.now();
+  function frame(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const progress = startProgress * (1 - easeOutCubic(t));
+    applyFlipVisual(progress, dir);
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      readerState.isAnimating = false;
+      teardownLip();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---- Smart "read what's on screen" logic ---- */
+function stopReaderSpeech() {
+  window.speechSynthesis.cancel();
+  readerSpeaking = false;
+  document.querySelectorAll(".verse-block.reading-now").forEach(el => el.classList.remove("reading-now"));
+  readerListenBtn.textContent = "🔊";
+}
+// Returns the ordered list of verses that should be read right now: just the
+// originally-tapped verse if the user hasn't navigated away yet, otherwise every
+// verse on the chapter currently shown on screen.
+function getReaderReadItems() {
+  const chap = readerState.chapters[readerState.currentIndex];
+  if (!chap) return [];
+  const versesObj = (rawBible[readerState.translation] && rawBible[readerState.translation][chap.book] && rawBible[readerState.translation][chap.book][chap.chapter]) || {};
+  if (readerState.highlightVerse != null && versesObj[readerState.highlightVerse]) {
+    const v = readerState.highlightVerse;
+    return [{ verseNum: v, text: versesObj[v], ref: `${chap.book} ${chap.chapter}:${v}` }];
+  }
+  return Object.entries(versesObj).map(([v, text]) => ({ verseNum: v, text, ref: `${chap.book} ${chap.chapter}:${v}` }));
+}
+function pickBestVoice() {
+  let allVoices = window.speechSynthesis.getVoices();
+  let v = allVoices.find(voice => voice.lang.includes('en') && (voice.name.includes('Premium') || voice.name.includes('Natural') || voice.name.includes('Google US English')));
+  if (!v) v = allVoices.find(voice => voice.name.includes('Samantha') || voice.name.includes('Google'));
+  if (!v) v = allVoices.find(voice => voice.lang.startsWith('en'));
+  return v;
+}
+function readerReadAloud() {
+  if (readerSpeaking) { stopReaderSpeech(); return; }
+  const items = getReaderReadItems();
+  if (!items.length) { showToast("No text to read on this page."); return; }
+  window.speechSynthesis.cancel();
+  readerSpeaking = true;
+  readerListenBtn.textContent = "⏸";
+  if (typeof trackAppEvent === "function") {
+    trackAppEvent("reader_read_aloud", { ref: items[0].ref, count: items.length, translation: readerState.translation });
+  }
+  let i = 0;
+  function speakNext() {
+    if (!readerSpeaking) return;
+    if (i >= items.length) { stopReaderSpeech(); return; }
+    const item = items[i];
+    const activeContent = pageFlipEl.querySelector(".page-content");
+    document.querySelectorAll(".verse-block.reading-now").forEach(el => el.classList.remove("reading-now"));
+    if (activeContent) {
+      const block = activeContent.querySelector(`.verse-block[data-verse="${item.verseNum}"]`);
+      if (block) { block.classList.add("reading-now"); block.scrollIntoView({ block: "center", behavior: "smooth" }); }
+    }
+    const text = items.length === 1 ? `${item.text} ... ${item.ref}` : item.text;
+    const u = new SpeechSynthesisUtterance(text);
+    const voice = pickBestVoice();
+    if (voice) u.voice = voice;
+    u.rate = 0.92;
+    u.pitch = 1.0;
+    u.onend = () => { i++; speakNext(); };
+    u.onerror = () => { stopReaderSpeech(); };
+    window.speechSynthesis.speak(u);
+  }
+  speakNext();
+}
+
 async function openBibleReader(key) {
   if (!key) return;
   if (typeof trackAppEvent === "function") {
@@ -1445,17 +1627,19 @@ async function openBibleReader(key) {
     await loadTranslation(translation);
   }
   if (!rawBible[translation]) { showToast("Unable to load Bible text."); return; }
+  stopReaderSpeech();
   const chapters = getChapterIndex(translation);
   let idx = chapters.findIndex(c => c.book === parsed.book && String(c.chapter) === String(parsed.chapter));
   if (idx === -1) idx = 0;
   readerState.translation = translation;
   readerState.chapters = chapters;
   readerState.currentIndex = idx;
+  readerState.highlightVerse = parsed.verse;
   bibleReaderEl.classList.add("open");
   document.body.style.overflow = "hidden";
   pageFlipEl.style.transition = "none";
   pageFlipEl.style.transform = "rotateY(0deg)";
-  pageFlipEl.style.transformOrigin = "left center";
+  teardownLip();
   setShade(0);
   renderChapterInto(pageFlipEl, idx, parsed.verse);
   renderChapterInto(pageBaseEl, idx, null);
@@ -1465,19 +1649,19 @@ async function openBibleReader(key) {
   setTimeout(() => { readerHintEl.style.opacity = "0"; }, 4500);
 }
 function closeBibleReader() {
+  stopReaderSpeech();
   bibleReaderEl.classList.remove("open");
   document.body.style.overflow = "";
-  if (window.speechSynthesis) window.speechSynthesis.cancel();
 }
 function prepareBaseForDirection(dir) {
   const targetIdx = readerState.currentIndex + dir;
   if (targetIdx < 0 || targetIdx >= readerState.chapters.length) return null;
-  pageFlipEl.style.transformOrigin = dir === 1 ? "left center" : "right center";
   renderChapterInto(pageBaseEl, targetIdx, null);
   return targetIdx;
 }
 function completeFlip(targetIdx) {
   readerState.currentIndex = targetIdx;
+  readerState.highlightVerse = null; // once the user navigates, we're in "read what's on screen" mode
   pageFlipEl.style.transition = "none";
   pageFlipEl.style.transform = "rotateY(0deg)";
   renderChapterInto(pageFlipEl, targetIdx, null);
@@ -1486,31 +1670,22 @@ function completeFlip(targetIdx) {
   readerState.isAnimating = false;
   updateReaderHeader();
 }
-const FLIP_EASE = "transform 0.45s cubic-bezier(.4,0,.2,1)";
-function pulseEdge() { /* no more pages in that direction */ }
 function tapFlip(dir) {
-  if (readerState.isAnimating || dragState.dragging) return;
+  if (readerState.isAnimating) return;
+  if (readerSpeaking) stopReaderSpeech();
   const targetIdx = prepareBaseForDirection(dir);
-  if (targetIdx === null) { pulseEdge(); return; }
-  readerState.isAnimating = true;
-  pageFlipEl.style.transition = FLIP_EASE;
-  requestAnimationFrame(() => {
-    pageFlipEl.style.transform = `rotateY(${dir === 1 ? -180 : 180}deg)`;
-    setShade(1);
-  });
-  pageFlipEl.addEventListener("transitionend", function handler() {
-    pageFlipEl.removeEventListener("transitionend", handler);
-    completeFlip(targetIdx);
-  });
+  if (targetIdx === null) return;
+  buildLip();
+  animateFlip(dir, targetIdx, 0);
 }
 // Drag-to-flip (mouse + touch via Pointer Events) for a real paper feel
-const dragState = { dragging: false, dir: 0, startX: 0, lastDelta: 0 };
+const dragState = { dragging: false, dir: 0, startX: 0, lastProgress: 0 };
 function onStagePointerDown(e) {
   if (readerState.isAnimating) return;
   dragState.dragging = true;
   dragState.dir = 0;
   dragState.startX = e.clientX;
-  dragState.lastDelta = 0;
+  dragState.lastProgress = 0;
   pageFlipEl.style.transition = "none";
   try { pageStageEl.setPointerCapture(e.pointerId); } catch (err) {}
 }
@@ -1523,39 +1698,27 @@ function onStagePointerMove(e) {
     const targetIdx = prepareBaseForDirection(dir);
     if (targetIdx === null) { dragState.dir = null; return; }
     dragState.dir = dir;
+    if (readerSpeaking) stopReaderSpeech();
+    buildLip();
+    readerHintEl.style.opacity = "0";
   }
   if (!dragState.dir) return;
-  dragState.lastDelta = delta;
   const width = pageStageEl.clientWidth || 320;
   const progress = Math.min(1, Math.abs(delta) / width);
-  const angle = dragState.dir === 1 ? -180 * progress : 180 * progress;
-  pageFlipEl.style.transform = `rotateY(${angle}deg)`;
-  setShade(progress);
-  readerHintEl.style.opacity = "0";
+  dragState.lastProgress = progress;
+  applyFlipVisual(progress, dragState.dir);
 }
 function onStagePointerUp() {
   if (!dragState.dragging) return;
   dragState.dragging = false;
   if (!dragState.dir) return;
-  const width = pageStageEl.clientWidth || 320;
-  const progress = Math.min(1, Math.abs(dragState.lastDelta) / width);
-  pageFlipEl.style.transition = FLIP_EASE;
+  const dir = dragState.dir;
+  const progress = dragState.lastProgress;
   if (progress > 0.28) {
-    const targetIdx = readerState.currentIndex + dragState.dir;
-    readerState.isAnimating = true;
-    requestAnimationFrame(() => {
-      pageFlipEl.style.transform = `rotateY(${dragState.dir === 1 ? -180 : 180}deg)`;
-      setShade(1);
-    });
-    pageFlipEl.addEventListener("transitionend", function handler() {
-      pageFlipEl.removeEventListener("transitionend", handler);
-      completeFlip(targetIdx);
-    });
+    const targetIdx = readerState.currentIndex + dir;
+    animateFlip(dir, targetIdx, progress);
   } else {
-    requestAnimationFrame(() => {
-      pageFlipEl.style.transform = "rotateY(0deg)";
-      setShade(0);
-    });
+    animateCancel(dir, progress);
   }
   dragState.dir = 0;
 }
@@ -1582,16 +1745,18 @@ function initBibleReader() {
   edgeLeftEl.addEventListener("click", () => tapFlip(-1));
   edgeRightEl.addEventListener("click", () => tapFlip(1));
   readerCloseBtn.addEventListener("click", closeBibleReader);
-  readerListenBtn.addEventListener("click", () => readVerse());
+  readerListenBtn.addEventListener("click", readerReadAloud);
   readerJumpBtn.addEventListener("click", () => { populateJumpBooks(); jumpModalEl.style.display = "flex"; });
   jumpCloseBtn.addEventListener("click", () => jumpModalEl.style.display = "none");
   jumpModalEl.addEventListener("click", e => { if (e.target === jumpModalEl) jumpModalEl.style.display = "none"; });
   jumpBookSelect.addEventListener("change", populateJumpChapters);
   jumpGoBtn.addEventListener("click", () => {
+    if (readerSpeaking) stopReaderSpeech();
     const book = jumpBookSelect.value, chapter = jumpChapterSelect.value;
     const idx = readerState.chapters.findIndex(c => c.book === book && String(c.chapter) === String(chapter));
     if (idx > -1) {
       readerState.currentIndex = idx;
+      readerState.highlightVerse = null;
       pageFlipEl.style.transition = "opacity 0.25s ease";
       pageFlipEl.style.opacity = "0";
       setTimeout(() => {
@@ -1599,6 +1764,7 @@ function initBibleReader() {
         pageFlipEl.style.transition = "none";
         pageFlipEl.style.transform = "rotateY(0deg)";
         pageFlipEl.style.opacity = "1";
+        teardownLip();
         updateReaderHeader();
       }, 250);
     }
