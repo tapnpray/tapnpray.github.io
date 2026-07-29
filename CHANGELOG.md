@@ -6,11 +6,16 @@ All notable changes to this project will be documented in this file.
 
 
 **Current Version: 1.4.1**
-- **The entire Interactive Bible Reader build (drag/edge-tap page turns, full Genesis→Revelation navigation, Jump to Passage modal, verse styling/highlighting)
-- **The smart Read Aloud behavior (single verse vs. whole-chapter modes, auto-stop on navigation)
-- **The new "📖 Open Bible" FAB button
-- **The translation selector relocation + live in-reader translation switching
-- **The paper-fold removal and animation timing slowdown (430ms→700ms / 260ms→380ms)
+- **Interactive Bible Reader**: Tapping the daily/random verse now opens a full-screen, book-like reader turned directly to that verse's exact chapter, instead of just reading it aloud.
+- **Realistic Page-Turn Navigation**: Drag/swipe the page left or right to turn it, with a shadow that deepens as it rotates; tap the left/right screen edges or use ← / → arrow keys for a quick animated turn; release a drag early and the page springs back into place.
+- **Flip Through the Entire Bible**: A full Genesis-to-Revelation chapter index is built from the loaded translation data, so page turns aren't limited to a single verse — you can flip seamlessly across chapters and entire books.
+- **📖 Jump to Passage**: A modal with Book and Chapter dropdowns lets you teleport directly to any passage instead of flipping through pages one at a time.
+- **Smart "Read What's On Screen" Read Aloud**: Opening the reader from a tapped verse reads just that verse, highlighted as it plays. Once you navigate to a different page, Listen automatically switches to reading the entire visible chapter, verse-by-verse, highlighting each as it's spoken. Pressing Listen again stops playback; closing or navigating away auto-stops any speech in progress.
+- **New "📖 Open Bible" Button**: Added to the top of the floating action menu (replacing the old translation selector spot) — opens the reader directly to whatever verse is currently on screen.
+- **Translation Selector Relocated**: Moved the NLT/NIV/KJV dropdown out of the floating action menu and into the reader's top bar, next to the Listen and Jump-to-Passage icons, since it's more relevant while actively reading.
+- **Live Translation Switching**: Changing translation while the reader is open now re-renders the current page in the new translation automatically, staying on the same book/chapter (falling back to chapter 1 if that chapter doesn't exist in the new translation).
+- **Slower, More Natural Page-Turn Animation**: Removed the unnatural paper-fold/curl effect in favor of a clean flat rotation, and slowed the timing — full turn from 430ms to 700ms, snap-back from 260ms to 380ms — so it feels more deliberate.
+- **Verse Styling in the Reader**: Serif chapter headings, superscript verse numbers in brand blue (#0086D6), a soft yellow highlight on the originally tapped verse, and a footer showing book/chapter/translation; reaching the start of Genesis or end of Revelation shows a friendly end-cap page.
 
 **Current Version: 1.3.5**
  
