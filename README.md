@@ -7,19 +7,9 @@ Tap N Pray is a minimalist, immersive web application designed to bring the Word
 ## 🚀 Project Status
 For a detailed breakdown of codebase development, please refer to the [Full Changelog](./CHANGELOG.md).
 
-**Current Version: 1.3.4**
- 
-- **Menu Accessibility Improvements:** Upgraded menu controls from clickable `<div>` elements to semantic `<button>` elements, improving accessibility, keyboard navigation, and overall mobile compatibility.
- 
-- **Streak System Optimization:** Removed duplicate streak processing during application startup, preventing streak calculations and hint notifications from triggering multiple times.
- 
-- **Verse Layout Improvements:** Enhanced verse rendering to maintain proper centered alignment and improve line wrapping for longer passages while preserving word-by-word highlighting during audio playback.
- 
-- **Verse Loading Protection:** Added fallback handling for missing verse content to prevent blank screens and provide a more reliable user experience.
- 
-- **Improved Popup Experience:** Help, Share, and Streak dialogs can now be dismissed by tapping outside the popup area for faster and more intuitive navigation.
- 
-- **Code Cleanup & Maintainability:** Moved Donate button styling into CSS, standardized menu button styling, and performed general code cleanup to simplify future development.
+**Current Version: 1.3.5**
+- **Added new Morning and Night backgrounds with a subtle blur effect for an improved reading experience.
+
 
 ## ✨ Core Features
 
