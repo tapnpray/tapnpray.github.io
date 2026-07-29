@@ -495,6 +495,26 @@ background: rgba(255, 255, 255, 0.25);
 .donate-btn {
 color: #FFD700;
 }
+.open-reader-btn {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  font-family: 'Merriweather', serif;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+.open-reader-btn:active {
+  background: rgba(255,255,255,0.22);
+}
 
 /* =========================
    BIBLE READER (interactive page-flip)
@@ -541,6 +561,24 @@ color: #FFD700;
   font-weight: 700;
   font-size: 16px;
   letter-spacing: 0.3px;
+}
+.reader-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.reader-translation-select {
+  height: 40px;
+  box-sizing: border-box;
+  margin-top: 0;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #f2e8d4;
 }
 .page-stage {
   position: relative;
@@ -628,35 +666,6 @@ color: #FFD700;
   margin-top: 45%;
   font-size: 16px;
   opacity: 0.65;
-}
-/* Curling "lip" near the leading edge of the turning page, for a realistic paper fold */
-.page-lip {
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  overflow: hidden;
-  transform-origin: left center;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  pointer-events: none;
-  z-index: 3;
-  background: linear-gradient(135deg, #fbf6e8 0%, #f4ead0 55%, #ecdfbe 100%);
-  box-shadow: inset 10px 0 22px rgba(90,60,20,0.28), -12px 0 25px rgba(0,0,0,0.4);
-  opacity: 0;
-  will-change: transform;
-}
-.page-lip .page-content {
-  position: absolute;
-  top: 0;
-  right: 0;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-.page-lip-sheen {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0) 100%);
-  opacity: 0;
-  pointer-events: none;
 }
 .reader-edge {
   position: absolute;
@@ -746,11 +755,7 @@ color: #FFD700;
 
   <div id="expandableMenu">
     <div class="menu-items">
-      <select id="translationSelect" class="translation-select">
-        <option value="nlt">NLT</option>
-        <option value="niv">NIV</option>
-        <option value="kjv">KJV</option>
-      </select>
+      <button id="openReaderBtn" class="open-reader-btn" type="button">📖 Open Bible</button>
 
       <div class="mode-buttons">
         <button id="dailyBtn" class="active">Daily</button>
@@ -811,17 +816,20 @@ color: #FFD700;
     <div class="reader-topbar">
       <button id="readerCloseBtn" class="reader-icon-btn" type="button" aria-label="Close">✕</button>
       <div id="readerRef"></div>
-      <button id="readerListenBtn" class="reader-icon-btn" type="button" aria-label="Listen">🔊</button>
-      <button id="readerJumpBtn" class="reader-icon-btn" type="button" aria-label="Jump to passage">📖</button>
+      <div class="reader-topbar-right">
+        <select id="translationSelect" class="translation-select reader-translation-select">
+          <option value="nlt">NLT</option>
+          <option value="niv">NIV</option>
+          <option value="kjv">KJV</option>
+        </select>
+        <button id="readerListenBtn" class="reader-icon-btn" type="button" aria-label="Listen">🔊</button>
+        <button id="readerJumpBtn" class="reader-icon-btn" type="button" aria-label="Jump to passage">📖</button>
+      </div>
     </div>
     <div class="page-stage" id="pageStage">
       <div class="paper-page" id="pageBase"><div class="page-content"></div></div>
       <div class="paper-page" id="pageFlip">
         <div class="page-content"></div>
-        <div class="page-lip" id="pageLip">
-          <div class="page-content" id="pageLipContent"></div>
-          <div class="page-lip-sheen" id="pageLipSheen"></div>
-        </div>
         <div class="page-shade" id="pageShade"></div>
       </div>
       <div class="reader-edge left" id="edgeLeft"></div>
@@ -843,7 +851,7 @@ color: #FFD700;
 /* =========================
    VERSES & TRANSLATIONS
 ========================= */
-const APP_VERSION = "1.4.0";
+const APP_VERSION = "1.4.1";
 let verses = { nlt:{}, niv:{}, kjv:{} };
 let rawBible = { nlt:null, niv:null, kjv:null }; // full nested Book -> Chapter -> Verse text, used by the Bible Reader
 let chapterIndexCache = {};
@@ -879,9 +887,6 @@ const pageStageEl = document.getElementById("pageStage");
 const pageBaseEl = document.getElementById("pageBase");
 const pageFlipEl = document.getElementById("pageFlip");
 const pageShadeEl = document.getElementById("pageShade");
-const pageLipEl = document.getElementById("pageLip");
-const pageLipContentEl = document.getElementById("pageLipContent");
-const pageLipSheenEl = document.getElementById("pageLipSheen");
 const edgeLeftEl = document.getElementById("edgeLeft");
 const edgeRightEl = document.getElementById("edgeRight");
 const readerHintEl = document.getElementById("readerHint");
@@ -894,9 +899,8 @@ const jumpCloseBtn = document.getElementById("jumpCloseBtn");
 const jumpBookSelect = document.getElementById("jumpBookSelect");
 const jumpChapterSelect = document.getElementById("jumpChapterSelect");
 const jumpGoBtn = document.getElementById("jumpGoBtn");
+const openReaderBtn = document.getElementById("openReaderBtn");
 const readerState = { translation: null, chapters: [], currentIndex: 0, isAnimating: false, highlightVerse: null };
-const LIP_WIDTH_PCT = 0.32;   // portion of the page width that curls near the leading edge
-const LIP_MAX_ANGLE = 42;     // degrees of extra "fold" at the peak of the turn
 let readerSpeaking = false;
 
 let isSharing = false;
@@ -1120,6 +1124,17 @@ modal.style.display = "none";
 });
   donateIcon.addEventListener("click", goDonate);
   initBibleReader();
+  if (openReaderBtn) {
+    openReaderBtn.addEventListener("click", () => {
+      const menuFabEl = document.getElementById("menuFab");
+      const expandableMenuEl = document.getElementById("expandableMenu");
+      if (menuFabEl && expandableMenuEl) {
+        menuFabEl.classList.remove("open");
+        expandableMenuEl.classList.remove("open");
+      }
+      openBibleReader(currentKey);
+    });
+  }
 
   const menuFab = document.getElementById("menuFab");
   const expandableMenu = document.getElementById("expandableMenu");
@@ -1268,9 +1283,12 @@ function changeTranslation(t) {
     trackAppEvent('change_translation', { 'to_translation': t });
   }
   translation = t;
+  const readerWasOpen = bibleReaderEl.classList.contains("open");
+  const readerBookChapter = readerWasOpen ? readerState.chapters[readerState.currentIndex] : null;
   if (!verses[translation] || !Object.keys(verses[translation]).length) {
     loadTranslation(t).then(() => {
       updateVerse(dailyBtn.classList.contains("active") ? "Daily Bible Verse" : "Random Bible Verse");
+      if (readerWasOpen) refreshReaderTranslation(readerBookChapter);
     });
     return;
   }
@@ -1278,6 +1296,30 @@ function changeTranslation(t) {
     currentKey = verses[translation][dailyKey] ? dailyKey : Object.keys(verses[translation])[0];
   }
   updateVerse(dailyBtn.classList.contains("active") ? "Daily Bible Verse" : "Random Bible Verse");
+  if (readerWasOpen) refreshReaderTranslation(readerBookChapter);
+}
+// Re-renders the currently open Bible Reader page after the translation changes,
+// keeping the reader on the same book/chapter (falling back to the start if that
+// chapter doesn't exist in the new translation).
+function refreshReaderTranslation(bookChapter) {
+  if (!rawBible[translation]) return;
+  if (readerSpeaking) stopReaderSpeech();
+  readerState.translation = translation;
+  const chapters = getChapterIndex(translation);
+  readerState.chapters = chapters;
+  let idx = 0;
+  if (bookChapter) {
+    const found = chapters.findIndex(c => c.book === bookChapter.book && String(c.chapter) === String(bookChapter.chapter));
+    if (found > -1) idx = found;
+  }
+  readerState.currentIndex = idx;
+  readerState.highlightVerse = null;
+  pageFlipEl.style.transition = "none";
+  pageFlipEl.style.transform = "rotateY(0deg)";
+  setShade(0);
+  renderChapterInto(pageFlipEl, idx, null);
+  renderChapterInto(pageBaseEl, idx, null);
+  updateReaderHeader();
 }
 
 function updateVerse(titleText) {
@@ -1484,42 +1526,21 @@ function setShade(progress) {
   pageShadeEl.style.opacity = Math.max(0, Math.min(0.6, progress * 0.6));
 }
 
-/* ---- Paper-fold visuals ---- */
-// Builds a "curling lip" near the leading edge of the page that is about to turn,
-// by cloning the current page content into an overlapping strip that gets its own
-// extra rotation. Because #pageFlip uses transform-style:preserve-3d, the lip's
-// rotation compounds with the page's main rotation, producing a believable fold/curl.
-function buildLip() {
-  const stageWidth = pageStageEl.clientWidth || 320;
-  const lipWidthPx = Math.round(stageWidth * LIP_WIDTH_PCT);
-  pageLipEl.style.width = lipWidthPx + "px";
-  const srcContent = pageFlipEl.querySelector(".page-content");
-  pageLipContentEl.innerHTML = srcContent.innerHTML;
-  pageLipContentEl.style.width = stageWidth + "px";
-  pageLipContentEl.style.transform = `translateY(${-srcContent.scrollTop}px)`;
-  pageLipEl.style.opacity = "1";
-}
-function teardownLip() {
-  pageLipEl.style.opacity = "0";
-  pageLipEl.style.transform = "rotateY(0deg)";
-  pageLipSheenEl.style.opacity = "0";
-}
-// Applies both the main page rotation and the extra curling-lip rotation for a given
-// signed progress (0..1 magnitude) and direction (1 = forward, -1 = backward).
+/* ---- Page-turn visuals ---- */
+// Simple, natural flat-page rotation (no fold/curl) with a shadow that deepens
+// as the page turns, to sell depth without the artifacts of a fake paper curl.
 function applyFlipVisual(progress, dir) {
   const mainAngle = dir === 1 ? -180 * progress : 180 * progress;
   pageFlipEl.style.transform = `rotateY(${mainAngle}deg)`;
-  const lipExtra = -dir * Math.sin(Math.min(1, progress) * Math.PI) * LIP_MAX_ANGLE;
-  pageLipEl.style.transform = `rotateY(${lipExtra}deg)`;
-  pageLipSheenEl.style.opacity = String(Math.sin(Math.min(1, progress) * Math.PI) * 0.55);
   setShade(progress);
 }
 function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
 function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 // Commits a page turn: animates from startProgress to 1, then swaps content.
+// Slowed down from the original 430ms so the turn reads as a deliberate, natural motion.
 function animateFlip(dir, targetIdx, startProgress) {
   readerState.isAnimating = true;
-  const duration = 430;
+  const duration = 700;
   const start = performance.now();
   const startP = startProgress || 0;
   function frame(now) {
@@ -1530,7 +1551,6 @@ function animateFlip(dir, targetIdx, startProgress) {
       requestAnimationFrame(frame);
     } else {
       completeFlip(targetIdx);
-      teardownLip();
     }
   }
   requestAnimationFrame(frame);
@@ -1538,7 +1558,7 @@ function animateFlip(dir, targetIdx, startProgress) {
 // Cancels a page turn: springs back from startProgress to 0 (paper relaxing flat).
 function animateCancel(dir, startProgress) {
   readerState.isAnimating = true;
-  const duration = 260;
+  const duration = 380;
   const start = performance.now();
   function frame(now) {
     const t = Math.min(1, (now - start) / duration);
@@ -1548,7 +1568,6 @@ function animateCancel(dir, startProgress) {
       requestAnimationFrame(frame);
     } else {
       readerState.isAnimating = false;
-      teardownLip();
     }
   }
   requestAnimationFrame(frame);
@@ -1639,7 +1658,6 @@ async function openBibleReader(key) {
   document.body.style.overflow = "hidden";
   pageFlipEl.style.transition = "none";
   pageFlipEl.style.transform = "rotateY(0deg)";
-  teardownLip();
   setShade(0);
   renderChapterInto(pageFlipEl, idx, parsed.verse);
   renderChapterInto(pageBaseEl, idx, null);
@@ -1675,7 +1693,6 @@ function tapFlip(dir) {
   if (readerSpeaking) stopReaderSpeech();
   const targetIdx = prepareBaseForDirection(dir);
   if (targetIdx === null) return;
-  buildLip();
   animateFlip(dir, targetIdx, 0);
 }
 // Drag-to-flip (mouse + touch via Pointer Events) for a real paper feel
@@ -1699,7 +1716,6 @@ function onStagePointerMove(e) {
     if (targetIdx === null) { dragState.dir = null; return; }
     dragState.dir = dir;
     if (readerSpeaking) stopReaderSpeech();
-    buildLip();
     readerHintEl.style.opacity = "0";
   }
   if (!dragState.dir) return;
@@ -1764,7 +1780,6 @@ function initBibleReader() {
         pageFlipEl.style.transition = "none";
         pageFlipEl.style.transform = "rotateY(0deg)";
         pageFlipEl.style.opacity = "1";
-        teardownLip();
         updateReaderHeader();
       }, 250);
     }
