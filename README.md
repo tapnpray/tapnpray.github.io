@@ -88,7 +88,8 @@ These custom NFC keytags are designed to:
 
 Built with love for the Kingdom.
 
-## Reach Out
-https://linktr.ee/tapnpray
+## 🙏 Reach Out
 
+🔗 Connect with Tap N Pray:
+**[linktr.ee/tapnpray](https://linktr.ee/tapnpray)**
 
