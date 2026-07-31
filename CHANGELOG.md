@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## [1.4.2] - 07-31-2026
+
+### Fixed
+- **Daily verse changing before the day actually changed** — `generateDaily()` was keying the verse-of-the-day off the **UTC** calendar date, while the on-screen date label used the browser's **local** date. For users west of UTC (e.g., US time zones), this caused the verse to silently roll over to "tomorrow's" verse in the early evening (around 7–8 PM local), while the displayed date still read the current day. The daily verse now uses the visitor's **local date** as the seed, so the verse and the on-screen date always change together, exactly once per calendar day.
+- **Midnight auto-refresh firing at the wrong time** — `setAutoRefreshAtMidnight()` scheduled its timer against UTC midnight instead of local midnight, compounding the issue above. It now schedules against the visitor's local midnight.
+- **Streak counter using a different day boundary than the verse** — `updateStreak()` also compared UTC dates, which meant the streak could tick over at a different moment than the daily verse did. It now uses the same local-date logic, so the verse and streak are always in sync.
+- **Auto-refresh timer could drift after Daylight Saving Time changes** — replaced the fixed `setInterval(..., 86400000)` (exactly 24 hours) with a self-rearming `setTimeout` that recalculates the next local midnight each time. A flat 24-hour interval would drift by an hour whenever clocks spring forward or fall back; this keeps the rollover accurate year-round.
+- **Misleading console warning on every page load** — `updateVerse()` logged `"Missing verse"` to the console every time a verse loaded, even when the verse text was present. It now only logs (and safely exits) when the verse text is genuinely missing, preventing a potential crash from calling `.split()` on `undefined`.
+- **Random verse pool shrinking unnecessarily** — `addToRecent(dailyKey)` was called on every single app load, including when reusing an already-cached daily verse. This meant the "recently shown" exclusion list used by the Random button filled up with repeats of the same daily verse, reducing variety over time. It's now only added to the recent list when a **new** daily verse is actually generated.
+
+### Notes
+- No changes to translations, the Bible Reader, share-image generation, or streak milestones — only the date/time logic described above.
 
 **Current Version: 1.4.1**
 - **Interactive Bible Reader**: Tapping the daily/random verse now opens a full-screen, book-like reader turned directly to that verse's exact chapter, instead of just reading it aloud.
