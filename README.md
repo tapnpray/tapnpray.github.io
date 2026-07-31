@@ -7,8 +7,12 @@ Tap N Pray is a minimalist, immersive web app designed to bring the Word of God 
 ## 🚀 Project Status
 For a detailed history of every update, see the [Full Changelog](./CHANGELOG.md).
 
-**Current Version: 1.4.1**
-- **Added an Interactive Bible Reader** — tap any verse to open a full, book-like Bible you can flip through page by page, jump to any passage, and listen to as you read.
+**Current Version: 1.4.2**
+- **Fixed daily verse changing too early** — verse now rolls over at each visitor's local midnight instead of UTC midnight, matching the displayed date
+- **Fixed streak counter timing** — now syncs to the same local-date logic as the daily verse
+- **Fixed DST drift** — midnight refresh timer now recalculates each day instead of using a flat 24-hour interval
+- **Fixed console warning spam** — "Missing verse" no longer logs on every load, only when a verse is actually missing
+- **Fixed Random verse variety** — daily verse no longer re-added to the "recently shown" list on every reload
 
 ---
 
