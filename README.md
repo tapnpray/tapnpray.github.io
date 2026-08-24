@@ -6,13 +6,13 @@ Tap N Pray is a minimalist, immersive web app designed to bring the Word of God 
 
 ## 🚀 Project Status
 For a detailed history of every update, see the [Full Changelog](./CHANGELOG.md).
-
-**Current Version: 1.4.2**
-- **Fixed daily verse changing too early** — verse now rolls over at each visitor's local midnight instead of UTC midnight, matching the displayed date
-- **Fixed streak counter timing** — now syncs to the same local-date logic as the daily verse
-- **Fixed DST drift** — midnight refresh timer now recalculates each day instead of using a flat 24-hour interval
-- **Fixed console warning spam** — "Missing verse" no longer logs on every load, only when a verse is actually missing
-- **Fixed Random verse variety** — daily verse no longer re-added to the "recently shown" list on every reload
+<br>
+**Current Version: 1.4.3**
+- **Redesigned Help section** — replaced the raw README pop-up with a fully styled, illustrated guide covering how to tap the NFC tag and how to enable NFC on iPhone and Android/Samsung, including extra guidance for older and budget devices
+- **Added a new About section** — shows the app logo, current version, mission statement, and quick links to the Changelog, README, and Linktree
+- **Reorganized the menu** — swapped "Ambient" for "About" in the main menu grid for easier access to app info
+- **Relocated Ambient toggle** — moved out of the menu into a small, subtle icon fixed in the top-right corner of the screen, always reachable in a single tap
+- **Streamlined Help loading** — Help content now loads instantly instead of fetching and parsing README.md at runtime
 
 ---
 
