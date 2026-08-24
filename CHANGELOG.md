@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 # Changelog
 
+## Version 1.4.3
+
+- **Redesigned Help section** — replaced the raw README pop-up with a fully styled, illustrated Help guide covering how to tap the NFC tag, how to enable NFC on iPhone and Android/Samsung (including guidance for older and budget devices), a troubleshooting accordion, and an FAQ section.
+- **Added custom hero illustration** — a new branded graphic showing the Tap N Pray keytag, phone, and NFC connection, set against a sunset/three-crosses backdrop, used at the top of the Help modal.
+- **Added an About section** — new modal with the app logo, current version number, mission statement, and quick links to the Changelog, README, and Linktree.
+- **Reorganized the menu** — replaced the "Ambient" button in the main menu grid with "About"; Ambient is no longer inside the expandable menu.
+- **Relocated Ambient toggle** — moved out of the menu entirely into a small, subtle icon fixed in the top-right corner of the screen, so it's always reachable in one tap without opening the menu. It stays low-opacity when off and lights up with the existing breathing animation when active.
+- **Removed markdown README fetch** — Help content no longer depends on fetching and parsing `README.md` at runtime; content is now instant and no longer requires `marked.min.js`.
+
+
+
 ## [1.4.2] - 07-31-2026
 
 ### Fixed
