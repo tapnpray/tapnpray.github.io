@@ -487,11 +487,11 @@ color: white;
 border: none;
 font-family: system-ui, sans-serif;
 }
- 
+ 
 .menu-btn:active {
 background: rgba(255, 255, 255, 0.25);
 }
- 
+ 
 .donate-btn {
 color: #FFD700;
 }
@@ -734,8 +734,64 @@ color: #FFD700;
   font-weight: 600;
   cursor: pointer;
 }
+
+/* =========================
+   HELP CONTENT (illustration-matched theme)
+========================= */
+.htp-hero{width:100%;border-radius:16px;overflow:hidden;margin-bottom:18px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.5); border:1px solid rgba(244,169,90,0.25);}
+.htp-hero img{width:100%;display:block;}
+
+.htp-h2{font-family:'Merriweather',serif;font-size:19px;margin:24px 0 10px;color:#fff;}
+.htp-h2:first-of-type{margin-top:0;}
+.htp-lede{margin:0 0 14px;font-size:13.5px;color:rgba(255,255,255,0.65);line-height:1.5;}
+
+.htp-steps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px;}
+.htp-step{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+  border-radius:14px;padding:12px;}
+.htp-num{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;
+  border-radius:50%;background:linear-gradient(135deg,#F2A65A,#108cd7);
+  color:#fff;font-weight:800;font-size:11px;margin-bottom:6px;font-family:system-ui,sans-serif;}
+.htp-step b{display:block;font-family:'Merriweather',serif;font-size:14px;margin-bottom:3px;color:#fff;}
+.htp-step p{margin:0;font-size:12.5px;color:rgba(255,255,255,0.6);line-height:1.4;}
+
+.htp-platform{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);
+  border-radius:16px;padding:16px;margin-bottom:12px;}
+.htp-platform h3{margin:0 0 10px;font-family:'Merriweather',serif;font-size:16px;color:#fff;}
+.htp-platform ol{margin:0;padding-left:18px;color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.65;}
+.htp-platform ol li{margin-bottom:6px;}
+.htp-platform ol b{color:#fff;}
+.htp-note{margin-top:10px;padding:10px 12px;border-radius:10px;
+  background:rgba(242,166,90,0.10);border:1px solid rgba(242,166,90,0.28);
+  font-size:12.5px;color:#ffe4bd;line-height:1.5;}
+
+.htp-acc{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;margin-bottom:10px;overflow:hidden;}
+.htp-acc summary{padding:13px 16px;cursor:pointer;font-weight:700;font-family:'Merriweather',serif;
+  font-size:14.5px;list-style:none;display:flex;justify-content:space-between;align-items:center;
+  gap:10px;color:#fff;-webkit-tap-highlight-color:transparent;}
+.htp-acc summary::-webkit-details-marker{display:none;}
+.htp-acc summary::after{content:"+";color:#F2A65A;font-size:18px;font-weight:800;flex:0 0 auto;}
+.htp-acc[open] summary::after{content:"\2013";}
+.htp-acc-body{padding:0 16px 14px;color:rgba(255,255,255,0.68);font-size:13.5px;line-height:1.6;}
+.htp-acc-body ul{margin:6px 0 0;padding-left:18px;}
+.htp-acc-body li{margin-bottom:5px;}
+
+.htp-cta{margin-top:20px;text-align:center;
+  background:linear-gradient(135deg, rgba(242,166,90,0.18), rgba(16,140,215,0.14));
+  border:1px solid rgba(242,166,90,0.3);border-radius:18px;padding:20px;}
+.htp-cta p{margin:0 0 12px;font-size:13.5px;color:rgba(255,255,255,0.9);font-family:'Merriweather',serif;}
+.htp-btn{display:inline-block;padding:11px 22px;border-radius:999px;
+  background:linear-gradient(135deg,#F2A65A,#d9822f);color:#1a0f04;text-decoration:none;
+  font-weight:800;font-size:13.5px;font-family:system-ui,sans-serif;
+  box-shadow:0 6px 18px rgba(242,166,90,0.3);}
+
+.htp-footer{margin-top:18px;text-align:center;font-size:11.5px;}
+.htp-footer a{color:rgba(255,255,255,0.5);text-decoration:none;font-family:system-ui,sans-serif;}
+.htp-footer a:hover{color:#F2A65A;}
+
+@media (max-width:380px){ .htp-steps{grid-template-columns:1fr;} }
 </style>
-<script src="/js/marked.min.js"></script>  
 </head>
 <body>
   <div id="bg-layer"></div>
@@ -1114,7 +1170,7 @@ async function initApp() {
   streakEl.addEventListener("click", openStreak);
   helpIcon.addEventListener("click", openHelp);
 document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
- 
+ 
 [helpModal, streakModal, shareModal].forEach(modal => {
 modal.addEventListener("click", e => {
 if (e.target === modal) {
@@ -1441,17 +1497,93 @@ function updateStreak() {
 function openStreak() { streakModal.style.display = "flex"; }
 function closeStreak() { streakModal.style.display = "none"; }
 
-async function openHelp() {
-  helpModal.style.display = "flex";
-  helpContent.innerHTML = "Loading...";
-  try {
-    const res = await fetch("https://raw.githubusercontent.com/tapnpray/tapnpray.github.io/refs/heads/main/README.md");
-    const text = await res.text();
-    helpContent.innerHTML = marked.parse(text);
-    helpContent.querySelectorAll("a").forEach(a => a.target = "_blank");
-  } catch {
-    helpContent.innerText = "Unable to load help content.";
+const HELP_CONTENT_HTML = `
+  <div class="htp-hero"><img src="help-hero.png" alt="Tapping a phone to a Tap N Pray NFC tag"></div>
+
+  <h2 class="htp-h2">📖 How to Tap Your Tag</h2>
+  <p class="htp-lede">No app to install — just your phone and the tag.</p>
+  <div class="htp-steps">
+    <div class="htp-step"><span class="htp-num">1</span><b>Unlock &amp; wake</b><p>Wake your screen and unlock your phone.</p></div>
+    <div class="htp-step"><span class="htp-num">2</span><b>Hold near the tag</b><p>Rest the back of your phone on the tag.</p></div>
+    <div class="htp-step"><span class="htp-num">3</span><b>Wait a second</b><p>Hold for 1–2 sec until it vibrates or shows a banner.</p></div>
+    <div class="htp-step"><span class="htp-num">4</span><b>Tap to open</b><p>Tap the notification to open Tap N Pray.</p></div>
+  </div>
+
+  <h2 class="htp-h2">📲 Enable NFC on Your Phone</h2>
+  <div class="htp-platform">
+    <h3>🍎 iPhone (iOS)</h3>
+    <ol>
+      <li><b>NFC is on by default</b> on iPhone 7 and newer running iOS 11+ — just wake the phone and hold it near the tag. There's no toggle to find.</li>
+      <li><b>iPhone 7 / 8 / X on iOS 11–12:</b> tags only open a banner from the <b>Lock Screen</b> — make sure your phone is locked (not unlocked) when you tap for the smoothest experience on these older versions.</li>
+      <li>If it's not reading, turn off <b>Low Power Mode</b> (Settings → Battery) and try again.</li>
+      <li>Confirm your version in Settings → General → About — <b>iOS 13 or later</b> gives the smoothest background tag reading from any screen, locked or unlocked.</li>
+      <li>Still nothing? Open the <b>Camera app</b> once to wake the NFC radio, then re-tap the tag.</li>
+    </ol>
+    <div class="htp-note">💡 <b>iPhone 6s and earlier</b> (and the original iPhone SE) don't support tag reading at all — only Apple Pay NFC. These models can still visit <a href="https://tapnpray.github.io/" target="_blank" style="color:#F2A65A;">tapnpray.github.io</a> directly.</div>
+  </div>
+  <div class="htp-platform">
+    <h3>🤖 Android &amp; Samsung</h3>
+    <ol>
+      <li><b>Fastest way on any Android:</b> Open Settings and type <b>"NFC"</b> into the search bar at the top — tap the result and toggle it <b>ON</b>.</li>
+      <li><b>Samsung Galaxy:</b> Settings → <b>Connections</b> → <b>NFC and contactless payments</b> → toggle ON.</li>
+      <li><b>Google Pixel:</b> Settings → <b>Connected devices</b> → <b>Connection preferences</b> → <b>NFC</b> → toggle ON.</li>
+      <li><b>Other brands</b> (Motorola, LG, OnePlus, older Samsung One UI): Settings → <b>Connected devices</b> or <b>Wireless &amp; networks</b> → look for <b>NFC</b> or <b>Tap &amp; pay</b>.</li>
+      <li>On <b>older Android versions (8 and below)</b>, NFC often lives under Settings → <b>More networks</b> or <b>More connection settings</b> instead.</li>
+      <li>Unlock your phone and stay on the home screen (not inside another app) for the link to open right away.</li>
+    </ol>
+    <div class="htp-note">💡 <b>Budget or older Android phones (pre-2017)</b> may not have NFC hardware at all. If Settings has no NFC option whatsoever, your device likely doesn't support it — you can still visit <a href="https://tapnpray.github.io/" target="_blank" style="color:#F2A65A;">tapnpray.github.io</a> directly instead.</div>
+    <div class="htp-note">💡 The antenna is usually upper-middle on the back — slide the phone slightly if nothing happens.</div>
+  </div>
+
+  <h2 class="htp-h2">🛠️ Troubleshooting</h2>
+  <details class="htp-acc" open>
+    <summary>Nothing happens when I tap the tag</summary>
+    <div class="htp-acc-body"><ul>
+      <li>Confirm NFC is enabled (see above).</li>
+      <li>Unlock your phone first — most devices ignore tags while locked.</li>
+      <li>Remove thick cases, wallet card holders, or magnetic mounts — they block the signal.</li>
+      <li>Hold the tag against the phone for a full 2–3 seconds.</li>
+    </ul></div>
+  </details>
+  <details class="htp-acc">
+    <summary>It opens a link, but the page won't load</summary>
+    <div class="htp-acc-body">Tapping the tag doesn't need data — but loading Tap N Pray does. Make sure Wi-Fi or cellular data is on and Airplane Mode is off.</div>
+  </details>
+  <details class="htp-acc">
+    <summary>My phone doesn't have NFC</summary>
+    <div class="htp-acc-body">Nearly every phone since 2016 has it. If yours truly doesn't, just visit <a href="https://tapnpray.github.io/" target="_blank" style="color:#F2A65A;">tapnpray.github.io</a> directly.</div>
+  </details>
+
+  <h2 class="htp-h2">❓ FAQ</h2>
+  <details class="htp-acc">
+    <summary>Do I need an app?</summary>
+    <div class="htp-acc-body">No — Tap N Pray runs entirely in your browser.</div>
+  </details>
+  <details class="htp-acc">
+    <summary>Is it safe? Can it access my data?</summary>
+    <div class="htp-acc-body">Yes. The tag only stores a web link, just like a QR code — it can't read or access anything on your phone.</div>
+  </details>
+  <details class="htp-acc">
+    <summary>How do I get my own keytag?</summary>
+    <div class="htp-acc-body">Support the mission below and we'll get one made for you 🙏</div>
+  </details>
+
+  <div class="htp-cta">
+    <p>Help fund physical Tap N Pray NFC keytags 🔑</p>
+    <a class="htp-btn" href="https://venmo.com/u/tapnpray" target="_blank">💛 Support on Venmo</a>
+  </div>
+
+  <div class="htp-footer">
+    <a href="https://github.com/tapnpray/tapnpray.github.io/blob/main/CHANGELOG.md" target="_blank">View full changelog →</a>
+  </div>
+`;
+
+function openHelp() {
+  if (typeof trackAppEvent === 'function') {
+    trackAppEvent('help_opened');
   }
+  helpModal.style.display = "flex";
+  helpContent.innerHTML = HELP_CONTENT_HTML;
 }
 function closeHelp() { helpModal.style.display = "none"; }
 
