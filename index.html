@@ -196,7 +196,7 @@ transition: opacity 0.15s ease, color 0.15s ease;
     background: #108cd7;
   }
 
-  #helpModal, #streakModal, #shareModal {
+  #helpModal, #streakModal, #shareModal, #aboutModal {
     position: fixed;
     inset: 0;
     display: none;
@@ -403,11 +403,16 @@ transition: opacity 0.15s ease, color 0.15s ease;
     75% { transform: scale(1.05); }
   }
 
-#menuFab {
+#fabWrapper {
     position: fixed;
     bottom: calc(30px + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%);
+    z-index: 2000; /* Boosted high above all view components */
+  }
+
+#menuFab {
+    position: relative;
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -417,11 +422,33 @@ transition: opacity 0.15s ease, color 0.15s ease;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 2000; /* Boosted high above all view components */
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     transition: background 0.3s, transform 0.3s;
     -webkit-tap-highlight-color: transparent;
   }
+
+.fab-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 2001;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0.9;
+    transition: opacity 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  }
+  .fab-badge:active { transform: scale(0.9); }
 
   .bar {
     position: absolute;
@@ -791,6 +818,14 @@ color: #FFD700;
 .htp-footer a:hover{color:#F2A65A;}
 
 @media (max-width:380px){ .htp-steps{grid-template-columns:1fr;} }
+
+/* ===== ABOUT CONTENT ===== */
+.about-header{text-align:center;margin-bottom:6px;}
+.about-header img{width:64px;height:64px;margin-bottom:10px;filter:drop-shadow(0 4px 15px rgba(0,0,0,0.4));}
+.about-header h2{margin:0;font-family:'Merriweather',serif;font-size:22px;color:#fff;}
+.about-version{display:inline-block;margin-top:8px;padding:4px 14px;border-radius:999px;
+  background:rgba(16,140,215,0.18);border:1px solid rgba(16,140,215,0.35);
+  font-size:12px;color:#7fd0ff;font-family:system-ui,sans-serif;font-weight:700;}
 </style>
 </head>
 <body>
@@ -826,16 +861,19 @@ color: #FFD700;
 <div class="menu-actions">
 <button id="shareBtn" class="menu-btn" type="button">🔗 Share</button>
 <button id="helpIcon" class="menu-btn" type="button">❔ Help</button>
-<button id="ambientToggle" class="menu-btn" type="button">🌿 Ambient</button>
+<button id="aboutBtn" class="menu-btn" type="button">ℹ️ About</button>
 <button id="donateIcon" class="menu-btn donate-btn" type="button">♥ Donate</button>
 </div>
     </div>
   </div>
 
-  <button id="menuFab" aria-label="Menu">
-    <span class="bar bar-1"></span>
-    <span class="bar bar-2"></span>
-  </button>
+  <div id="fabWrapper">
+    <button id="menuFab" aria-label="Menu">
+      <span class="bar bar-1"></span>
+      <span class="bar bar-2"></span>
+    </button>
+    <button id="ambientToggle" class="fab-badge" type="button" aria-label="Toggle ambient sound">🌿</button>
+  </div>
 
   <div id="streakModal">
     <div class="streak-card">
@@ -849,6 +887,13 @@ color: #FFD700;
     <div class="help-card">
       <div class="close-btn" id="helpCloseBtn">✕</div>
       <div id="helpContent">Loading...</div>
+    </div>
+  </div>
+
+  <div id="aboutModal">
+    <div class="help-card">
+      <div class="close-btn" id="aboutCloseBtn">✕</div>
+      <div id="aboutContent"></div>
     </div>
   </div>
 
@@ -933,6 +978,10 @@ const helpIcon = document.getElementById("helpIcon");
 const donateIcon = document.getElementById("donateIcon");
 const helpModal = document.getElementById("helpModal");
 const helpContent = document.getElementById("helpContent");
+const aboutBtn = document.getElementById("aboutBtn");
+const aboutModal = document.getElementById("aboutModal");
+const aboutContent = document.getElementById("aboutContent");
+const fabWrapper = document.getElementById("fabWrapper");
 const shareModal = document.getElementById("shareModal");
 const saveImageBtn = document.getElementById("saveImageBtn");
 const cancelShareBtn = document.getElementById("cancelShareBtn");
@@ -1170,8 +1219,10 @@ async function initApp() {
   streakEl.addEventListener("click", openStreak);
   helpIcon.addEventListener("click", openHelp);
 document.getElementById("helpCloseBtn").addEventListener("click", closeHelp);
+  aboutBtn.addEventListener("click", openAbout);
+document.getElementById("aboutCloseBtn").addEventListener("click", closeAbout);
  
-[helpModal, streakModal, shareModal].forEach(modal => {
+[helpModal, streakModal, shareModal, aboutModal].forEach(modal => {
 modal.addEventListener("click", e => {
 if (e.target === modal) {
 modal.style.display = "none";
@@ -1208,7 +1259,7 @@ document.addEventListener("click", (e) => {
       if (!expandableMenu.classList.contains("open")) return;
       
       // If the user clicked outside both the menu and the FAB button, close it safely
-      if (!expandableMenu.contains(e.target) && !menuFab.contains(e.target)) {
+      if (!expandableMenu.contains(e.target) && !fabWrapper.contains(e.target)) {
         menuFab.classList.remove("open");
         expandableMenu.classList.remove("open");
       }
@@ -1586,6 +1637,43 @@ function openHelp() {
   helpContent.innerHTML = HELP_CONTENT_HTML;
 }
 function closeHelp() { helpModal.style.display = "none"; }
+
+const ABOUT_CONTENT_HTML = `
+  <div class="about-header">
+    <img src="logo.svg" alt="Tap N Pray Logo">
+    <h2>Tap N Pray</h2>
+    <div class="about-version">Version ${APP_VERSION}</div>
+  </div>
+
+  <p class="htp-lede" style="text-align:center;margin-top:16px;">One Tap. One Verse. One Step Closer to Christ.</p>
+  <p class="htp-lede" style="text-align:center;">A minimalist, immersive web app designed to bring the Word of God into your daily life with simplicity and focus — built for quiet reflection, meditation, and prayer.</p>
+
+  <div class="htp-cta">
+    <p>📋 See what's new in the latest release</p>
+    <a class="htp-btn" href="https://github.com/tapnpray/tapnpray.github.io/blob/main/CHANGELOG.md" target="_blank">View Changelog</a>
+  </div>
+
+  <div class="htp-cta">
+    <p>📖 Read the full project README</p>
+    <a class="htp-btn" href="https://github.com/tapnpray/tapnpray.github.io/blob/main/README.md" target="_blank">View README</a>
+  </div>
+
+  <div class="htp-cta">
+    <p>🔗 Connect with Tap N Pray</p>
+    <a class="htp-btn" href="https://linktr.ee/tapnpray" target="_blank">linktr.ee/tapnpray</a>
+  </div>
+
+  <div class="htp-footer" style="margin-top:22px;">Built with 🙏 for the Kingdom.</div>
+`;
+
+function openAbout() {
+  if (typeof trackAppEvent === 'function') {
+    trackAppEvent('about_opened');
+  }
+  aboutModal.style.display = "flex";
+  aboutContent.innerHTML = ABOUT_CONTENT_HTML;
+}
+function closeAbout() { aboutModal.style.display = "none"; }
 
 function goDonate() {
   if (typeof trackAppEvent === 'function') {
